@@ -4,7 +4,7 @@
 # About
 An interactive tool for visualizing epidemiological time-series data.
 
-The site is live at http://delphi.midas.cs.cmu.edu/misc/epivis/
+The site is live at http://delphi.midas.cs.cmu.edu/epivis/
 
 # Legacy Changelog
 ````
