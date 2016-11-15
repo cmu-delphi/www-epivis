@@ -14,21 +14,21 @@
     {
       "type": "move",
       "src": "site/",
-      "dst": "/var/www/html/misc/epivis/",
+      "dst": "/var/www/html/epivis/",
       "match": "^.*\\.(html|php|txt)$",
       "add-header-comment": true
     },
     {
       "type": "move",
       "src": "site/js/",
-      "dst": "/var/www/html/misc/epivis/js/",
+      "dst": "/var/www/html/epivis/js/",
       "match": "^.*\\.js$",
       "add-header-comment": true
     },
     {
       "type": "move",
       "src": "site/css/",
-      "dst": "/var/www/html/misc/epivis/css/",
+      "dst": "/var/www/html/epivis/css/",
       "match": "^.*\\.css$",
       "add-header-comment": true
     },
@@ -37,12 +37,12 @@
     {
       "type": "move",
       "src": "site/manifest.json",
-      "dst": "/var/www/html/misc/epivis/manifest.json"
+      "dst": "/var/www/html/epivis/manifest.json"
     },
     {
       "type": "move",
       "src": "site/icon.png",
-      "dst": "/var/www/html/misc/epivis/icon.png"
+      "dst": "/var/www/html/epivis/icon.png"
     }
 
   ]
