@@ -77,16 +77,16 @@ var Epidata = (function() {
          var columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
          api.fluview(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag);
       },
-      fetchILINet: function(onSuccess, onFailure, location, auth) {
+      fetchILINet: function(onSuccess, onFailure, location, version, auth) {
          var columns = ['ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
          if(location.length > 2) {
             // this isn't a state abbreviation, so it must either be regional or national - those also have wILI
             columns.push('wili');
          } else {
-            // this isn't either be regional or national, so it must be a state abbreviation - those also have ili_estimate
+            // this isn't either be regional or national, so it must be a state abbreviation - those also have ili_estimate (scraped from state websites)
             columns.push('ili_estimate');
          }
-         api.ilinet(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.ilinet, current_epiweek)], auth);
+         api.ilinet(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.ilinet, current_epiweek)], version, auth);
       },
       fetchStateILI: function(onSuccess, onFailure, auth, state) {
          var columns = ['ili'];

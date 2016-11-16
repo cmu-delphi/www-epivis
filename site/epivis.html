@@ -21,7 +21,7 @@
       <meta name="mobile-web-app-capable" content="yes">
    </head>
    <body>
-      <p class="info_text">[<a href="changelog.txt" target="_blank">v35</a>]</p>
+      <p class="info_text">[<a href="changelog.txt" target="_blank">v36</a>]</p>
       <div id="top_bar">
          <div id="file_csv" class="ui_flag ui_flag_icon"><i class="fa fa-folder-open"></i></div>
          <div id="file_api" class="ui_flag ui_flag_icon"><i class="fa fa-database"></i></div>
@@ -197,9 +197,21 @@
                </select>
             </div><span class="explanation">(location to filter data by)</span>
             <br />
+            <div class="option_label"><label><input type="radio" name="ilinet_version_radio" id="radio_ilinet_default_version" checked="checked" /> Scraped data: best estimate</label></div><span class="explanation">(average of all versions)</span>
+            <br />
+            <div class="option_label"><label><input type="radio" name="ilinet_version_radio" id="radio_ilinet_specific_version" /> Scraped data: specific version</label></div><span class="explanation">(fetch a specific version)</span>
+            <br />
+            <div class="csv_options" id="radio_ilinet_default_version_options">
+               <span class="explanation">(this option has no additional parameters)</span>
+               <br />
+            </div>
+            <div class="csv_options" id="radio_ilinet_specific_version_options" style="display: none;">
+               <div class="option_label"><label><input type="text" id="text_ilinet_specific_version" value="1" /> Which version should be fetched?</label></div> <span class="explanation">("1" scraped on 2015w34, "2" scraped on 2016w21)</span>
+               <br />
+            </div>
             <div class="option_label">
                <input type="text" name="text_ilinet_auth" id="text_ilinet_auth" size="8" />
-            </div><span class="explanation">(authorization token, required for state-level data provided by collaborating states' DoH via CDC. Without it, returned state-level ILI data will be based on states' public websites.)</span>
+            </div><span class="explanation">(authorization token; required for state-level data provided by collaborating states' DoH via CDC; in any case, the API will return state-level ILI data scraped on a best-effort basis from states' public websites)</span>
             <br />
          </div>
          <div class="csv_options" id="radio_stateili_options" style="display: none;">
@@ -1143,6 +1155,7 @@
             connectSubOptions(['radio_simple', 'radio_epiweek', 'radio_epi', 'radio_decimal', 'radio_monthly']);
             connectSubOptions(['radio_fluview', 'radio_ilinet', 'radio_stateili', 'radio_gft', 'radio_ght', 'radio_twitter', 'radio_wiki', 'radio_nidss_flu', 'radio_nidss_dengue', 'radio_signals', 'radio_cdc', 'radio_sensors', 'radio_nowcast']);
             connectSubOptions(['radio_fluview_recent', 'radio_fluview_static', 'radio_fluview_offset']);
+            connectSubOptions(['radio_ilinet_default_version', 'radio_ilinet_specific_version']);
             connectSubOptions(['radio_nidss_flu_recent', 'radio_nidss_flu_static', 'radio_nidss_flu_offset']);
             connectSubOptions(['check_wiki_hour']);
             connectSubOptions(['check_date']);
@@ -1255,8 +1268,13 @@
                   var auth = $('#text_ilinet_auth').val() || null;
                   var src = 'ILINet' + (auth ? '+' : '');
                   var location = $('#select_ilinet_location :selected').val();
-                  var title = src + ': ' + $('#select_ilinet_location :selected').text();
-                  Epidata.fetchILINet(successFunction(title), onFailure, location, auth);
+                  var version = null, titleVersion = '';
+                  if($('#radio_ilinet_specific_version').is(':checked')) {
+                    version = parseInt($('#text_ilinet_specific_version').val(), 10);
+                    titleVersion = ' (v' + version + ')';
+                  }
+                  var title = src + ': ' + $('#select_ilinet_location :selected').text() + titleVersion;
+                  Epidata.fetchILINet(successFunction(title), onFailure, location, version, auth);
                }());
             } else if($('#radio_stateili').is(':checked')) {
                (function() {
