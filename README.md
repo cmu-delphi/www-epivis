@@ -11,7 +11,7 @@ The site is live at http://delphi.midas.cs.cmu.edu/epivis/
 === v36: 2016-11-15 ===
    ./epivis.html
       * API update for `stateili` param `version`
-    js/epivis.js
+    js/epidata.js
       * API update for `stateili` param `version`
 
 === v35: 2016-11-14 ===
