@@ -5,6 +5,7 @@ var Epidata = (function() {
    // first available epiweek for each data source
    var first_epiweek = {
       'fluview': 199740,
+      'flusurv': 200340,
       'ilinet': 199740,
       'stateili': 201001,
       'gft': 200340,
@@ -76,6 +77,10 @@ var Epidata = (function() {
       fetchFluView: function(onSuccess, onFailure, region, issue, lag) {
          var columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
          api.fluview(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag);
+      },
+      fetchFluSurv: function(onSuccess, onFailure, location, issue, lag) {
+         var columns = ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'];
+         api.flusurv(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.flusurv, current_epiweek)], issue, lag);
       },
       fetchILINet: function(onSuccess, onFailure, location, version, auth) {
          var columns = ['ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];

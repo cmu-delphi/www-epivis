@@ -15,13 +15,13 @@
       <script type="text/javascript" src="js/csv.js"></script>
       <script type="text/javascript" src="js/epivis.js"></script>
       <script type="text/javascript" src="js/treeview.js"></script>
-      <script type="text/javascript" src="/epidata/lib/delphi_epidata.js"></script>
+      <script type="text/javascript" src="/epidata/lib/delphi_epidata.min.js"></script>
       <script type="text/javascript" src="js/epidata.js"></script>
       <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
       <meta name="mobile-web-app-capable" content="yes">
    </head>
    <body>
-      <p class="info_text">[<a href="changelog.txt" target="_blank">v36</a>]</p>
+      <p class="info_text">[<a href="changelog.txt" target="_blank">v37</a>]</p>
       <div id="top_bar">
          <div id="file_csv" class="ui_flag ui_flag_icon"><i class="fa fa-folder-open"></i></div>
          <div id="file_api" class="ui_flag ui_flag_icon"><i class="fa fa-database"></i></div>
@@ -50,7 +50,9 @@
       <div id="box_overlay"></div>
       <div id="dialog_api" class="box_dialog">
          <h1>Load from Epidata API</h1>
-         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_fluview" checked="checked" /> FluView</label></div><span class="explanation">(source: <a target="_blank" href="http://gis.cdc.gov/grasp/fluview/fluportaldashboard.html">cdc.gov</a>)</span>
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_fluview" checked="checked" /> FluView</label></div><span class="explanation">(source: <a target="_blank" href="https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html">cdc.gov</a>)</span>
+         <br />
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_flusurv" /> FluSurv</label></div><span class="explanation">(source: <a target="_blank" href="https://gis.cdc.gov/GRASP/Fluview/FluHospRates.html">cdc.gov</a>)</span>
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_ilinet" /> ILINet</label></div><span class="explanation">(source: <a target="_blank" href="http://www.cdc.gov/flu/weekly/">cdc.gov</a> et al)</span>
          <br />
@@ -117,6 +119,53 @@
             </div>
             <div class="csv_options" id="radio_fluview_offset_options" style="display: none;">
                <div class="option_label"><label><input type="text" id="text_fluview_offset" value="0" /> How many weeks is the data lagged by?</label></div> <span class="explanation">(a non-negative integer)</span>
+               <br />
+            </div>
+         </div>
+         <div class="csv_options" id="radio_flusurv_options">
+            <div class="option_label">
+               <select name="select_flusurv_location" id="select_flusurv_location">
+                  <option value="network_all" selected="selected">Entire Network</option>
+                  <option value="network_eip">EIP Netowrk</option>
+                  <option value="network_ihsp">IHSP Network</option>
+                  <option value="CA">CA</option>
+                  <option value="CO">CO</option>
+                  <option value="CT">CT</option>
+                  <option value="GA">GA</option>
+                  <option value="IA">IA</option>
+                  <option value="ID">ID</option>
+                  <option value="MD">MD</option>
+                  <option value="MI">MI</option>
+                  <option value="MN">MN</option>
+                  <option value="NM">NM</option>
+                  <option value="NY_albany">NY (Albany)</option>
+                  <option value="NY_rochester">NY (Rochester)</option>
+                  <option value="OH">OH</option>
+                  <option value="OK">OK</option>
+                  <option value="OR">OR</option>
+                  <option value="RI">RI</option>
+                  <option value="SD">SD</option>
+                  <option value="TN">TN</option>
+                  <option value="UT">UT</option>
+               </select>
+            </div><span class="explanation">(location to filter data by)</span>
+            <br />
+            <div class="option_label"><label><input type="radio" name="flusurv_issue_radio" id="radio_flusurv_recent" checked="checked" /> Most Recent Issue</label></div><span class="explanation">(fetch the most up-to-date/stable data)</span>
+            <br />
+            <div class="option_label"><label><input type="radio" name="flusurv_issue_radio" id="radio_flusurv_static" /> Specific Issue</label></div><span class="explanation">(fetch data "as-of" a specific week)</span>
+            <br />
+            <div class="option_label"><label><input type="radio" name="flusurv_issue_radio" id="radio_flusurv_offset" /> Lagged Issue</label></div><span class="explanation">(fetch data lagged by a number of weeks)</span>
+            <br />
+            <div class="csv_options" id="radio_flusurv_recent_options">
+               <span class="explanation">(this option has no additional parameters)</span>
+               <br />
+            </div>
+            <div class="csv_options" id="radio_flusurv_static_options" style="display: none;">
+               <div class="option_label"><label><input type="text" id="text_flusurv_static" value="201520" /> What MMWR week should the data come from?</label></div> <span class="explanation">(format: YYYYWW)</span>
+               <br />
+            </div>
+            <div class="csv_options" id="radio_flusurv_offset_options" style="display: none;">
+               <div class="option_label"><label><input type="text" id="text_flusurv_offset" value="0" /> How many weeks is the data lagged by?</label></div> <span class="explanation">(a non-negative integer)</span>
                <br />
             </div>
          </div>
@@ -1153,8 +1202,9 @@
             $('#button_draw_line').click(function() { addCustomLine(); });
             $('#box_overlay').click(function() { closeDialog(); });
             connectSubOptions(['radio_simple', 'radio_epiweek', 'radio_epi', 'radio_decimal', 'radio_monthly']);
-            connectSubOptions(['radio_fluview', 'radio_ilinet', 'radio_stateili', 'radio_gft', 'radio_ght', 'radio_twitter', 'radio_wiki', 'radio_nidss_flu', 'radio_nidss_dengue', 'radio_signals', 'radio_cdc', 'radio_sensors', 'radio_nowcast']);
+            connectSubOptions(['radio_fluview', 'radio_flusurv', 'radio_ilinet', 'radio_stateili', 'radio_gft', 'radio_ght', 'radio_twitter', 'radio_wiki', 'radio_nidss_flu', 'radio_nidss_dengue', 'radio_signals', 'radio_cdc', 'radio_sensors', 'radio_nowcast']);
             connectSubOptions(['radio_fluview_recent', 'radio_fluview_static', 'radio_fluview_offset']);
+            connectSubOptions(['radio_flusurv_recent', 'radio_flusurv_static', 'radio_flusurv_offset']);
             connectSubOptions(['radio_ilinet_default_version', 'radio_ilinet_specific_version']);
             connectSubOptions(['radio_nidss_flu_recent', 'radio_nidss_flu_static', 'radio_nidss_flu_offset']);
             connectSubOptions(['check_wiki_hour']);
@@ -1262,6 +1312,20 @@
                      title += ' (lagged ' + lag + ' week' + (lag != 1 ? 's' : '') + ')';
                   }
                   Epidata.fetchFluView(successFunction(title), onFailure, region, issue, lag);
+               }());
+            } else if($('#radio_flusurv').is(':checked')) {
+               (function() {
+                  var location = $('#select_flusurv_location :selected').val();
+                  var title = 'FluSurv: ' + $('#select_flusurv_location :selected').text();
+                  var issue, lag;
+                  if($('#radio_flusurv_static').is(':checked')) {
+                     issue = parseInt($('#text_flusurv_static').val(), 10);
+                     title += ' (reported ' + Math.floor(issue / 100) + 'w' + (issue % 100) + ')';
+                  } else if($('#radio_flusurv_offset').is(':checked')) {
+                     lag = parseInt($('#text_flusurv_offset').val(), 10);
+                     title += ' (lagged ' + lag + ' week' + (lag != 1 ? 's' : '') + ')';
+                  }
+                  Epidata.fetchFluSurv(successFunction(title), onFailure, location, issue, lag);
                }());
             } else if($('#radio_ilinet').is(':checked')) {
                (function() {

@@ -8,6 +8,12 @@ The site is live at http://delphi.midas.cs.cmu.edu/epivis/
 
 # Legacy Changelog
 ````
+=== v37: 2017-02-07 ===
+   ./epivis.html
+      + source `flusurv`
+   js/epidata.js
+      + source `flusurv`
+
 === v36: 2016-11-15 ===
    ./epivis.html
       * API update for `stateili` param `version`
