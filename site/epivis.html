@@ -103,11 +103,11 @@
                </select>
             </div><span class="explanation">(region to filter data by)</span>
             <br />
-            <div class="option_label"><label><input type="radio" name="issue_radio" id="radio_fluview_recent" checked="checked" /> Most Recent Issue</label></div><span class="explanation">(fetch the most up-to-date/stable data)</span>
+            <div class="option_label"><label><input type="radio" name="fluview_issue_radio" id="radio_fluview_recent" checked="checked" /> Most Recent Issue</label></div><span class="explanation">(fetch the most up-to-date/stable data)</span>
             <br />
-            <div class="option_label"><label><input type="radio" name="issue_radio" id="radio_fluview_static" /> Specific Issue</label></div><span class="explanation">(fetch data "as-of" a specific week)</span>
+            <div class="option_label"><label><input type="radio" name="fluview_issue_radio" id="radio_fluview_static" /> Specific Issue</label></div><span class="explanation">(fetch data "as-of" a specific week)</span>
             <br />
-            <div class="option_label"><label><input type="radio" name="issue_radio" id="radio_fluview_offset" /> Lagged Issue</label></div><span class="explanation">(fetch data lagged by a number of weeks)</span>
+            <div class="option_label"><label><input type="radio" name="fluview_issue_radio" id="radio_fluview_offset" /> Lagged Issue</label></div><span class="explanation">(fetch data lagged by a number of weeks)</span>
             <br />
             <div class="csv_options" id="radio_fluview_recent_options">
                <span class="explanation">(this option has no additional parameters)</span>
@@ -122,7 +122,7 @@
                <br />
             </div>
          </div>
-         <div class="csv_options" id="radio_flusurv_options">
+         <div class="csv_options" id="radio_flusurv_options" style="display: none;">
             <div class="option_label">
                <select name="select_flusurv_location" id="select_flusurv_location">
                   <option value="network_all" selected="selected">Entire Network</option>
