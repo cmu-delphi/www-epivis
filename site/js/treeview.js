@@ -2,7 +2,7 @@
 var TreeView = (function() {
    var self = {};
    var nextNodeID = 0;
-   var Node = function(name) {
+   var Node = function(name,parent) {
       var self = {};
       // private variables
       var nodes = null;
@@ -11,6 +11,7 @@ var TreeView = (function() {
       var id = nextNodeID++;
       var selected = false;
       // public methods
+      self.parent = parent;
       self.getID = function() { return id; };
       self.getName = function() { return name; };
       self.getNodes = function() { return nodes; };
@@ -25,6 +26,14 @@ var TreeView = (function() {
          if(typeof callback !== "undefined" && callback !== null) {
             callback(self);
          }
+      };
+      self.getParent = function(){ return self.parent };
+      self.getRoot = function(){
+         var par = self.getParent();
+         if (typeof par === "undefined")
+            return self;
+         else
+            return par.getRoot();
       };
       return self;
    };
@@ -69,10 +78,11 @@ var TreeView = (function() {
       // return all selected datasets
       var getSelectedDatasets = function() {
          var selected = [];
+         var nodenames = [];
          for(var i = 0; i < rootNodes.length; i++) {
-            getDatasetsRecursive(selected, rootNodes[i], true);
+            getDatasetsRecursive(selected, nodenames, rootNodes[i].getName(),rootNodes[i], true);
          }
-         return selected;
+         return [selected,nodenames];
       };
       // private methods
       function updateNodeCSS(node) {
@@ -106,14 +116,15 @@ var TreeView = (function() {
             }
          }
       }
-      function getDatasetsRecursive(datasets, node, onlySelected) {
+      function getDatasetsRecursive(datasets, nodenames, currpath, node, onlySelected) {
          if(node.isBranch()) {
             for(var i = 0; i < node.getNodes().length; i++) {
-               getDatasetsRecursive(datasets, node.getNodes()[i], onlySelected);
+               getDatasetsRecursive(datasets, nodenames, currpath+'/'+node.getName(), node.getNodes()[i], onlySelected);
             }
          }
          if(node.isLeaf() && (node.isSelected() || !onlySelected)) {
             datasets.push(node.getDataset());
+            nodenames.push(currpath+'/'+node.getName());
          }
       }
       function getNodeID(node) {

@@ -207,8 +207,53 @@ var EpiVis = (function() {
             }
          }
          if(num > 0) {
-            self.scale = 1 / (sum / num);
+            self.scaleAndShift(1 / (sum / num), 0);
          }
+      };
+
+      self.scaleAndShift = function(scaler, shift){
+         self.scale = scaler;
+         self.verticalOffset = shift;
+      };
+
+      self.getDataHash = function(){
+         var dataHash = {};
+         for(i = 0; i < self.data.length; i++) {
+            value = self.data[i].getValue();
+            key = self.data[i].getDate();
+            if(!isNaN(value)) {
+               dataHash[key]=value;
+            }
+         }
+         return dataHash;
+      };
+
+      self.regress = function(dataset){
+         var datahash = dataset.getDataHash();
+         var x = [];
+         var y = [];
+         for(i = 0; i < self.data.length; i++) {
+            value = self.data[i].getValue();
+            key = self.data[i].getDate();
+            if(!isNaN(value) && key in datahash) {
+               x.push(value);
+               y.push(datahash[key]);
+            }
+         }
+         // Run regression
+         var x_sum = x.reduce(function(a, b) { return a + b; });
+         var y_sum = y.reduce(function(a, b) { return a + b; });
+         var x_avg = x_sum / x.length;
+         var y_avg = y_sum / y.length;
+         var cov_sum = 0;
+         var x_var_sum = 0;
+         for(i = 0; i < x.length; i++) {
+            cov_sum += x[i]*y[i]-x_avg*y_avg;
+            x_var_sum += Math.pow(x[i], 2) - Math.pow(x_avg, 2);
+         }
+         var beta = cov_sum/x_var_sum;
+         var alpha = y_avg - beta*x_avg;
+         self.scaleAndShift(beta*dataset.scale,alpha*dataset.scale);
       };
       return self;
    };
