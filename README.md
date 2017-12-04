@@ -8,6 +8,13 @@ The site is live at http://delphi.midas.cs.cmu.edu/epivis/
 
 # Legacy Changelog
 ````
+=== v39: 2017-12-04 ===
+   ./epivis.html
+      + source `quidel`
+   js/epidata.js
+      + source `quidel`
+   (by Lisheng)
+
 === v38: 2017-02-15 ===
    ./epivis.html
       + 'run regression','reset' features
@@ -15,7 +22,8 @@ The site is live at http://delphi.midas.cs.cmu.edu/epivis/
 	  + regression related member functions in Dataset class
    js/treeview.js
       * return full path for dataset in `getDatasets...()` functions
-      
+   (by Lisheng)
+
 === v37: 2017-02-07 ===
    ./epivis.html
       + source `flusurv`

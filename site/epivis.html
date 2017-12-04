@@ -70,6 +70,8 @@
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_cdc" /> CDC Page Hits</label></div><span class="explanation">(source: private CDC dataset)</span>
          <br />
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_quidel" /> Quidel Data</label></div><span class="explanation">(source: private Quidel dataset)</span>
+         <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nidss_flu" /> NIDSS - Influenza</label></div><span class="explanation">(source: <a target="_blank" href="http://nidss.cdc.gov.tw/en/CDCWNH01.aspx?dc=wnh">nidss.cdc.gov.tw</a>)</span>
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nidss_dengue" /> NIDSS - Dengue</label></div><span class="explanation">(source: <a target="_blank" href="http://nidss.cdc.gov.tw/en/SingleDisease.aspx?dc=1&dt=4&disease=061&position=1">nidss.cdc.gov.tw</a>)</span>
@@ -866,6 +868,28 @@
             </div><span class="explanation">(location to filter data by)</span>
          </div>
          <br />
+         <div class="csv_options" id="radio_quidel_options" style="display: none;">
+            <div class="option_label">
+               <input type="text" name="text_quidel_auth" id="text_quidel_auth" size="8" />
+            </div><span class="explanation">(authorization token)</span>
+            <br />
+            <div class="option_label">
+               <select name="select_quidel_location" id="select_quidel_location">
+                  <option value="nat" selected="selected">U.S. National</option>
+                  <option value="hhs1">HHS Region 1</option>
+                  <option value="hhs2">HHS Region 2</option>
+                  <option value="hhs3">HHS Region 3</option>
+                  <option value="hhs4">HHS Region 4</option>
+                  <option value="hhs5">HHS Region 5</option>
+                  <option value="hhs6">HHS Region 6</option>
+                  <option value="hhs7">HHS Region 7</option>
+                  <option value="hhs8">HHS Region 8</option>
+                  <option value="hhs9">HHS Region 9</option>
+                  <option value="hhs10">HHS Region 10</option>
+               </select>
+            </div><span class="explanation">(location to filter data by)</span>
+         </div>
+         <br />
          <div class="csv_options" id="radio_nidss_flu_options" style="display: none;">
             <div class="option_label">
                <select name="select_nidss_flu_region" id="select_nidss_flu_region">
@@ -1274,7 +1298,7 @@
             $('#button_run_regression').click(function() { runRegression($( "#regress_dropdown" ).val()); });
             $('#box_overlay').click(function() { closeDialog(); });
             connectSubOptions(['radio_simple', 'radio_epiweek', 'radio_epi', 'radio_decimal', 'radio_monthly']);
-            connectSubOptions(['radio_fluview', 'radio_flusurv', 'radio_ilinet', 'radio_stateili', 'radio_gft', 'radio_ght', 'radio_twitter', 'radio_wiki', 'radio_nidss_flu', 'radio_nidss_dengue', 'radio_signals', 'radio_cdc', 'radio_sensors', 'radio_nowcast']);
+            connectSubOptions(['radio_fluview', 'radio_flusurv', 'radio_ilinet', 'radio_stateili', 'radio_gft', 'radio_ght', 'radio_twitter', 'radio_wiki', 'radio_nidss_flu', 'radio_nidss_dengue', 'radio_signals', 'radio_cdc', 'radio_quidel', 'radio_sensors', 'radio_nowcast']);
             connectSubOptions(['radio_fluview_recent', 'radio_fluview_static', 'radio_fluview_offset']);
             connectSubOptions(['radio_flusurv_recent', 'radio_flusurv_static', 'radio_flusurv_offset']);
             connectSubOptions(['radio_ilinet_default_version', 'radio_ilinet_specific_version']);
@@ -1498,6 +1522,14 @@
                   var location_t = $('#select_cdc_location :selected').text();
                   var title = 'CDC Page Hits: ' + location_t;
                   Epidata.fetchCDC(successFunction(title), onFailure, auth, location_v);
+               }());
+           } else if($('#radio_quidel').is(':checked')) {
+               (function() {
+                  var auth = $('#text_quidel_auth').val();
+                  var location_v = $('#select_quidel_location :selected').val();
+                  var location_t = $('#select_quidel_location :selected').text();
+                  var title = 'Quidel Data: ' + location_t;
+                  Epidata.fetchQuidel(successFunction(title), onFailure, auth, location_v);
                }());
             } else if($('#radio_sensors').is(':checked')) {
                (function() {

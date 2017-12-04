@@ -16,6 +16,7 @@ var Epidata = (function() {
       'nidss_dengue': 200301,
       'signals': 200340,
       'cdc': 201301,
+      'quidel': 201535,
       'sensors': 201030,
       'nowcast': 200901,
    };
@@ -126,6 +127,10 @@ var Epidata = (function() {
       fetchCDC: function(onSuccess, onFailure, auth, location) {
          var columns = ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'];
          api.cdc(getCallback(onSuccess, onFailure, columns), auth, [api.range(first_epiweek.cdc, current_epiweek)], location);
+      },
+      fetchQuidel: function(onSuccess, onFailure, auth, location) {
+         var columns = ['value'];
+         api.quidel(getCallback(onSuccess, onFailure, columns), auth, [api.range(first_epiweek.quidel, current_epiweek)], location);
       },
       fetchNIDSS_flu: function(onSuccess, onFailure, region, issue, lag) {
          var columns = ['visits', 'ili'];
