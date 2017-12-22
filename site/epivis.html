@@ -180,9 +180,8 @@
             </div>
             <div class="option_label">
                <input type="text" name="text_fluview_auth" id="text_fluview_auth" size="8" />
-             </div><span class="explanation">(authorization token; required for imputed data for non-participating states; in any case, the API will return data for regions and participating states)</span>
-               <br />
-            </div>
+            </div><span class="explanation">(authorization token; required for imputed data for non-participating states; in any case, the API will return data for regions and participating states)</span>
+            <br />
          </div>
          <div class="csv_options" id="radio_flusurv_options" style="display: none;">
             <div class="option_label">
@@ -1218,6 +1217,7 @@
                   var region = $('#select_fluview_region :selected').val();
                   var title = 'FluView: ' + $('#select_fluview_region :selected').text();
                   var issue, lag;
+                  var auth = $('#text_fluview_auth').val();
                   if($('#radio_fluview_static').is(':checked')) {
                      issue = parseInt($('#text_fluview_static').val(), 10);
                      title += ' (reported ' + Math.floor(issue / 100) + 'w' + (issue % 100) + ')';
@@ -1225,7 +1225,7 @@
                      lag = parseInt($('#text_fluview_offset').val(), 10);
                      title += ' (lagged ' + lag + ' week' + (lag != 1 ? 's' : '') + ')';
                   }
-                  Epidata.fetchFluView(successFunction(title), onFailure, region, issue, lag);
+                  Epidata.fetchFluView(successFunction(title), onFailure, region, issue, lag, auth);
                }());
             } else if($('#radio_flusurv').is(':checked')) {
                (function() {
