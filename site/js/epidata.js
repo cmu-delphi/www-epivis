@@ -6,15 +6,12 @@ var Epidata = (function() {
    var first_epiweek = {
       'fluview': 199740,
       'flusurv': 200340,
-      'ilinet': 199740,
-      'stateili': 201001,
       'gft': 200340,
       'ght': 200401,
       'twitter': 201148,
       'wiki': 200750,
       'nidss_flu': 200814,
       'nidss_dengue': 200301,
-      'signals': 200340,
       'cdc': 201301,
       'quidel': 201535,
       'sensors': 201030,
@@ -75,28 +72,13 @@ var Epidata = (function() {
    }
    // public API
    return {
-      fetchFluView: function(onSuccess, onFailure, region, issue, lag) {
+      fetchFluView: function(onSuccess, onFailure, region, issue, lag, auth) {
          var columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
-         api.fluview(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag);
+         api.fluview(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag, auth);
       },
       fetchFluSurv: function(onSuccess, onFailure, location, issue, lag) {
          var columns = ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'];
          api.flusurv(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.flusurv, current_epiweek)], issue, lag);
-      },
-      fetchILINet: function(onSuccess, onFailure, location, version, auth) {
-         var columns = ['ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
-         if(location.length > 2) {
-            // this isn't a state abbreviation, so it must either be regional or national - those also have wILI
-            columns.push('wili');
-         } else {
-            // this isn't either be regional or national, so it must be a state abbreviation - those also have ili_estimate (scraped from state websites)
-            columns.push('ili_estimate');
-         }
-         api.ilinet(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.ilinet, current_epiweek)], version, auth);
-      },
-      fetchStateILI: function(onSuccess, onFailure, auth, state) {
-         var columns = ['ili'];
-         api.stateili(getCallback(onSuccess, onFailure, columns), auth, state, [api.range(first_epiweek.stateili, current_epiweek)]);
       },
       fetchGFT: function(onSuccess, onFailure, location) {
          var columns = ['num'];
@@ -139,10 +121,6 @@ var Epidata = (function() {
       fetchNIDSS_dengue: function(onSuccess, onFailure, location) {
          var columns = ['count'];
          api.nidss_dengue(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.nidss_dengue, current_epiweek)]);
-      },
-      fetchSignals: function(onSuccess, onFailure, auth, name, location) {
-         var columns = ['value'];
-         api.signals(getCallback(onSuccess, onFailure, columns), auth, name, location, [api.range(first_epiweek.signals, current_epiweek)]);
       },
       fetchSensors: function(onSuccess, onFailure, auth, name, location) {
          var columns = ['value'];
