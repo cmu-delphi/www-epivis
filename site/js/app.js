@@ -86,6 +86,7 @@ function run() {
     "radio_nidss_dengue",
     "radio_cdc",
     "radio_quidel",
+    "radio_afhsb",
     "radio_sensors",
     "radio_nowcast"
   ]);
@@ -410,6 +411,16 @@ function loadEpidata() {
       var location_t = $("#select_quidel_location :selected").text();
       var title = "Quidel Data: " + location_t;
       Epidata.fetchQuidel(successFunction(title), onFailure, auth, location_v);
+    })();
+  } else if ($("#radio_afhsb").is(":checked")) {
+    (function() {
+      var auth = $("#text_afhsb_auth").val();
+      var location_v = $("#select_afhsb_location :selected").val();
+      var location_t = $("#select_afhsb_location :selected").text();
+      var flutype_v = $("#select_afhsb_flutype :selected").val();
+      var flutype_t = $("#select_afhsb_flutype :selected").text();
+      var title = "AFHSB Data: " + location_t + ', ' + flutype_t;
+      Epidata.fetchAFHSB(successFunction(title), onFailure, auth, location_v, flutype_v);
     })();
   } else if ($("#radio_sensors").is(":checked")) {
     (function() {

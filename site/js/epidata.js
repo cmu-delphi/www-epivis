@@ -30,6 +30,7 @@ var Epidata = (function() {
       'nidss_dengue': 200301,
       'cdc': 201301,
       'quidel': 201535,
+      'afhsb': 200001,
       'sensors': 201030,
       'nowcast': 200901,
    };
@@ -47,6 +48,7 @@ var Epidata = (function() {
    function loadEpidata(epidata, columns) {
       var datasets, points, row, col, year, week, date;
       datasets = [];
+      console.log(epidata.length);
       for(col = 0; col < columns.length; col++) {
          points = [];
          for(row = 0; row < epidata.length; row++) {
@@ -59,6 +61,7 @@ var Epidata = (function() {
             } else {
                throw {'msg': 'missing column "date" and "epiweek"'};
             }
+            console.log(year, week, epidata[row][columns[col]]);
             points.push(new EpiVis.Point(date, epidata[row][columns[col]]));
          }
          datasets.push(new EpiVis.Dataset(points, columns[col]));
@@ -77,6 +80,7 @@ var Epidata = (function() {
       }
       if(result >= 1) {
          // success
+         console.log("success");
          onSuccess(loadEpidata(epidata, columns));
       }
    }
@@ -129,6 +133,11 @@ var Epidata = (function() {
       fetchQuidel: function(onSuccess, onFailure, auth, location) {
          var columns = ['value'];
          api.quidel(getCallback(onSuccess, onFailure, columns), auth, [api.range(first_epiweek.quidel, current_epiweek)], location);
+      },
+      fetchAFHSB: function(onSuccess, onFailure, auth, location, flu_type) {
+         var columns = ['visit_sum'];
+         console.log(location, flu_type)
+         api.afhsb(getCallback(onSuccess, onFailure, columns), auth, location, [api.range(first_epiweek.afhsb, current_epiweek)], flu_type);
       },
       fetchNIDSS_flu: function(onSuccess, onFailure, region, issue, lag) {
          var columns = ['visits', 'ili'];

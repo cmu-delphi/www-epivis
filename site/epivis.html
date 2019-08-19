@@ -69,6 +69,8 @@
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_quidel" /> Quidel Data</label></div><span class="explanation">(source: private Quidel dataset)</span>
          <br />
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_afhsb" /> AFHSB Data</label></div><span class="explanation">(source: private AFHSB dataset)</span>
+         <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nidss_flu" /> NIDSS - Influenza</label></div><span class="explanation">(source: <a target="_blank" href="http://nidss.cdc.gov.tw/en/CDCWNH01.aspx?dc=wnh">nidss.cdc.gov.tw</a>)</span>
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nidss_dengue" /> NIDSS - Dengue</label></div><span class="explanation">(source: <a target="_blank" href="http://nidss.cdc.gov.tw/en/SingleDisease.aspx?dc=1&amp;dt=4&amp;disease=061&amp;position=1">nidss.cdc.gov.tw</a>)</span>
@@ -733,6 +735,101 @@
             </div><span class="explanation">(location to filter data by)</span>
          </div>
          <br />
+         <div class="csv_options" id="radio_afhsb_options" style="display: none;">
+            <div class="option_label">
+               <input type="text" name="text_afhsb_auth" id="text_afhsb_auth" size="8" />
+            </div><span class="explanation">(authorization token)</span>
+            <br />
+            <div class="option_label">
+               <select name="select_afhsb_location" id="select_afhsb_location">
+                  <option value="usa" selected="selected">U.S. National</option>
+                  <option value="hhs1">HHS Region 1</option>
+                  <option value="hhs2">HHS Region 2</option>
+                  <option value="hhs3">HHS Region 3</option>
+                  <option value="hhs4">HHS Region 4</option>
+                  <option value="hhs5">HHS Region 5</option>
+                  <option value="hhs6">HHS Region 6</option>
+                  <option value="hhs7">HHS Region 7</option>
+                  <option value="hhs8">HHS Region 8</option>
+                  <option value="hhs9">HHS Region 9</option>
+                  <option value="hhs10">HHS Region 10</option>
+                  <option value="cen1">Census Region 1</option>
+                  <option value="cen2">Census Region 2</option>
+                  <option value="cen3">Census Region 3</option>
+                  <option value="cen4">Census Region 4</option>
+                  <option value="cen5">Census Region 5</option>
+                  <option value="cen6">Census Region 6</option>
+                  <option value="cen7">Census Region 7</option>
+                  <option value="cen8">Census Region 8</option>
+                  <option value="cen9">Census Region 9</option>
+                  <option value="AK">AK</option>
+                  <option value="AL">AL</option>
+                  <option value="AR">AR</option>
+                  <option value="AZ">AZ</option>
+                  <option value="CA">CA</option>
+                  <option value="CO">CO</option>
+                  <option value="CT">CT</option>
+                  <option value="DC">DC</option>
+                  <option value="DE">DE</option>
+                  <option value="FL">FL</option>
+                  <option value="GA">GA</option>
+                  <option value="HI">HI</option>
+                  <option value="IA">IA</option>
+                  <option value="ID">ID</option>
+                  <option value="IL">IL</option>
+                  <option value="IN">IN</option>
+                  <option value="KS">KS</option>
+                  <option value="KY">KY</option>
+                  <option value="LA">LA</option>
+                  <option value="MA">MA</option>
+                  <option value="MD">MD</option>
+                  <option value="ME">ME</option>
+                  <option value="MI">MI</option>
+                  <option value="MN">MN</option>
+                  <option value="MO">MO</option>
+                  <option value="MS">MS</option>
+                  <option value="MT">MT</option>
+                  <option value="NC">NC</option>
+                  <option value="ND">ND</option>
+                  <option value="NE">NE</option>
+                  <option value="NH">NH</option>
+                  <option value="NJ">NJ</option>
+                  <option value="NM">NM</option>
+                  <option value="NV">NV</option>
+                  <option value="NY">NY</option>
+                  <option value="OH">OH</option>
+                  <option value="OK">OK</option>
+                  <option value="OR">OR</option>
+                  <option value="PA">PA</option>
+                  <option value="RI">RI</option>
+                  <option value="SC">SC</option>
+                  <option value="SD">SD</option>
+                  <option value="TN">TN</option>
+                  <option value="TX">TX</option>
+                  <option value="UT">UT</option>
+                  <option value="VA">VA</option>
+                  <option value="VT">VT</option>
+                  <option value="WA">WA</option>
+                  <option value="WI">WI</option>
+                  <option value="WV">WV</option>
+                  <option value="WY">WY</option>
+               </select>
+            </div><span class="explanation">(location to filter data by)</span>
+            <br />
+            <div class="option_label">
+               <select name="select_afhsb_flutype" id="select_afhsb_flutype">
+                  <option value="ili" selected="selected">ILI</option>
+                  <option value="flu1">Flu1</option>
+                  <option value="flu2">Flu2</option>
+                  <option value="flu3">Flu3</option>
+                  <option value="flu2-flu1">Flu2-Flu1</option>
+                  <option value="flu3-flu2">Flu3-Flu2</option>
+                  <option value="ili-flu3">ILI-Flu3</option>
+               </select>
+            </div><span class="explanation">(flu-type to filter data by)</span>
+            <br />
+         </div>
+         <br />
          <div class="csv_options" id="radio_nidss_flu_options" style="display: none;">
             <div class="option_label">
                <select name="select_nidss_flu_region" id="select_nidss_flu_region">
@@ -815,6 +912,7 @@
                   <option value="wiki">wiki</option>
                   <option value="cdc">cdc</option>
                   <option value="quid">quid</option>
+                  <option value="afhsb">afhsb</option>
                   <option value="epic">epic</option>
                   <option value="sar3">sar3</option>
                   <option value="arch">arch</option>
