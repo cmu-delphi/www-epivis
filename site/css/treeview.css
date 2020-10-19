@@ -1,34 +1,18 @@
-/*
- ____   ___    _   _  ___ _____   _____ ____ ___ _____ 
-|  _ \ / _ \  | \ | |/ _ \_   _| | ____|  _ \_ _|_   _|
-| | | | | | | |  \| | | | || |   |  _| | | | | |  | |  
-| |_| | |_| | | |\  | |_| || |   | |___| |_| | |  | |  
-|____/ \___/  |_| \_|\___/ |_|   |_____|____/___| |_|  
-                                                       
-        Automatically generated from sources at:       
-        https://github.com/cmu-delphi/www-epivis       
-                                                       
- Commit hash: 6c66fa51b7bbf0e7be8b99a4cb6f9bf059d1fd7a 
-     Deployed at: 2018-06-26 10:15:52 (1530022552)     
-*/
-
-
-
 div.tv_node {
-   padding: 2px;
-   -webkit-user-select: none;
-   -moz-user-select: none;
-   -ms-user-select: none;
-   user-select: none;
-   cursor: pointer;
-   min-width: 512px;
+  padding: 2px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  min-width: 512px;
 }
 div.tv_node div.tv_node {
-   margin-left: 16px;
+  margin-left: 16px;
 }
 div.tv_branch {
-   font-weight: bold;
+  font-weight: bold;
 }
 div.tv_leaf {
-   font-weight: normal;
+  font-weight: normal;
 }
