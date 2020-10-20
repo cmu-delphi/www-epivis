@@ -87,7 +87,8 @@ function run() {
     "radio_cdc",
     "radio_quidel",
     "radio_sensors",
-    "radio_nowcast"
+    "radio_nowcast",
+    "radio_covidcast"
   ]);
   connectSubOptions([
     "radio_fluview_recent",
@@ -202,6 +203,49 @@ function run() {
 
   $(window).resize(resize);
   resize();
+
+  initializeCovidcastOptions();
+}
+
+const initializeCovidcastOptions = () => {
+
+  const validNameRegex = /^[-_\w\d]+$/;
+
+  const getSortedUnique = (rows, key) => {
+    const set = {};
+    rows.forEach(row => {
+      set[row[key]] = 1;
+    });
+    const items = [];
+    Object.entries(set).forEach(keyval => items.push(keyval[0]));
+    return items.sort();
+  }
+
+  const populateDropdown = (element, names) => {
+    names.forEach(name => {
+      if (name.match(validNameRegex)) {
+        element.append(`<option value="${name}">${name}</option>`);
+      } else {
+        console.log('invalid name:', name);
+      }
+    });
+  };
+
+  Epidata.api.covidcast_meta((result, message, epidata) => {
+    if (result !== 1) {
+      console.log('failed to fetch covidcast metadata:', message);
+      return;
+    }
+    populateDropdown(
+        $('#select_covidcast_data_source'),
+        getSortedUnique(epidata, 'data_source'));
+    populateDropdown(
+        $('#select_covidcast_signal'),
+        getSortedUnique(epidata, 'signal'));
+    populateDropdown(
+        $('#select_covidcast_geo_type'),
+        getSortedUnique(epidata, 'geo_type'));
+  });
 }
 
 function setActionTooltip(id, action, tooltip) {
@@ -433,6 +477,23 @@ function loadEpidata() {
       var location_t = $("#select_nowcast_location :selected").text();
       var title = "Delphi Nowcast: " + location_t;
       Epidata.fetchNowcast(successFunction(title), onFailure, location_v);
+    })();
+  } else if ($("#radio_covidcast").is(":checked")) {
+    (() => {
+      const dataSource = $("#select_covidcast_data_source :selected").val();
+      const signal = $("#select_covidcast_signal :selected").val();
+      const timeType = 'day';
+      const geoType = $("#select_covidcast_geo_type :selected").val();
+      const geoValue = $("#text_covidcast_geo_value").val();
+      const title = `Delphi COVIDcast: ${geoValue} ${signal} (${dataSource})`;
+      Epidata.fetchCovidcast(
+          successFunction(title),
+          onFailure,
+          dataSource,
+          signal,
+          timeType,
+          geoType,
+          geoValue);
     })();
   } else {
     alert("invalid api");
@@ -1037,7 +1098,7 @@ function fillRegressionDialog() {
   var _tree$getSelectedData7 = tree.getSelectedDatasets(),
     _tree$getSelectedData8 = _slicedToArray(_tree$getSelectedData7, 2),
     selected = _tree$getSelectedData8[0],
-    nodenames = _tree$getSelectedData8[1]; //var dropdown = $("#regress_dropdown");
+    nodenames = _tree$getSelectedData8[1];
 
   $("#regress_dropdown").empty();
   $.each(nodenames, function(i, name) {

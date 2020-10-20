@@ -73,9 +73,11 @@
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nidss_dengue" /> NIDSS - Dengue</label></div><span class="explanation">(source: <a target="_blank" href="http://nidss.cdc.gov.tw/en/SingleDisease.aspx?dc=1&amp;dt=4&amp;disease=061&amp;position=1">nidss.cdc.gov.tw</a>)</span>
          <br />
-         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_sensors" /> Delphi Sensors</label></div><span class="explanation">(source: <a target="_blank" href="http://delphi.midas.cs.cmu.edu/">delphi.midas.cs.cmu.edu</a>)</span>
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_sensors" /> Delphi Sensors</label></div><span class="explanation">(source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</span>
          <br />
-         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nowcast" /> Delphi Nowcast</label></div><span class="explanation">(source: <a target="_blank" href="http://delphi.midas.cs.cmu.edu/">delphi.midas.cs.cmu.edu</a>)</span>
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nowcast" /> Delphi Nowcast</label></div><span class="explanation">(source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</span>
+         <br />
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_covidcast" /> Delphi COVIDcast</label></div><span class="explanation">(source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</span>
          <div class="csv_options" id="radio_fluview_options">
             <div class="option_label">
                <select name="select_fluview_region" id="select_fluview_region">
@@ -629,7 +631,6 @@
             </div>
             <br />
          </div>
-         <br />
          <div class="csv_options" id="radio_cdc_options" style="display: none;">
             <div class="option_label">
                <input type="text" name="text_cdc_auth" id="text_cdc_auth" size="8" />
@@ -711,7 +712,6 @@
                </select>
             </div><span class="explanation">(location to filter data by)</span>
          </div>
-         <br />
          <div class="csv_options" id="radio_quidel_options" style="display: none;">
             <div class="option_label">
                <input type="text" name="text_quidel_auth" id="text_quidel_auth" size="8" />
@@ -732,7 +732,6 @@
                </select>
             </div><span class="explanation">(location to filter data by)</span>
          </div>
-         <br />
          <div class="csv_options" id="radio_nidss_flu_options" style="display: none;">
             <div class="option_label">
                <select name="select_nidss_flu_region" id="select_nidss_flu_region">
@@ -800,7 +799,6 @@
                </select>
             </div><span class="explanation">(location to filter data by)</span>
          </div>
-         <br />
          <div class="csv_options" id="radio_sensors_options" style="display: none;">
             <div class="option_label">
                <input type="text" name="text_sensors_auth" id="text_sensors_auth" size="8" />
@@ -906,7 +904,6 @@
                </select>
             </div><span class="explanation">(location to filter data by)</span>
          </div>
-         <br />
          <div class="csv_options" id="radio_nowcast_options" style="display: none;">
             <div class="option_label">
                <select name="select_nowcast_location" id="select_nowcast_location">
@@ -993,7 +990,30 @@
                </select>
             </div><span class="explanation">(location to filter data by)</span>
          </div>
-         <br />
+         <div class="csv_options" id="radio_covidcast_options" style="display: none;">
+            <div class="option_label">
+               <select name="select_covidcast_source" id="select_covidcast_data_source">
+               <!-- populated on page load using API endpoint `covidcast_meta` -->
+               </select>
+            </div><span class="explanation">(upstream data source)</span>
+            <br />
+            <div class="option_label">
+               <select name="select_covidcast_signal" id="select_covidcast_signal">
+               <!-- populated on page load using API endpoint `covidcast_meta` -->
+               </select>
+            </div><span class="explanation">(delphi indicator name)</span>
+            <br />
+            <div class="option_label">
+               <select name="select_covidcast_geo_type" id="select_covidcast_geo_type">
+               <!-- populated on page load using API endpoint `covidcast_meta` -->
+               </select>
+            </div><span class="explanation">(geographic resolution)</span>
+            <br />
+            <div class="option_label">
+               <input type="text" name="text_covidcast_geo_value" id="text_covidcast_geo_value" />
+            </div><span class="explanation">(location, e.g. 'PA' or '42003')</span>
+            <br />
+         </div>
          <input type="button" id="button_import_api" value="Fetch Data" />
       </div>
       <div id="dialog_csv" class="box_dialog">

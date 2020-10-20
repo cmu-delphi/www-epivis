@@ -21,6 +21,7 @@ var Epidata = (function() {
    var first_date = {
       'twitter': 20111201,
       'wiki': 20071209,
+      'covidcast': 20200101,
    };
    // find the current epiweek and date
    var date = new Date();
@@ -34,6 +35,14 @@ var Epidata = (function() {
       for(col = 0; col < columns.length; col++) {
          points = [];
          for(row = 0; row < epidata.length; row++) {
+            if(epidata[row].hasOwnProperty('time_value')) {
+              const timeValue = '' + epidata[row].time_value;
+              if (timeValue.length == 6) {
+                epidata[row].epiweek = timeValue;
+              } else {
+                epidata[row].date = timeValue;
+              }
+            }
             if(epidata[row].hasOwnProperty('date')) {
                date = EpiVis.Date.parse(epidata[row].date);
             } else if(epidata[row].hasOwnProperty('epiweek')) {
@@ -72,6 +81,7 @@ var Epidata = (function() {
    }
    // public API
    return {
+      api: api,
       fetchFluView: function(onSuccess, onFailure, region, issue, lag, auth) {
          var columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
          api.fluview(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag, auth);
@@ -129,6 +139,11 @@ var Epidata = (function() {
       fetchNowcast: function(onSuccess, onFailure, location) {
          var columns = ['value', 'std'];
          api.nowcast(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.nowcast, current_epiweek)]);
+      },
+      fetchCovidcast: (onSuccess, onFailure, dataSource, signal, timeType, geoType, geoValue) => {
+        const columns = ['value', 'stderr', 'sample_size'];
+        const timeValue = [api.range(first_date.covidcast, current_date)];
+        api.covidcast(getCallback(onSuccess, onFailure, columns), dataSource, signal, timeType, geoType, timeValue, geoValue);
       },
    };
 }());
