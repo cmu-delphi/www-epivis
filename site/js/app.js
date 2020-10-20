@@ -1,46 +1,5 @@
 "use strict";
 
-function _slicedToArray(arr, i) {
-  return (
-    _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest()
-  );
-}
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance");
-}
-
-function _iterableToArrayLimit(arr, i) {
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-  try {
-    for (
-      var _i = arr[Symbol.iterator](), _s;
-      !(_n = (_s = _i.next()).done);
-      _n = true
-    ) {
-      _arr.push(_s.value);
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-  return _arr;
-}
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
 var chart;
 var tree;
 var currentDialog = null;
@@ -48,7 +7,9 @@ var currentDialog = null;
 function run() {
   // chart setup
   chart = new EpiVis.Chart("chart_canvas", chartListener);
-  tree = new TreeView.TreeView("chart_tree"); // interface setup
+
+  // interface setup
+  tree = new TreeView.TreeView("chart_tree");
 
   $("#file_local").change(function() {
     loadFile(previewFile);
@@ -107,8 +68,9 @@ function run() {
   ]);
   connectSubOptions(["check_wiki_hour"]);
   connectSubOptions(["check_date"]);
-  connectSubOptions(["check_group"]); // top button bar
+  connectSubOptions(["check_group"]);
 
+  // top button bar
   setActionTooltip(
     "file_csv",
     function() {
@@ -166,12 +128,12 @@ function run() {
   setActionTooltip(
     "action_undo",
     chartUndo,
-    'undo <span style="color: #d42">//not implemented</' + "span>"
+    'undo <span style="color: #d42">//not implemented</span>'
   );
   setActionTooltip(
     "action_redo",
     chartRedo,
-    'redo <span style="color: #d42">//not implemented</' + "span>"
+    'redo <span style="color: #d42">//not implemented</span>'
   );
   setActionTooltip(
     "navmode_pan",
@@ -193,14 +155,16 @@ function run() {
       setNavMode(EpiVis.Chart.NavMode.zoom);
     },
     "zoom mode"
-  ); // escape key closes dialog
+  );
 
+  // escape key closes dialog
   $(document).keyup(function(e) {
     if (e.keyCode == 27) {
       closeDialog();
     }
-  }); // dynamic resizing
+  });
 
+  // dynamic resizing
   $(window).resize(resize);
   resize();
 
@@ -542,46 +506,27 @@ function showLeftSection(show) {
 }
 
 function multiScale() {
-  var _tree$getSelectedData = tree.getSelectedDatasets(),
-    _tree$getSelectedData2 = _slicedToArray(_tree$getSelectedData, 2),
-    selected = _tree$getSelectedData2[0],
-    nodenames = _tree$getSelectedData2[1];
-
-  for (i = 0; i < selected.length; i++) {
-    selected[i].scaleMean();
-  }
-
+  tree.getSelectedDatasets()[0].forEach(data => data.scaleMean());
   chart.render();
 }
 
 function runRegression(index) {
-  var _tree$getSelectedData3 = tree.getSelectedDatasets(),
-    _tree$getSelectedData4 = _slicedToArray(_tree$getSelectedData3, 2),
-    selected = _tree$getSelectedData4[0],
-    nodenames = _tree$getSelectedData4[1];
-
-  if (selected.length < 2) multiScale();
-  else {
-    for (i = 0; i < selected.length; i++) {
-      if (i == index) continue;
-      else selected[i].regress(selected[index]);
+  const selected = tree.getSelectedDatasets()[0];
+  if (selected.length < 2) {
+    multiScale();
+  } else {
+    for (let i = 0; i < selected.length; i++) {
+      if (i != index) {
+        selected[i].regress(selected[index]);
+      }
     }
-
     chart.render();
   }
   closeDialog();
 }
 
 function resetChart() {
-  var _tree$getSelectedData5 = tree.getSelectedDatasets(),
-    _tree$getSelectedData6 = _slicedToArray(_tree$getSelectedData5, 2),
-    selected = _tree$getSelectedData6[0],
-    nodenames = _tree$getSelectedData6[1];
-
-  for (i = 0; i < selected.length; i++) {
-    selected[i].scaleAndShift(1, 0);
-  }
-
+  tree.getSelectedDatasets()[0].forEach(data => data.scaleAndShift(1, 0));
   chart.render();
 }
 
@@ -915,8 +860,9 @@ function createDataset(title, kernel) {
 
   for (var i = 0; i < selected.length; i++) {
     console.log("   " + selected[i].title);
-  } // find the union of dates
+  }
 
+  // find the union of dates
   var values = {};
 
   for (var ds = 0; ds < selected.length; ds++) {
@@ -1098,13 +1044,8 @@ function closeDialog() {
 }
 
 function fillRegressionDialog() {
-  var _tree$getSelectedData7 = tree.getSelectedDatasets(),
-    _tree$getSelectedData8 = _slicedToArray(_tree$getSelectedData7, 2),
-    selected = _tree$getSelectedData8[0],
-    nodenames = _tree$getSelectedData8[1];
-
   $("#regress_dropdown").empty();
-  $.each(nodenames, function(i, name) {
+  $.each(tree.getSelectedDatasets()[1], (i, name) => {
     $("#regress_dropdown").append(
       $("<option>", {
         value: i,
