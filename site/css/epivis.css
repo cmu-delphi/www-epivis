@@ -171,3 +171,14 @@ span.explanation {
   font-size: 0.85em;
   color: #666;
 }
+.directlink_text {
+  color: #444;
+  font-family: monospace;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+  padding: 8px;
+}
+.warning_text {
+  color: #620;
+  padding: 8px;
+}

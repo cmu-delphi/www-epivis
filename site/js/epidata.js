@@ -29,18 +29,18 @@ var Epidata = (function() {
    var current_epiweek = (epidate.getEpiYear() * 100) + epidate.getEpiWeek();
    var current_date = (epidate.getYear() * 10000) + (epidate.getMonth() * 100) + epidate.getDay();
    // generic epidata loader
-   function loadEpidata(epidata, columns) {
+   function loadEpidata(epidata, columns, params) {
       var datasets, points, row, col, year, week, date;
       datasets = [];
       for(col = 0; col < columns.length; col++) {
          points = [];
          for(row = 0; row < epidata.length; row++) {
             if(epidata[row].hasOwnProperty('time_value')) {
-              const timeValue = '' + epidata[row].time_value;
-              if (timeValue.length == 6) {
+              const timeValue = epidata[row].time_value;
+              if ('' + timeValue.length == 6) {
                 epidata[row].epiweek = timeValue;
               } else {
-                epidata[row].date = timeValue;
+                epidata[row].date = '' + timeValue;
               }
             }
             if(epidata[row].hasOwnProperty('date')) {
@@ -50,16 +50,16 @@ var Epidata = (function() {
                week = epidata[row].epiweek % 100;
                date = EpiVis.Date.fromEpiweek(year, week);
             } else {
-               throw {'msg': 'missing column "date" and "epiweek"'};
+               throw {'msg': 'missing date/week column', 'row': epidata[row]};
             }
             points.push(new EpiVis.Point(date, epidata[row][columns[col]]));
          }
-         datasets.push(new EpiVis.Dataset(points, columns[col]));
+         datasets.push(new EpiVis.Dataset(points, columns[col], params));
       }
       return datasets;
    }
    // generic API access
-   function handleData(onSuccess, onFailure, columns, result, message, epidata) {
+   function handleData(onSuccess, onFailure, columns, params, result, message, epidata) {
       if(result <= 0) {
          // hard failure (can't continue)
          onFailure('There was an error fetching the data. [result=' + result + ']');
@@ -70,80 +70,93 @@ var Epidata = (function() {
       }
       if(result >= 1) {
          // success
-         onSuccess(loadEpidata(epidata, columns));
+         onSuccess(loadEpidata(epidata, columns, params));
       }
    }
    // generic callback generator
-   function getCallback(onSuccess, onFailure, columns) {
+   function getCallback(onSuccess, onFailure, columns, params) {
       return function(result, message, epidata) {
-         handleData(onSuccess, onFailure, columns, result, message, epidata);
+         handleData(onSuccess, onFailure, columns, params, result, message, epidata);
       };
    }
    // public API
    return {
       api: api,
-      fetchFluView: function(onSuccess, onFailure, region, issue, lag, auth) {
-         var columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
-         api.fluview(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag, auth);
+      fetchFluView: (onSuccess, onFailure, region, issue, lag, auth) => {
+         const params = ['fluview', region, issue, lag, auth];
+         const columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
+         api.fluview(getCallback(onSuccess, onFailure, columns, params), region, [api.range(first_epiweek.fluview, current_epiweek)], issue, lag, auth);
       },
-      fetchFluSurv: function(onSuccess, onFailure, location, issue, lag) {
-         var columns = ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'];
-         api.flusurv(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.flusurv, current_epiweek)], issue, lag);
+      fetchFluSurv: (onSuccess, onFailure, location, issue, lag) => {
+         const params = ['flusurv', location, issue, lag];
+         const columns = ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'];
+         api.flusurv(getCallback(onSuccess, onFailure, columns, params), location, [api.range(first_epiweek.flusurv, current_epiweek)], issue, lag);
       },
-      fetchGFT: function(onSuccess, onFailure, location) {
-         var columns = ['num'];
-         api.gft(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.gft, current_epiweek)]);
+      fetchGFT: (onSuccess, onFailure, location) => {
+         const params = ['gft', location];
+         const columns = ['num'];
+         api.gft(getCallback(onSuccess, onFailure, columns, params), location, [api.range(first_epiweek.gft, current_epiweek)]);
       },
-      fetchGHT: function(onSuccess, onFailure, auth, location, query) {
-         var columns = ['value'];
-         api.ght(getCallback(onSuccess, onFailure, columns), auth, location, [api.range(first_epiweek.ght, current_epiweek)], query);
+      fetchGHT: (onSuccess, onFailure, auth, location, query) => {
+         const params = ['ght', auth, location, query];
+         const columns = ['value'];
+         api.ght(getCallback(onSuccess, onFailure, columns, params), auth, location, [api.range(first_epiweek.ght, current_epiweek)], query);
       },
-      fetchTwitter: function(onSuccess, onFailure, auth, location, resolution) {
-         var columns = ['num', 'total', 'percent'];
-         var callback = getCallback(onSuccess, onFailure, columns);
+      fetchTwitter: (onSuccess, onFailure, auth, location, resolution) => {
+         const params = ['twtr', auth, location, resolution];
+         const columns = ['num', 'total', 'percent'];
+         const callback = getCallback(onSuccess, onFailure, columns, params);
          if(resolution === 'daily') {
             api.twitter(callback, auth, location, [api.range(first_date.twitter, current_date)], null);
          } else {
             api.twitter(callback, auth, location, null, [api.range(first_epiweek.twitter, current_epiweek)]);
          }
       },
-      fetchWiki: function(onSuccess, onFailure, article, resolution, hour) {
-         var columns = ['count', 'total', 'value'];
-         var callback = getCallback(onSuccess, onFailure, columns);
+      fetchWiki: (onSuccess, onFailure, article, resolution, hour) => {
+         const params = ['wiki', article, resolution, hour];
+         const columns = ['count', 'total', 'value'];
+         const callback = getCallback(onSuccess, onFailure, columns, params);
          if(resolution === 'daily') {
             api.wiki(callback, article, [api.range(first_date.wiki, current_date)], null, hour);
          } else {
             api.wiki(callback, article, null, [api.range(first_epiweek.wiki, current_epiweek)], hour);
          }
       },
-      fetchCDC: function(onSuccess, onFailure, auth, location) {
-         var columns = ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'];
-         api.cdc(getCallback(onSuccess, onFailure, columns), auth, [api.range(first_epiweek.cdc, current_epiweek)], location);
+      fetchCDC: (onSuccess, onFailure, auth, location) => {
+         const params = ['cdcp', auth, location];
+         const columns = ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'];
+         api.cdc(getCallback(onSuccess, onFailure, columns, params), auth, [api.range(first_epiweek.cdc, current_epiweek)], location);
       },
-      fetchQuidel: function(onSuccess, onFailure, auth, location) {
-         var columns = ['value'];
-         api.quidel(getCallback(onSuccess, onFailure, columns), auth, [api.range(first_epiweek.quidel, current_epiweek)], location);
+      fetchQuidel: (onSuccess, onFailure, auth, location) => {
+         const params = ['quidel', auth, location];
+         const columns = ['value'];
+         api.quidel(getCallback(onSuccess, onFailure, columns, params), auth, [api.range(first_epiweek.quidel, current_epiweek)], location);
       },
-      fetchNIDSS_flu: function(onSuccess, onFailure, region, issue, lag) {
-         var columns = ['visits', 'ili'];
-         api.nidss_flu(getCallback(onSuccess, onFailure, columns), region, [api.range(first_epiweek.nidss_flu, current_epiweek)], issue, lag);
+      fetchNIDSS_flu: (onSuccess, onFailure, region, issue, lag) => {
+         const params = ['nidss_flu', region, issue, lag];
+         const columns = ['visits', 'ili'];
+         api.nidss_flu(getCallback(onSuccess, onFailure, columns, params), region, [api.range(first_epiweek.nidss_flu, current_epiweek)], issue, lag);
       },
-      fetchNIDSS_dengue: function(onSuccess, onFailure, location) {
-         var columns = ['count'];
-         api.nidss_dengue(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.nidss_dengue, current_epiweek)]);
+      fetchNIDSS_dengue: (onSuccess, onFailure, location) => {
+         const params = ['nidss_dengue', location];
+         const columns = ['count'];
+         api.nidss_dengue(getCallback(onSuccess, onFailure, columns, params), location, [api.range(first_epiweek.nidss_dengue, current_epiweek)]);
       },
-      fetchSensors: function(onSuccess, onFailure, auth, name, location) {
-         var columns = ['value'];
-         api.sensors(getCallback(onSuccess, onFailure, columns), auth, name, location, [api.range(first_epiweek.sensors, current_epiweek)]);
+      fetchSensors: (onSuccess, onFailure, auth, name, location) => {
+         const params = ['sensors', auth, name, location];
+         const columns = ['value'];
+         api.sensors(getCallback(onSuccess, onFailure, columns, params), auth, name, location, [api.range(first_epiweek.sensors, current_epiweek)]);
       },
-      fetchNowcast: function(onSuccess, onFailure, location) {
-         var columns = ['value', 'std'];
-         api.nowcast(getCallback(onSuccess, onFailure, columns), location, [api.range(first_epiweek.nowcast, current_epiweek)]);
+      fetchNowcast: (onSuccess, onFailure, location) => {
+         const params = ['nowcast', location];
+         const columns = ['value', 'std'];
+         api.nowcast(getCallback(onSuccess, onFailure, columns, params), location, [api.range(first_epiweek.nowcast, current_epiweek)]);
       },
       fetchCovidcast: (onSuccess, onFailure, dataSource, signal, timeType, geoType, geoValue) => {
+        const params = ['covidcast', dataSource, signal, timeType, geoType, geoValue];
         const columns = ['value', 'stderr', 'sample_size'];
         const timeValue = [api.range(first_date.covidcast, current_date)];
-        api.covidcast(getCallback(onSuccess, onFailure, columns), dataSource, signal, timeType, geoType, timeValue, geoValue);
+        api.covidcast(getCallback(onSuccess, onFailure, columns, params), dataSource, signal, timeType, geoType, timeValue, geoValue);
       },
    };
 }());

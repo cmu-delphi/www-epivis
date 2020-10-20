@@ -125,6 +125,7 @@ function run() {
   );
   setActionTooltip("action_reset", resetChart, "reset scaling and shifting");
   setActionTooltip("action_screenshot", screenshot, "take a screenshot");
+  setActionTooltip("action_directlink", showDirectLink, "link to this view");
   setActionTooltip(
     "action_undo",
     chartUndo,
@@ -168,7 +169,11 @@ function run() {
   $(window).resize(resize);
   resize();
 
+  // populate covidcast options from live metadata
   initializeCovidcastOptions();
+
+  // maybe load config encoded in path fragment
+  loadDirectLinkFragment();
 }
 
 const initializeCovidcastOptions = () => {
@@ -238,25 +243,28 @@ function hideTooltip(event) {
   $("#tooltip").hide(0);
 }
 
+const successFunction = (title) => {
+  return function(datasets) {
+    datasets.forEach(data => {
+      data.parentTitle = title;
+    });
+    var info = new CSV.Info();
+    info.numCols = datasets.length;
+    info.numRows = datasets[0].data.length;
+    info.data = new CSV.DataGroup("[API] " + title, datasets);
+    info.print();
+    var node = new TreeView.Node(info.data.getTitle());
+    loadDataGroup(node, info.data.getData());
+    tree.append(node);
+    closeDialog();
+  };
+};
+
+const onFailure = (message) => {
+  alert(message);
+};
+
 function loadEpidata() {
-  function successFunction(title) {
-    return function(datasets) {
-      var info = new CSV.Info();
-      info.numCols = datasets.length;
-      info.numRows = datasets[0].data.length;
-      info.data = new CSV.DataGroup("[API] " + title, datasets);
-      info.print();
-      var node = new TreeView.Node(info.data.getTitle());
-      loadDataGroup(node, info.data.getData());
-      tree.append(node);
-      closeDialog();
-    };
-  }
-
-  function onFailure(message) {
-    alert(message);
-  }
-
   if ($("#radio_fluview").is(":checked")) {
     (function() {
       var region = $("#select_fluview_region :selected").val();
@@ -1054,5 +1062,108 @@ function fillRegressionDialog() {
     );
   });
 }
+
+const showDirectLink = () => {
+  const [href, anySkipped] = getDirectLink();
+  $('#dialog_directlink_text').text(href);
+  const warningText = $('#dialog_directlink_warning');
+  if (anySkipped) {
+    warningText.show();
+  } else {
+    warningText.hide();
+  }
+  openDialog("dialog_directlink");
+};
+
+const getDirectLink = () => {
+  const config = {
+    'chart': {
+      'viewport': chart.getViewport(),
+      'showPoints': chart.isShowingPoints(),
+    },
+    'datasets': [],
+  };
+  let anySkipped = false;
+  tree.getSelectedDatasets()[0].forEach(data => {
+    if (data.params) {
+      config.datasets.push({
+        'color': data.color,
+        'title': data.title,
+        'parentTitle': data.parentTitle,
+        'params': data.params,
+      });
+    } else {
+      console.log('unable to get direct link to dataset:', data.title);
+      anySkipped = true;
+    }
+  });
+  if (anySkipped) {
+    console.log('unable to link some datasets');
+  }
+  let href = window.location.href;
+  // remove the existing fragment, if present
+  let idx = href.indexOf('#');
+  if (idx >= 0) {
+    href = href.substring(0, idx);
+  }
+  // append the generated fragment
+  href += '#' + btoa(JSON.stringify(config));
+  return [href, anySkipped];
+};
+
+const loadDirectLinkFragment = () => {
+  // check for a path fragment
+  if (!window.location.hash) {
+    console.log('no config linked');
+    return;
+  }
+
+  // attempt to decode the config in the fragment
+  let config;
+  try {
+    config = JSON.parse(atob(window.location.hash.substring(1)));
+  } catch {
+    console.log('invalid path fragment');
+    return;
+  }
+
+  // load, select, and format each dataset
+  config.datasets.forEach(data => {
+    const func = {
+      'fluview': Epidata.fetchFluView,
+      'flusurv': Epidata.fetchFluSurv,
+      'gft': Epidata.fetchGFT,
+      'ght': Epidata.fetchGHT,
+      'twtr': Epidata.fetchTwitter,
+      'wiki': Epidata.fetchWiki,
+      'cdcp': Epidata.fetchCDC,
+      'quidel': Epidata.fetchQuidel,
+      'nidss_flu': Epidata.fetchNIDSS_flu,
+      'nidss_dengue': Epidata.fetchNIDSS_dengue,
+      'sensors': Epidata.fetchSensors,
+      'nowcast': Epidata.fetchNowcast,
+      'covidcast': Epidata.fetchCovidcast,
+    }[data.params[0]];
+    const onSuccess = (datasets) => {
+      const loader = successFunction(data.parentTitle);
+      loader(datasets);
+      const rootNode = tree.getRootNodes().slice(-1)[0];
+      tree.toggleNode(rootNode);
+      rootNode.getNodes().forEach((node) => {
+        if (node.getDataset().title === data.title) {
+          node.getDataset().color = data.color;
+          tree.toggleNode(node);
+        }
+      });
+    };
+    func(onSuccess, onFailure, ...data.params.slice(1));
+  });
+
+  // apply chart-level settings
+  chart.setViewport(...config.chart.viewport);
+  if (config.chart.showPoints) {
+    chartShowPoints();
+  }
+};
 
 $(document).ready(run);

@@ -165,7 +165,7 @@ var EpiVis = (function() {
       this.getDate = function() { return date; };
       this.getValue = function() { return value; };
    };
-   var Dataset = function(data, title) {
+   var Dataset = function(data, title, params) {
       function getComponent() {
          var x = 0x20 + Math.floor(Math.random() * 0xC0);
          return ("0" + x.toString(16)).slice(-2);
@@ -175,7 +175,9 @@ var EpiVis = (function() {
       }
       var self = {};
       self.data = data;
+      self.parentTitle = '';
       self.title = (typeof title === 'undefined') ? '' : title;
+      self.params = (typeof params === 'undefined') ? null : params;
       self.color = getRandomColor();
       self.lineWidth = 2;
       self.scale = 1;
@@ -943,6 +945,9 @@ var EpiVis = (function() {
          yMin = y1;
          yMax = y2;
          this.render();
+      };
+      this.getViewport = () => {
+         return [xMin, yMin, xMax, yMax];
       };
       this.highlight = function(date) {
          var update = false;
