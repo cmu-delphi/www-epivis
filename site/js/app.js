@@ -1,46 +1,5 @@
 "use strict";
 
-function _slicedToArray(arr, i) {
-  return (
-    _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest()
-  );
-}
-
-function _nonIterableRest() {
-  throw new TypeError("Invalid attempt to destructure non-iterable instance");
-}
-
-function _iterableToArrayLimit(arr, i) {
-  var _arr = [];
-  var _n = true;
-  var _d = false;
-  var _e = undefined;
-  try {
-    for (
-      var _i = arr[Symbol.iterator](), _s;
-      !(_n = (_s = _i.next()).done);
-      _n = true
-    ) {
-      _arr.push(_s.value);
-      if (i && _arr.length === i) break;
-    }
-  } catch (err) {
-    _d = true;
-    _e = err;
-  } finally {
-    try {
-      if (!_n && _i["return"] != null) _i["return"]();
-    } finally {
-      if (_d) throw _e;
-    }
-  }
-  return _arr;
-}
-
-function _arrayWithHoles(arr) {
-  if (Array.isArray(arr)) return arr;
-}
-
 var chart;
 var tree;
 var currentDialog = null;
@@ -48,7 +7,9 @@ var currentDialog = null;
 function run() {
   // chart setup
   chart = new EpiVis.Chart("chart_canvas", chartListener);
-  tree = new TreeView.TreeView("chart_tree"); // interface setup
+
+  // interface setup
+  tree = new TreeView.TreeView("chart_tree");
 
   $("#file_local").change(function() {
     loadFile(previewFile);
@@ -87,7 +48,8 @@ function run() {
     "radio_cdc",
     "radio_quidel",
     "radio_sensors",
-    "radio_nowcast"
+    "radio_nowcast",
+    "radio_covidcast"
   ]);
   connectSubOptions([
     "radio_fluview_recent",
@@ -106,8 +68,9 @@ function run() {
   ]);
   connectSubOptions(["check_wiki_hour"]);
   connectSubOptions(["check_date"]);
-  connectSubOptions(["check_group"]); // top button bar
+  connectSubOptions(["check_group"]);
 
+  // top button bar
   setActionTooltip(
     "file_csv",
     function() {
@@ -162,15 +125,16 @@ function run() {
   );
   setActionTooltip("action_reset", resetChart, "reset scaling and shifting");
   setActionTooltip("action_screenshot", screenshot, "take a screenshot");
+  setActionTooltip("action_directlink", showDirectLink, "link to this view");
   setActionTooltip(
     "action_undo",
     chartUndo,
-    'undo <span style="color: #d42">//not implemented</' + "span>"
+    'undo <span style="color: #d42">//not implemented</span>'
   );
   setActionTooltip(
     "action_redo",
     chartRedo,
-    'redo <span style="color: #d42">//not implemented</' + "span>"
+    'redo <span style="color: #d42">//not implemented</span>'
   );
   setActionTooltip(
     "navmode_pan",
@@ -192,16 +156,65 @@ function run() {
       setNavMode(EpiVis.Chart.NavMode.zoom);
     },
     "zoom mode"
-  ); // escape key closes dialog
+  );
 
+  // escape key closes dialog
   $(document).keyup(function(e) {
     if (e.keyCode == 27) {
       closeDialog();
     }
-  }); // dynamic resizing
+  });
 
+  // dynamic resizing
   $(window).resize(resize);
   resize();
+
+  // populate covidcast options from live metadata
+  initializeCovidcastOptions();
+
+  // maybe load config encoded in path fragment
+  loadDirectLinkFragment();
+}
+
+const initializeCovidcastOptions = () => {
+
+  const validNameRegex = /^[-_\w\d]+$/;
+
+  const getSortedUnique = (rows, key) => {
+    const set = {};
+    rows.forEach(row => {
+      set[row[key]] = 1;
+    });
+    const items = [];
+    Object.entries(set).forEach(keyval => items.push(keyval[0]));
+    return items.sort();
+  }
+
+  const populateDropdown = (element, names) => {
+    names.forEach(name => {
+      if (name.match(validNameRegex)) {
+        element.append(`<option value="${name}">${name}</option>`);
+      } else {
+        console.log('invalid name:', name);
+      }
+    });
+  };
+
+  Epidata.api.covidcast_meta((result, message, epidata) => {
+    if (result !== 1) {
+      console.log('failed to fetch covidcast metadata:', message);
+      return;
+    }
+    populateDropdown(
+        $('#select_covidcast_data_source'),
+        getSortedUnique(epidata, 'data_source'));
+    populateDropdown(
+        $('#select_covidcast_signal'),
+        getSortedUnique(epidata, 'signal'));
+    populateDropdown(
+        $('#select_covidcast_geo_type'),
+        getSortedUnique(epidata, 'geo_type'));
+  });
 }
 
 function setActionTooltip(id, action, tooltip) {
@@ -230,25 +243,28 @@ function hideTooltip(event) {
   $("#tooltip").hide(0);
 }
 
+const successFunction = (title) => {
+  return function(datasets) {
+    datasets.forEach(data => {
+      data.parentTitle = title;
+    });
+    var info = new CSV.Info();
+    info.numCols = datasets.length;
+    info.numRows = datasets[0].data.length;
+    info.data = new CSV.DataGroup("[API] " + title, datasets);
+    info.print();
+    var node = new TreeView.Node(info.data.getTitle());
+    loadDataGroup(node, info.data.getData());
+    tree.append(node);
+    closeDialog();
+  };
+};
+
+const onFailure = (message) => {
+  alert(message);
+};
+
 function loadEpidata() {
-  function successFunction(title) {
-    return function(datasets) {
-      var info = new CSV.Info();
-      info.numCols = datasets.length;
-      info.numRows = datasets[0].data.length;
-      info.data = new CSV.DataGroup("[API] " + title, datasets);
-      info.print();
-      var node = new TreeView.Node(info.data.getTitle());
-      loadDataGroup(node, info.data.getData());
-      tree.append(node);
-      closeDialog();
-    };
-  }
-
-  function onFailure(message) {
-    alert(message);
-  }
-
   if ($("#radio_fluview").is(":checked")) {
     (function() {
       var region = $("#select_fluview_region :selected").val();
@@ -434,6 +450,23 @@ function loadEpidata() {
       var title = "Delphi Nowcast: " + location_t;
       Epidata.fetchNowcast(successFunction(title), onFailure, location_v);
     })();
+  } else if ($("#radio_covidcast").is(":checked")) {
+    (() => {
+      const dataSource = $("#select_covidcast_data_source :selected").val();
+      const signal = $("#select_covidcast_signal :selected").val();
+      const timeType = 'day';
+      const geoType = $("#select_covidcast_geo_type :selected").val();
+      const geoValue = $("#text_covidcast_geo_value").val();
+      const title = `Delphi COVIDcast: ${geoValue} ${signal} (${dataSource})`;
+      Epidata.fetchCovidcast(
+          successFunction(title),
+          onFailure,
+          dataSource,
+          signal,
+          timeType,
+          geoType,
+          geoValue);
+    })();
   } else {
     alert("invalid api");
   }
@@ -481,51 +514,35 @@ function showLeftSection(show) {
 }
 
 function multiScale() {
-  var _tree$getSelectedData = tree.getSelectedDatasets(),
-    _tree$getSelectedData2 = _slicedToArray(_tree$getSelectedData, 2),
-    selected = _tree$getSelectedData2[0],
-    nodenames = _tree$getSelectedData2[1];
-
-  for (i = 0; i < selected.length; i++) {
-    selected[i].scaleMean();
-  }
-
+  tree.getSelectedDatasets()[0].forEach(data => data.scaleMean());
   chart.render();
 }
 
 function runRegression(index) {
-  var _tree$getSelectedData3 = tree.getSelectedDatasets(),
-    _tree$getSelectedData4 = _slicedToArray(_tree$getSelectedData3, 2),
-    selected = _tree$getSelectedData4[0],
-    nodenames = _tree$getSelectedData4[1];
-
-  if (selected.length < 2) multiScale();
-  else {
-    for (i = 0; i < selected.length; i++) {
-      if (i == index) continue;
-      else selected[i].regress(selected[index]);
+  const selected = tree.getSelectedDatasets()[0];
+  if (selected.length < 2) {
+    multiScale();
+  } else {
+    for (let i = 0; i < selected.length; i++) {
+      if (i != index) {
+        selected[i].regress(selected[index]);
+      }
     }
-
     chart.render();
   }
   closeDialog();
 }
 
 function resetChart() {
-  var _tree$getSelectedData5 = tree.getSelectedDatasets(),
-    _tree$getSelectedData6 = _slicedToArray(_tree$getSelectedData5, 2),
-    selected = _tree$getSelectedData6[0],
-    nodenames = _tree$getSelectedData6[1];
-
-  for (i = 0; i < selected.length; i++) {
-    selected[i].scaleAndShift(1, 0);
-  }
-
+  tree.getSelectedDatasets()[0].forEach(data => data.scaleAndShift(1, 0));
   chart.render();
 }
 
 function screenshot() {
-  window.open($("#chart_canvas")[0].toDataURL());
+  const image = new Image();
+  image.src = $('#chart_canvas')[0].toDataURL();
+  const newWindow = window.open('');
+  newWindow.document.write(image.outerHTML);
 }
 
 function chartAutoScale() {
@@ -851,8 +868,9 @@ function createDataset(title, kernel) {
 
   for (var i = 0; i < selected.length; i++) {
     console.log("   " + selected[i].title);
-  } // find the union of dates
+  }
 
+  // find the union of dates
   var values = {};
 
   for (var ds = 0; ds < selected.length; ds++) {
@@ -1034,13 +1052,8 @@ function closeDialog() {
 }
 
 function fillRegressionDialog() {
-  var _tree$getSelectedData7 = tree.getSelectedDatasets(),
-    _tree$getSelectedData8 = _slicedToArray(_tree$getSelectedData7, 2),
-    selected = _tree$getSelectedData8[0],
-    nodenames = _tree$getSelectedData8[1]; //var dropdown = $("#regress_dropdown");
-
   $("#regress_dropdown").empty();
-  $.each(nodenames, function(i, name) {
+  $.each(tree.getSelectedDatasets()[1], (i, name) => {
     $("#regress_dropdown").append(
       $("<option>", {
         value: i,
@@ -1049,5 +1062,108 @@ function fillRegressionDialog() {
     );
   });
 }
+
+const showDirectLink = () => {
+  const [href, anySkipped] = getDirectLink();
+  $('#dialog_directlink_text').text(href);
+  const warningText = $('#dialog_directlink_warning');
+  if (anySkipped) {
+    warningText.show();
+  } else {
+    warningText.hide();
+  }
+  openDialog("dialog_directlink");
+};
+
+const getDirectLink = () => {
+  const config = {
+    'chart': {
+      'viewport': chart.getViewport(),
+      'showPoints': chart.isShowingPoints(),
+    },
+    'datasets': [],
+  };
+  let anySkipped = false;
+  tree.getSelectedDatasets()[0].forEach(data => {
+    if (data.params) {
+      config.datasets.push({
+        'color': data.color,
+        'title': data.title,
+        'parentTitle': data.parentTitle,
+        'params': data.params,
+      });
+    } else {
+      console.log('unable to get direct link to dataset:', data.title);
+      anySkipped = true;
+    }
+  });
+  if (anySkipped) {
+    console.log('unable to link some datasets');
+  }
+  let href = window.location.href;
+  // remove the existing fragment, if present
+  let idx = href.indexOf('#');
+  if (idx >= 0) {
+    href = href.substring(0, idx);
+  }
+  // append the generated fragment
+  href += '#' + btoa(JSON.stringify(config));
+  return [href, anySkipped];
+};
+
+const loadDirectLinkFragment = () => {
+  // check for a path fragment
+  if (!window.location.hash) {
+    console.log('no config linked');
+    return;
+  }
+
+  // attempt to decode the config in the fragment
+  let config;
+  try {
+    config = JSON.parse(atob(window.location.hash.substring(1)));
+  } catch {
+    console.log('invalid path fragment');
+    return;
+  }
+
+  // load, select, and format each dataset
+  config.datasets.forEach(data => {
+    const func = {
+      'fluview': Epidata.fetchFluView,
+      'flusurv': Epidata.fetchFluSurv,
+      'gft': Epidata.fetchGFT,
+      'ght': Epidata.fetchGHT,
+      'twtr': Epidata.fetchTwitter,
+      'wiki': Epidata.fetchWiki,
+      'cdcp': Epidata.fetchCDC,
+      'quidel': Epidata.fetchQuidel,
+      'nidss_flu': Epidata.fetchNIDSS_flu,
+      'nidss_dengue': Epidata.fetchNIDSS_dengue,
+      'sensors': Epidata.fetchSensors,
+      'nowcast': Epidata.fetchNowcast,
+      'covidcast': Epidata.fetchCovidcast,
+    }[data.params[0]];
+    const onSuccess = (datasets) => {
+      const loader = successFunction(data.parentTitle);
+      loader(datasets);
+      const rootNode = tree.getRootNodes().slice(-1)[0];
+      tree.toggleNode(rootNode);
+      rootNode.getNodes().forEach((node) => {
+        if (node.getDataset().title === data.title) {
+          node.getDataset().color = data.color;
+          tree.toggleNode(node);
+        }
+      });
+    };
+    func(onSuccess, onFailure, ...data.params.slice(1));
+  });
+
+  // apply chart-level settings
+  chart.setViewport(...config.chart.viewport);
+  if (config.chart.showPoints) {
+    chartShowPoints();
+  }
+};
 
 $(document).ready(run);

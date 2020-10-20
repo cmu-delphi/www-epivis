@@ -3,19 +3,12 @@
   "version": 1,
   "actions": [
 
-    "// make changelog",
-    {
-      "type": "move",
-      "src": "README.md",
-      "dst": "site/changelog.txt"
-    },
-
     "// web sources",
     {
       "type": "move",
       "src": "site/",
       "dst": "/var/www/html/epivis/",
-      "match": "^.*\\.(html|php|txt)$",
+      "match": "^.*\\.(html|php)$",
       "add-header-comment": true
     },
     {

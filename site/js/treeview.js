@@ -1,19 +1,3 @@
-/*
- ____   ___    _   _  ___ _____   _____ ____ ___ _____ 
-|  _ \ / _ \  | \ | |/ _ \_   _| | ____|  _ \_ _|_   _|
-| | | | | | | |  \| | | | || |   |  _| | | | | |  | |  
-| |_| | |_| | | |\  | |_| || |   | |___| |_| | |  | |  
-|____/ \___/  |_| \_|\___/ |_|   |_____|____/___| |_|  
-                                                       
-        Automatically generated from sources at:       
-        https://github.com/cmu-delphi/www-epivis       
-                                                       
- Commit hash: 6c66fa51b7bbf0e7be8b99a4cb6f9bf059d1fd7a 
-     Deployed at: 2018-06-26 10:15:52 (1530022552)     
-*/
-
-
-
 // dfarrow
 var TreeView = (function() {
    var self = {};
@@ -84,21 +68,22 @@ var TreeView = (function() {
          }
       };
       // return all datasets
-      var getAllDatasets = function() {
-         var datasets = [];
-         for(var i = 0; i < rootNodes.length; i++) {
-            getDatasetsRecursive(datasets, rootNodes[i], false);
-         }
-         return datasets;
-      };
+      const getAllDatasets = () => getDatasets(false);
       // return all selected datasets
-      var getSelectedDatasets = function() {
-         var selected = [];
-         var nodenames = [];
-         for(var i = 0; i < rootNodes.length; i++) {
-            getDatasetsRecursive(selected, nodenames, rootNodes[i].getName(),rootNodes[i], true);
+      const getSelectedDatasets = () => getDatasets(true);
+      // return datasets
+      const getDatasets = (onlySelected) => {
+         const datasets = [];
+         const nodenames = [];
+         for(let i = 0; i < rootNodes.length; i++) {
+            getDatasetsRecursive(
+               datasets,
+               nodenames,
+               rootNodes[i].getName(),
+               rootNodes[i],
+               onlySelected);
          }
-         return [selected,nodenames];
+         return [datasets, nodenames];
       };
       // private methods
       function updateNodeCSS(node) {
@@ -132,6 +117,13 @@ var TreeView = (function() {
             }
          }
       }
+      const toggleNode = (node) => {
+         node.toggleSelected();
+         updateNodeCSS(node);
+      };
+      const getRootNodes = () => {
+         return rootNodes;
+      };
       function getDatasetsRecursive(datasets, nodenames, currpath, node, onlySelected) {
          if(node.isBranch()) {
             for(var i = 0; i < node.getNodes().length; i++) {
@@ -179,6 +171,8 @@ var TreeView = (function() {
       self.toggleLike = toggleLike;
       self.getAllDatasets = getAllDatasets;
       self.getSelectedDatasets = getSelectedDatasets;
+      self.getRootNodes = getRootNodes;
+      self.toggleNode = toggleNode;
       return self;
    };
    self.TreeView = TreeView;

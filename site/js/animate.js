@@ -1,19 +1,3 @@
-/*
- ____   ___    _   _  ___ _____   _____ ____ ___ _____ 
-|  _ \ / _ \  | \ | |/ _ \_   _| | ____|  _ \_ _|_   _|
-| | | | | | | |  \| | | | || |   |  _| | | | | |  | |  
-| |_| | |_| | | |\  | |_| || |   | |___| |_| | |  | |  
-|____/ \___/  |_| \_|\___/ |_|   |_____|____/___| |_|  
-                                                       
-        Automatically generated from sources at:       
-        https://github.com/cmu-delphi/www-epivis       
-                                                       
- Commit hash: 6c66fa51b7bbf0e7be8b99a4cb6f9bf059d1fd7a 
-     Deployed at: 2018-06-26 10:15:51 (1530022551)     
-*/
-
-
-
 // dfarrow
 var Animate = (function() {
    var self = {};

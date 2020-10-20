@@ -1,19 +1,3 @@
-/*
- ____   ___    _   _  ___ _____   _____ ____ ___ _____ 
-|  _ \ / _ \  | \ | |/ _ \_   _| | ____|  _ \_ _|_   _|
-| | | | | | | |  \| | | | || |   |  _| | | | | |  | |  
-| |_| | |_| | | |\  | |_| || |   | |___| |_| | |  | |  
-|____/ \___/  |_| \_|\___/ |_|   |_____|____/___| |_|  
-                                                       
-        Automatically generated from sources at:       
-        https://github.com/cmu-delphi/www-epivis       
-                                                       
- Commit hash: 6c66fa51b7bbf0e7be8b99a4cb6f9bf059d1fd7a 
-     Deployed at: 2018-06-26 10:15:52 (1530022552)     
-*/
-
-
-
 // dfarrow
 var EpiVis = (function() {
    var self = {};
@@ -181,7 +165,7 @@ var EpiVis = (function() {
       this.getDate = function() { return date; };
       this.getValue = function() { return value; };
    };
-   var Dataset = function(data, title) {
+   var Dataset = function(data, title, params) {
       function getComponent() {
          var x = 0x20 + Math.floor(Math.random() * 0xC0);
          return ("0" + x.toString(16)).slice(-2);
@@ -191,7 +175,9 @@ var EpiVis = (function() {
       }
       var self = {};
       self.data = data;
+      self.parentTitle = '';
       self.title = (typeof title === 'undefined') ? '' : title;
+      self.params = (typeof params === 'undefined') ? null : params;
       self.color = getRandomColor();
       self.lineWidth = 2;
       self.scale = 1;
@@ -959,6 +945,9 @@ var EpiVis = (function() {
          yMin = y1;
          yMax = y2;
          this.render();
+      };
+      this.getViewport = () => {
+         return [xMin, yMin, xMax, yMax];
       };
       this.highlight = function(date) {
          var update = false;
