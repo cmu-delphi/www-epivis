@@ -586,7 +586,10 @@ function resetChart() {
 }
 
 function screenshot() {
-  window.open($("#chart_canvas")[0].toDataURL());
+  const image = new Image();
+  image.src = $('#chart_canvas')[0].toDataURL();
+  const newWindow = window.open('');
+  newWindow.document.write(image.outerHTML);
 }
 
 function chartAutoScale() {
