@@ -88,6 +88,7 @@ var EpiVis = (function() {
       return (((year % 4) === 0) && ((year % 100) !== 0)) || ((year % 400) === 0);
    };
    Date.parse = function(str) {
+      str = '' + str;
       var y, m, d;
       if(str.length === 8) {
          y = parseInt(str.substring(0, 4), 10);
