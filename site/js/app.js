@@ -49,7 +49,8 @@ function run() {
     "radio_quidel",
     "radio_sensors",
     "radio_nowcast",
-    "radio_covidcast"
+    "radio_covidcast",
+    "radio_covid_hosp"
   ]);
   connectSubOptions([
     "radio_fluview_recent",
@@ -69,6 +70,10 @@ function run() {
   connectSubOptions(["check_wiki_hour"]);
   connectSubOptions(["check_date"]);
   connectSubOptions(["check_group"]);
+  connectSubOptions([
+    "radio_covid_hosp_recent",
+    "radio_covid_hosp_static"
+  ]);
 
   // top button bar
   setActionTooltip(
@@ -466,6 +471,25 @@ function loadEpidata() {
           timeType,
           geoType,
           geoValue);
+    })();
+  } else if ($("#radio_covid_hosp").is(":checked")) {
+    (() => {
+      const state_v = $("#select_covid_hosp_state :selected").val();
+      const state_t = $("#select_covid_hosp_state :selected").text();
+      let title = "COVID Hospitalization: " + state_t;
+      let issue;
+      if ($("#radio_covid_hosp_static").is(":checked")) {
+        issue = parseInt($("#text_covid_hosp_static").val(), 10);
+        title += " (issued on " + issue + ")";
+      } else {
+        title += " (most recent issue)";
+      }
+
+      Epidata.fetchCovidHosp(
+          successFunction(title),
+          onFailure,
+          state_v,
+          issue);
     })();
   } else {
     alert("invalid api");
@@ -1143,6 +1167,7 @@ const loadDirectLinkFragment = () => {
       'sensors': Epidata.fetchSensors,
       'nowcast': Epidata.fetchNowcast,
       'covidcast': Epidata.fetchCovidcast,
+      'covid_hosp': Epidata.fetchCovidHosp,
     }[data.params[0]];
     const onSuccess = (datasets) => {
       const loader = successFunction(data.parentTitle);

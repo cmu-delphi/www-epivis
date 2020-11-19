@@ -79,6 +79,8 @@
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_nowcast" /> Delphi Nowcast</label></div><span class="explanation">(source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</span>
          <br />
          <div class="option_label"><label><input type="radio" name="source_radio" id="radio_covidcast" /> Delphi COVIDcast</label></div><span class="explanation">(source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</span>
+         <br />
+         <div class="option_label"><label><input type="radio" name="source_radio" id="radio_covid_hosp" /> COVID Hospitalization</label></div><span class="explanation">(source: <a target="_blank" href="https://healthdata.gov/dataset/covid-19-reported-patient-impact-and-hospital-capacity-state-timeseries">healthdata.gov</a>)</span>
          <div class="csv_options" id="radio_fluview_options">
             <div class="option_label">
                <select name="select_fluview_region" id="select_fluview_region">
@@ -990,6 +992,78 @@
                   <option value="jfk">New York City</option>
                </select>
             </div><span class="explanation">(location to filter data by)</span>
+         </div>
+         <div class="csv_options" id="radio_covid_hosp_options" style="display: none;">
+            <div class="option_label">
+               <select name="select_covid_hosp_state" id="select_covid_hosp_state">
+                  <option value="AK">AK</option>
+                  <option value="AL">AL</option>
+                  <option value="AR">AR</option>
+                  <option value="AZ">AZ</option>
+                  <option value="CA">CA</option>
+                  <option value="CO">CO</option>
+                  <option value="CT">CT</option>
+                  <option value="DE">DE</option>
+                  <option value="FL">FL</option>
+                  <option value="GA">GA</option>
+                  <option value="HI">HI</option>
+                  <option value="IA">IA</option>
+                  <option value="ID">ID</option>
+                  <option value="IL">IL</option>
+                  <option value="IN">IN</option>
+                  <option value="KS">KS</option>
+                  <option value="KY">KY</option>
+                  <option value="LA">LA</option>
+                  <option value="MA">MA</option>
+                  <option value="MD">MD</option>
+                  <option value="ME">ME</option>
+                  <option value="MI">MI</option>
+                  <option value="MN">MN</option>
+                  <option value="MO">MO</option>
+                  <option value="MS">MS</option>
+                  <option value="MT">MT</option>
+                  <option value="NC">NC</option>
+                  <option value="ND">ND</option>
+                  <option value="NE">NE</option>
+                  <option value="NH">NH</option>
+                  <option value="NJ">NJ</option>
+                  <option value="NM">NM</option>
+                  <option value="NV">NV</option>
+                  <option value="NY">NY</option>
+                  <option value="OH">OH</option>
+                  <option value="OK">OK</option>
+                  <option value="OR">OR</option>
+                  <option value="PA">PA</option>
+                  <option value="RI">RI</option>
+                  <option value="SC">SC</option>
+                  <option value="SD">SD</option>
+                  <option value="TN">TN</option>
+                  <option value="TX">TX</option>
+                  <option value="UT">UT</option>
+                  <option value="VA">VA</option>
+                  <option value="VT">VT</option>
+                  <option value="WA">WA</option>
+                  <option value="WI">WI</option>
+                  <option value="WV">WV</option>
+                  <option value="WY">WY</option>
+                  <option value="DC">District of Columbia</option>
+                  <option value="PR">Puerto Rico</option>
+                  <option value="VI">Virgin Islands</option>
+               </select>
+            </div><span class="explanation">(location to filter data by)</span>
+            <br />
+            <div class="option_label"><label><input type="radio" name="covid_hosp_issue_radio" id="radio_covid_hosp_recent" checked="checked" /> Most Recent Issue</label></div><span class="explanation">(fetch the most up-to-date/stable data)</span>
+            <br />
+            <div class="option_label"><label><input type="radio" name="covid_hosp_issue_radio" id="radio_covid_hosp_static" /> Specific Issue</label></div><span class="explanation">(fetch data "as-of" a specific date)</span>
+            <br />
+            <div class="csv_options" id="radio_covid_hosp_recent_options">
+               <span class="explanation">(this option has no additional parameters)</span>
+               <br />
+            </div>
+            <div class="csv_options" id="radio_covid_hosp_static_options" style="display: none;">
+               <div class="option_label"><label><input type="text" id="text_covid_hosp_static" value="20201116" /> What date was the dataset published?</label></div> <span class="explanation">(format: YYYYMMDD)</span>
+               <br />
+            </div>
          </div>
          <div class="csv_options" id="radio_covidcast_options" style="display: none;">
             <div class="option_label">
