@@ -1,6 +1,5 @@
-// dfarrow
-var TreeView = (function() {
-   var self = {};
+<script lang="ts">
+     var self = {};
    var nextNodeID = 0;
    var Node = function(name,parent) {
       var self = {};
@@ -175,7 +174,25 @@ var TreeView = (function() {
       self.toggleNode = toggleNode;
       return self;
    };
-   self.TreeView = TreeView;
-   self.Node = Node;
-   return self;
-})();
+</script>
+
+<style>
+div.tv_node {
+  padding: 2px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  min-width: 512px;
+}
+div.tv_node div.tv_node {
+  margin-left: 16px;
+}
+div.tv_branch {
+  font-weight: bold;
+}
+div.tv_leaf {
+  font-weight: normal;
+}
+</style>

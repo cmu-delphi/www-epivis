@@ -1,4 +1,5 @@
-import { DataSet, EpiDate } from '../data/model';
+import EpiDate from '../data/EpiDate';
+import type DataSet from '../data/DataSet';
 
 export enum NavMode {
   pan = 0,

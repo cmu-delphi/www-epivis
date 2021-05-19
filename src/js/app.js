@@ -573,16 +573,6 @@ function chartAutoScale() {
   chart.autoScale(true);
 }
 
-function chartUndo() {
-  //chart.multiScale();
-  alert("undo is not implemented yet");
-}
-
-function chartRedo() {
-  //chart.multiScale();
-  alert("redo is not implemented yet");
-}
-
 function chartRandomizeColors() {
   chart.randomizeColors();
 }
@@ -602,122 +592,11 @@ function setNavMode(mode) {
   chart.setNavMode(mode);
 }
 
-function loadFile(action) {
-  if ($("#file_local")[0].files.length == 0) {
-    return;
-  }
-
-  var file;
-
-  try {
-    file = $("#file_local")[0].files[0];
-
-    if (
-      file.type !== "text/csv" &&
-      file.type !== "application/vnd.ms-excel" &&
-      file.type !==
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    ) {
-      if (
-        !confirm(
-          "*Unknown file type.*\n\nBrowser reports mime type of [" +
-            file.type +
-            "]; expected [text/csv].\n\nAttempt to load anyway?"
-        )
-      ) {
-        return;
-      }
-    }
-
-    if (file.size > 1 << 20) {
-      if (
-        !confirm(
-          "*Large file.*\n\nBrowser reports file size of [" +
-            file.size +
-            " bytes].\n\nAttempt to load anyway?"
-        )
-      ) {
-        return;
-      }
-    }
-  } catch (e) {
-    alert(e + "\n(Hint: Double check that you selected the right file.)");
-  }
-
-  var reader = new FileReader();
-
-  reader.onload = function(e) {
-    console.log("Loaded " + reader.result.length + " bytes");
-    action(reader.result);
-  };
-
-  reader.onerror = function(e) {
-    alert("Failed to read file: " + reader.error);
-  };
-
-  reader.readAsText(file);
-}
-
-function getCSVOptions() {
-  var options = new CSV.Options();
-  options.transpose = $("#check_transpose").is(":checked");
-  options.hasHeader = $("#check_header").is(":checked");
-
-  if ($("#check_date").is(":checked")) {
-    if ($("#radio_simple").is(":checked")) {
-      options.dateType = CSV.Options.DateType.Simple;
-      options.dateCol1 = parseInt($("#text_simple_0").val(), 10);
-      options.dateFormat = "YYYY-MM-DD";
-    }
-
-    if ($("#radio_epiweek").is(":checked")) {
-      options.dateType = CSV.Options.DateType.Epiweek;
-      options.dateCol1 = parseInt($("#text_epiweek_0").val(), 10);
-    }
-
-    if ($("#radio_epi").is(":checked")) {
-      options.dateType = CSV.Options.DateType.Epi;
-      options.dateCol1 = parseInt($("#text_epi_0").val(), 10);
-      options.dateCol2 = parseInt($("#text_epi_1").val(), 10);
-    }
-
-    if ($("#radio_decimal").is(":checked")) {
-      options.dateType = CSV.Options.DateType.Decimal;
-      options.dateCol1 = parseInt($("#text_decimal_0").val(), 10);
-    }
-
-    if ($("#radio_monthly").is(":checked")) {
-      options.dateType = CSV.Options.DateType.Monthly;
-      options.dateCol1 = parseInt($("#text_monthly_0").val(), 10);
-      options.dateCol2 = parseInt($("#text_monthly_1").val(), 10);
-    }
-  } else {
-    options.dateType = null;
-  }
-
-  options.hasGroup = $("#check_group").is(":checked");
-
-  if (options.hasGroup) {
-    options.groupColumn = parseInt($("#text_group_0").val(), 10);
-  }
-
-  options.print();
-  return options;
-}
 
 function parseFile(text) {
   var options;
   var info = text.split("\n")[0].trim();
 
-  if (info.startsWith("#{") && info.endsWith("}")) {
-    options = JSON.parse(info.substring(1));
-    console.log("using CSVOptions from file");
-  } else {
-    options = getCSVOptions();
-    console.log(JSON.stringify(options));
-  }
-
-  var title = $("#file_local")[0].files[0].name;
   var csv = CSV.read(title, text, options);
   var node = new TreeView.Node(csv.data.getTitle());
   var data = csv.data.getData();
@@ -726,22 +605,6 @@ function parseFile(text) {
   closeDialog();
 }
 
-function previewFile(text) {
-  var lines = text.split("\n");
-  var preview = "";
-  var i;
-
-  for (i = 0; i < Math.min(5, lines.length); i++) {
-    preview += lines[i] + "\n";
-  }
-
-  $("#preview_box").val(preview);
-  var info = lines[0].trim();
-
-  if (info.startsWith("#{") && info.endsWith("}")) {
-    parseFile(text);
-  }
-}
 
 function loadDataGroup(node, data) {
   var nodes = [];
@@ -794,22 +657,6 @@ function nodeToggled(node) {
     } else {
       chart.removeDataset(node.getDataset());
     }
-  }
-}
-
-function updateDatePresent() {
-  if ($("#check_date").is(":checked")) {
-    $("#check_date_options").show(200);
-  } else {
-    $("#check_date_options").hide(200);
-  }
-}
-
-function updateGroupPresent() {
-  if ($("#check_group").is(":checked")) {
-    $("#check_group_options").show(200);
-  } else {
-    $("#check_group_options").hide(200);
   }
 }
 
@@ -941,91 +788,31 @@ function createDataset(title, kernel) {
 
 var chartListener = {
   onNavModeChanged: function onNavModeChanged(navMode) {
-    var cls = "ui_flag_icon_selected";
-    $("#navmode_pan").removeClass(cls);
-    $("#navmode_crop").removeClass(cls);
-    $("#navmode_zoom").removeClass(cls);
+    var cls = 'ui_flag_icon_selected';
+    $('#navmode_pan').removeClass(cls);
+    $('#navmode_crop').removeClass(cls);
+    $('#navmode_zoom').removeClass(cls);
 
     switch (navMode) {
       case EpiVis.Chart.NavMode.pan:
         {
-          $("#navmode_pan").addClass(cls);
+          $('#navmode_pan').addClass(cls);
         }
         break;
 
       case EpiVis.Chart.NavMode.crop:
         {
-          $("#navmode_crop").addClass(cls);
+          $('#navmode_crop').addClass(cls);
         }
         break;
 
       case EpiVis.Chart.NavMode.zoom:
         {
-          $("#navmode_zoom").addClass(cls);
+          $('#navmode_zoom').addClass(cls);
         }
         break;
     }
-  }
-};
-var Kernels = {
-  sum: function sum() {
-    return function(date, values) {
-      var sum = 0;
-
-      for (var i = 0; i < values.length; i++) {
-        sum += values[i];
-      }
-
-      return [date, sum];
-    };
   },
-  product: function product() {
-    return function(date, values) {
-      var product = 1;
-
-      for (var i = 0; i < values.length; i++) {
-        product *= values[i];
-      }
-
-      return [date, product];
-    };
-  },
-  average: function average() {
-    return function(date, values) {
-      var sum = 0;
-
-      for (var i = 0; i < values.length; i++) {
-        sum += values[i];
-      }
-
-      return [date, sum / values.length];
-    };
-  },
-  ratio: function ratio(inverse) {
-    return function(date, values) {
-      var a, b;
-
-      if (inverse) {
-        a = values[1];
-        b = values[0];
-      } else {
-        a = values[0];
-        b = values[1];
-      }
-
-      return [date, b == 0 ? 0 : a / b];
-    };
-  },
-  scale: function scale(_scale) {
-    return function(date, values) {
-      return [date, values[0] * _scale];
-    };
-  },
-  iliplus: function iliplus() {
-    return function(date, values) {
-      return [date, (values[0] * values[1]) / 100];
-    };
-  }
 };
 
 function openDialog(name) {
@@ -1190,5 +977,3 @@ const loadDirectLinkFragment = () => {
     chartShowPoints();
   }
 };
-
-$(document).ready(run);
