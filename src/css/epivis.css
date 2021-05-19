@@ -1,35 +1,3 @@
-html {
-  height: 100%;
-  box-sizing: border-box;
-  font-size: 100%;
-}
-*, *:before, *:after {
-  box-sizing: inherit;
-}
-body {
-  height: 100%;
-  margin: 0px;
-  padding: 0px;
-  background-color: #222;
-  color: #ddd;
-  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
-  font-size: 0.9em;
-}
-a:link {
-  color: #16a;
-}
-a:visited {
-  color: #16a;
-}
-a:hover {
-  color: #61a;
-}
-a:active {
-  color: #61a;
-}
-h1 {
-  text-align: center;
-}
 #top_bar {
   text-align: center;
   height: 32px;
