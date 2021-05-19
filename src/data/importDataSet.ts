@@ -14,7 +14,7 @@ import EpiPoint from './EpiPoint';
 export interface CSVOptions {
   transpose: boolean;
   hasHeader: boolean;
-  dataType: 'simple' | 'epiweek' | 'epi' | 'decimal' | 'monthly' | 0 | 1 | 2 | 3 | 4 | null;
+  dateType: 'simple' | 'epiweek' | 'epi' | 'decimal' | 'monthly' | 0 | 1 | 2 | 3 | 4 | null;
   dateCol1: number;
   dateCol2: number;
   dateFormat: string;
@@ -150,17 +150,17 @@ function splitGroup(rows: string[][], prefix: string, level: number, groupColumn
 }
 
 function isDateColumn(column: number, options: CSVOptions) {
-  if (options.dataType == null) {
+  if (options.dateType == null) {
     return false;
   }
   if (column === options.dateCol1) {
     return true;
   }
   if (
-    options.dataType === 'epi' ||
-    options.dataType === 1 ||
-    options.dataType === 'monthly' ||
-    options.dataType === 3
+    options.dateType === 'epi' ||
+    options.dateType === 1 ||
+    options.dateType === 'monthly' ||
+    options.dateType === 3
   ) {
     return column == options.dateCol2;
   }
@@ -169,28 +169,28 @@ function isDateColumn(column: number, options: CSVOptions) {
 
 function parseDate(values: string[], lineIndex: number, options: CSVOptions): EpiDate | null {
   try {
-    if (options.dataType === 'simple' || options.dataType === 0) {
+    if (options.dateType === 'simple' || options.dateType === 0) {
       const m = parse(values[options.dateCol1], options.dateFormat, new Date());
       return new EpiDate(m.getFullYear(), m.getMonth() + 1, m.getDate());
     }
-    if (options.dataType === 'epiweek' || options.dataType === 4) {
+    if (options.dateType === 'epiweek' || options.dateType === 4) {
       const ew = Number.parseInt(values[options.dateCol1], 10);
       const year = Math.floor(ew / 100);
       const week = ew % 100;
       return EpiDate.fromEpiweek(year, week);
     }
-    if (options.dataType === 'epi' || options.dataType === 1) {
+    if (options.dateType === 'epi' || options.dateType === 1) {
       const year = Number.parseInt(values[options.dateCol1], 10);
       const week = Number.parseInt(values[options.dateCol2], 10);
       return EpiDate.fromEpiweek(year, week);
     }
-    if (options.dataType === 'decimal' || options.dataType === 2) {
+    if (options.dateType === 'decimal' || options.dateType === 2) {
       const y = Number.parseFloat(values[options.dateCol1]);
       const year = Math.floor(y);
       const days = Math.floor((y - year) * 365.25);
       return new EpiDate(year, 1, 1).addDays(days);
     }
-    if (options.dataType === 'monthly' || options.dataType === 3) {
+    if (options.dateType === 'monthly' || options.dateType === 3) {
       const year = Number.parseInt(values[options.dateCol1], 10);
       const month = Number.parseInt(values[options.dateCol2], 10);
       return new EpiDate(year, month, 15);
