@@ -1,16 +1,26 @@
 <script lang="ts">
+  import TreeInnerNode from './components/TreeInnerNode.svelte';
+  import { datasetTree } from './store';
 </script>
 
-<main>
-  <p class="info_text">[<a href="https://github.com/cmu-delphi/www-epivis" target="_blank">source</a>]</p>
-
-      <div id="chart_container" class="show_bottom">
-         <div id="chart_tree"></div>
-         <canvas id="chart_canvas" class="show_left" width="800" height="400"></canvas>
-      </div>
-      <div id="tooltip" class="box_tooltip" style="display: none;"></div>
-      <div id="box_overlay"></div>
-</main>
+<div class="root">
+  <side class="tree">
+    <TreeInnerNode node={$datasetTree} />
+  </side>
+  <main>CANVAS</main>
+</div>
 
 <style>
+  .root {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0;
+  }
+  .tree {
+    padding: 0.5em 1em 0.5em 0.5em;
+    border-right: 1px solid grey;
+  }
+  main {
+    flex: 1 1 0;
+  }
 </style>

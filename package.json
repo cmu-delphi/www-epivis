@@ -14,15 +14,15 @@
   },
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w",
-    "start": "sirv public --no-clear --port 8080",
+    "start": "rollup -c -w",
+    "server": "sirv public --no-clear --port 8080",
     "validate": "svelte-check",
     "lint": "eslint src --ext .ts,.js,.svelte && prettier --check \"**/*\"",
     "lint:fix": "eslint src --ext .ts,.js,.svelte --fix && npm run prettier",
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@fortawesome/fontawesome-free": "^5.15.3",
+    "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@rollup/plugin-commonjs": "^19.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-replace": "^2.4.2",
@@ -53,6 +53,7 @@
     "sirv-cli": "^1.0.11",
     "svelte": "^3.38.2",
     "svelte-check": "^1.5.4",
+    "svelte-fa": "^2.2.0",
     "svelte-preprocess": "^4.7.3",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4"

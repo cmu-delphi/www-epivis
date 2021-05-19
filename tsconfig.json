@@ -4,6 +4,7 @@
     "module": "ES2020",
     "lib": ["ES2019", "DOM"],
     "importsNotUsedAsValues": "error",
+    "sourceMap": true,
     "strict": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
@@ -14,7 +15,6 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-
     "resolveJsonModule": true
   },
   "include": ["src/**/*", "types.d.ts"],
