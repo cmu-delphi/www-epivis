@@ -280,6 +280,14 @@ export class DataSet {
     return dataHash;
   }
 
+  getPointValue(index: number): number {
+    const temp = this.data[index].getValue();
+    if (Number.isNaN(temp)) {
+      return temp;
+    }
+    return this.verticalOffset + temp * this.scale;
+  }
+
   regress(dataset: DataSet): void {
     const datahash = dataset.getDataHash();
     const x: number[] = [];
@@ -316,3 +324,21 @@ export class DataSet {
     return gaps.length > 0 ? gaps[Math.floor(gaps.length / 2)] : 1;
   }
 }
+
+export const SAMPLE_DATASET: DataSet = ((): DataSet => {
+  // initial dataset, just for fun
+  const data = new Array<EpiPoint>(365);
+  const now = new Date();
+  const baseIndex = new EpiDate(now.getFullYear(), now.getMonth() + 1, now.getDate()).getIndex() - 182;
+  for (let i = 0; i < data.length; i++) {
+    const x = 6 - (12 * i) / (data.length - 1);
+    const xp = x * Math.PI;
+    const v = x === 0 ? 1 : Math.sin(xp) / xp;
+    data[i] = new EpiPoint(EpiDate.fromIndex(baseIndex + i), v);
+  }
+  const ds = new DataSet(data, 'EpiVis Sample');
+
+  //sampleDataset.lineWidth = 5;
+  //sampleDataset.color = '#dd3311';
+  return ds;
+})();
