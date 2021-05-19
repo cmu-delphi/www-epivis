@@ -1,0 +1,15 @@
+/node_modules/
+
+.DS_Store
+
+/.idea/
+
+*.zip
+.eslintcache
+/public
+src/**/*.generated.json
+/cypress/videos
+/cypress/screenshots
+*.log
+__diff_output__
+*.tgz
