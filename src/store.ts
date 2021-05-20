@@ -1,4 +1,5 @@
 import { get, writable } from 'svelte/store';
+import { NavMode } from './components/Chart';
 import { DataGroup, SAMPLE_DATASET } from './data/DataSet';
 
 const defaultGroup: DataGroup = { title: 'All Datasets', datasets: [SAMPLE_DATASET], level: 0 };
@@ -7,6 +8,7 @@ export const activeDatasets = writable([SAMPLE_DATASET]);
 export const expandedDataGroups = writable([defaultGroup]);
 
 export const isShowingPoints = writable(false);
+export const navMode = writable(NavMode.crop);
 
 interface ILinkConfig {
   chart: {

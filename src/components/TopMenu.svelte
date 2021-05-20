@@ -1,39 +1,96 @@
 <script lang="ts">
-  import { getDirectLink } from '../store';
+  import {
+    faAnchor,
+    faArrowsAlt,
+    faChartLine,
+    faCrop,
+    faEllipsisH,
+    faExpand,
+    faExternalLinkSquareAlt,
+    faLink,
+    faPaintBrush,
+    faPizzaSlice,
+    faReceipt,
+  } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
   import UIkit from 'uikit';
+  import { getDirectLink, navMode } from '../store';
+  import { NavMode } from './Chart';
 
   function showDirectLink() {
     const r = getDirectLink();
     const code = `
     ${r.anySkipped ? `<div class="uk-alert uk-alert-warning">Some datasets could not be linked</div>` : ''}
-    <input value="${r.url.href}" readonly />
+    <input class="uk-input" value="${r.url.href}" readonly />
     `;
     UIkit.modal.alert(code);
   }
 </script>
 
-<div style="grid-area: menu">
-  <div id="file_csv" class="ui_flag ui_flag_icon"><i class="fa fa-folder-open" /></div>
-  <div id="file_api" class="ui_flag ui_flag_icon"><i class="fa fa-database" /></div>
-  <div id="file_draw" class="ui_flag ui_flag_icon"><i class="fa fa-pencil" /></div>
-  <div id="file_kernels" class="ui_flag ui_flag_icon"><i class="fa fa-code" /></div>
-  <div id="file_tree" class="ui_flag ui_flag_icon ui_flag_icon_selected"><i class="fa fa-list" /></div>
-  <div id="file_fullscreen" class="ui_flag ui_flag_icon" style="display: none;">
-    <i class="fa fa-external-link-square" />
+<div class="menu">
+  <div class="uk-divider" />
+
+  <button type="button" class="uk-button uk-button-default uk-button-small" id="file_fullscreen" style="display: none;">
+    <Fa icon={faExternalLinkSquareAlt} />
+  </button>
+  <div class="uk-button-group">
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_randomize"
+      ><Fa icon={faPaintBrush} /></button
+    >
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_autoscale"
+      ><Fa icon={faArrowsAlt} /></button
+    >
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_showpoints"
+      ><Fa icon={faEllipsisH} /></button
+    >
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_multiscale"
+      ><Fa icon={faAnchor} /></button
+    >
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_regress"
+      ><Fa icon={faChartLine} /></button
+    >
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_reset"
+      ><Fa icon={faReceipt} /></button
+    >
+    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_screenshot"
+      ><Fa icon={faPizzaSlice} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      id="action_directlink"
+      on:click|preventDefault={showDirectLink}><Fa icon={faLink} /></button
+    >
   </div>
-  <div class="spacer" />
-  <div id="action_randomize" class="ui_flag ui_flag_icon"><i class="fa fa-paint-brush" /></div>
-  <div id="action_autoscale" class="ui_flag ui_flag_icon"><i class="fa fa-arrows-alt" /></div>
-  <div id="action_showpoints" class="ui_flag ui_flag_icon"><i class="fa fa-ellipsis-h" /></div>
-  <div id="action_multiscale" class="ui_flag ui_flag_icon ui_flag_icon_disabled"><i class="fa fa-anchor" /></div>
-  <div id="action_regress" class="ui_flag ui_flag_icon ui_flag_icon_disabled"><i class="fa fa-line-chart" /></div>
-  <div id="action_reset" class="ui_flag ui_flag_icon ui_flag_icon_disabled"><i class="fa fa-refresh" /></div>
-  <div id="action_screenshot" class="ui_flag ui_flag_icon"><i class="fa fa-picture-o" /></div>
-  <div id="action_directlink" class="ui_flag ui_flag_icon" on:click={showDirectLink}><i class="fa fa-link" /></div>
-  <div id="action_undo" class="ui_flag ui_flag_icon ui_flag_icon_disabled"><i class="fa fa-undo" /></div>
-  <div id="action_redo" class="ui_flag ui_flag_icon ui_flag_icon_disabled"><i class="fa fa-repeat" /></div>
-  <div class="spacer" />
-  <div id="navmode_pan" class="ui_flag ui_flag_icon ui_flag_icon_selected"><i class="fa fa-arrows" /></div>
-  <div id="navmode_crop" class="ui_flag ui_flag_icon"><i class="fa fa-crop" /></div>
-  <div id="navmode_zoom" class="ui_flag ui_flag_icon"><i class="fa fa-expand" /></div>
+
+  <div class="uk-divider" />
+
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      class:uk-active={$navMode === NavMode.pan}
+      on:click|preventDefault={() => ($navMode = NavMode.pan)}><Fa icon={faArrowsAlt} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      class:uk-active={$navMode === NavMode.crop}
+      on:click|preventDefault={() => ($navMode = NavMode.crop)}><Fa icon={faCrop} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      class:uk-active={$navMode === NavMode.zoom}
+      on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faExpand} /></button
+    >
+  </div>
 </div>
+
+<style>
+  .menu {
+    grid-area: menu;
+    display: flex;
+    justify-content: center;
+  }
+</style>

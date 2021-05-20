@@ -1,13 +1,17 @@
 <script lang="ts">
   import UIkit from 'uikit';
-  import { onMount } from 'svelte';
+  import { onMount, createEventDispatcher } from 'svelte';
 
+  const dispatch = createEventDispatcher();
   export let title = '';
 
   let root: HTMLElement | null;
 
   onMount(() => {
     UIkit.modal(root!).show();
+    (UIkit.util as any).on(root, 'hidden', () => {
+      dispatch('close');
+    });
   });
 </script>
 

@@ -1,12 +1,10 @@
-<script lang="ts" context="module">
-</script>
-
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import importDataSet, { CSVOptions } from '../data/importDataSet';
+  import importDataSet from '../../data/importDataSet';
+  import type { CSVOptions } from '../../data/importDataSet';
 
   import Dialog from './Dialog.svelte';
-  import { randomId } from './utils';
+  import { randomId } from '../utils';
 
   const dispatch = createEventDispatcher();
 
@@ -29,7 +27,7 @@
   function onSubmit(e: Event) {
     e.preventDefault();
     dispatch(
-      'import',
+      'imported',
       importDataSet(file!, fileContent, {
         transpose,
         hasHeader,
@@ -66,7 +64,7 @@
   $: {
     let inlineConfig = resolveInlineConfig(fileContent);
     if (inlineConfig) {
-      dispatch('import', importDataSet(file!, fileContent, inlineConfig));
+      dispatch('imported', importDataSet(file!, fileContent, inlineConfig));
     }
   }
 
@@ -105,7 +103,7 @@
   }
 </script>
 
-<Dialog title="Load from CSV File">
+<Dialog title="Load from CSV File" on:close>
   <form class="uk-form-stacked" {id} on:submit={onSubmit}>
     <div>
       <label class="uk-form-label" for="{id}-f">Select Local File</label>
