@@ -6,11 +6,12 @@
   import AddKernelDialog from './dialogs/AddKernelDialog.svelte';
   import ImportApiDialog from './dialogs/ImportAPIDialog.svelte';
   import ImportCsvDialog from './dialogs/ImportCSVDialog.svelte';
+  import { addDataSet } from '../store';
 
   let doDialog: null | 'csv' | 'api' | 'addLine' | 'addKernel' = null;
 
   function importedDataset(e: CustomEvent) {
-    console.log(e.detail as DataSet | DataGroup);
+    addDataSet(e.detail as DataSet | DataGroup);
     doDialog = null;
   }
   function closeDialog() {

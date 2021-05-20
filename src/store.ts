@@ -1,14 +1,21 @@
 import { get, writable } from 'svelte/store';
 import { NavMode } from './components/chartUtils';
-import { DataGroup, SAMPLE_DATASET } from './data/DataSet';
+import DataSet, { DataGroup, DEFAULT_GROUP, SAMPLE_DATASET, flatten } from './data/DataSet';
 
-const defaultGroup: DataGroup = { title: 'All Datasets', datasets: [SAMPLE_DATASET], level: 0 };
-export const datasetTree = writable<DataGroup>(defaultGroup);
+export const datasetTree = writable<DataGroup>(DEFAULT_GROUP);
 export const activeDatasets = writable([SAMPLE_DATASET]);
-export const expandedDataGroups = writable([defaultGroup]);
+export const expandedDataGroups = writable([DEFAULT_GROUP]);
 
 export const isShowingPoints = writable(false);
 export const navMode = writable(NavMode.crop);
+
+export function addDataSet(dataset: DataSet | DataGroup): void {
+  const root = get(datasetTree);
+  root.datasets.push(dataset);
+  datasetTree.set(root); // set tree to trigger updates
+  const ds = flatten(dataset);
+  activeDatasets.set([...get(activeDatasets), ...ds]);
+}
 
 interface ILinkConfig {
   chart: {
@@ -18,7 +25,6 @@ interface ILinkConfig {
   datasets: {
     color: string;
     title: string;
-    parentTitle: string;
     params: Record<string, unknown>;
   }[];
 }
@@ -43,7 +49,6 @@ export function getDirectLink(chart: IChart): { url: URL; anySkipped: boolean } 
       config.datasets.push({
         color: data.color,
         title: data.title,
-        parentTitle: data.parentTitle,
         params: data.params,
       });
     } else {

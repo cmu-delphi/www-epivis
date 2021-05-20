@@ -1,15 +1,24 @@
 <script lang="ts">
+  import DataSet from '../data/DataSet';
   import { datasetTree } from '../store';
-
   import ImportDataSetsMenu from './ImportDataSetsMenu.svelte';
   import TreeInnerNode from './TreeInnerNode.svelte';
+  import TreeLeafNode from './TreeLeafNode.svelte';
 
-  export let style = ''
+  export let style = '';
 </script>
 
 <side class="left" {style}>
   <ImportDataSetsMenu />
-  <TreeInnerNode node={$datasetTree} />
+  <div>
+    {#each $datasetTree.datasets as child (child.title)}
+      {#if child instanceof DataSet}
+        <TreeLeafNode node={child} />
+      {:else}
+        <TreeInnerNode node={child} />
+      {/if}
+    {/each}
+  </div>
 </side>
 
 <style>

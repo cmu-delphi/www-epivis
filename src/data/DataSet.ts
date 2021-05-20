@@ -18,7 +18,6 @@ function computeGap(data: readonly EpiPoint[]): number {
 }
 
 export default class DataSet {
-  public readonly parentTitle: string = '';
   public color: string = getRandomColor();
   public readonly lineWidth = 2;
   public scale = 1;
@@ -119,9 +118,31 @@ export const SAMPLE_DATASET: DataSet = ((): DataSet => {
   return ds;
 })();
 
-export interface DataGroup {
-  title: string;
-  level: number;
-  datasets: (DataSet | DataGroup)[];
-  parent?: DataGroup;
+export class DataGroup {
+  constructor(
+    public readonly title: string,
+    public readonly level: number,
+    public readonly datasets: (DataSet | DataGroup)[],
+  ) {}
+
+  flat(arr: DataSet[]): void {
+    for (const child of this.datasets) {
+      if (child instanceof DataSet) {
+        arr.push(child);
+      } else {
+        child.flat(arr);
+      }
+    }
+  }
+}
+
+export const DEFAULT_GROUP: DataGroup = new DataGroup('All Datasets', 0, [SAMPLE_DATASET]);
+
+export function flatten(dataset: DataSet | DataGroup): DataSet[] {
+  if (dataset instanceof DataSet) {
+    return [dataset];
+  }
+  const arr: DataSet[] = [];
+  dataset.flat(arr);
+  return arr;
 }
