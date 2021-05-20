@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import { NavMode } from './components/Chart';
+import { NavMode } from './components/chartUtils';
 import { DataGroup, SAMPLE_DATASET } from './data/DataSet';
 
 const defaultGroup: DataGroup = { title: 'All Datasets', datasets: [SAMPLE_DATASET], level: 0 };
@@ -23,10 +23,16 @@ interface ILinkConfig {
   }[];
 }
 
-export function getDirectLink(): { url: URL; anySkipped: boolean } {
+export interface IChart {
+  fitData(): boolean;
+  getViewPort(): [number, number, number, number];
+  getCanvas(): HTMLCanvasElement;
+}
+
+export function getDirectLink(chart: IChart): { url: URL; anySkipped: boolean } {
   const config: ILinkConfig = {
     chart: {
-      viewport: [0, 0, 0, 0], // TODO: chart.getViewport(),
+      viewport: chart.getViewPort(),
       showPoints: get(isShowingPoints),
     },
     datasets: [],
@@ -51,4 +57,31 @@ export function getDirectLink(): { url: URL; anySkipped: boolean } {
     url,
     anySkipped,
   };
+}
+
+export function randomizeColors(): void {
+  activeDatasets.set(
+    get(activeDatasets).map((dataset) => {
+      dataset.randomize();
+      return dataset;
+    }),
+  );
+}
+
+export function reset(): void {
+  activeDatasets.set(
+    get(activeDatasets).map((dataset) => {
+      dataset.reset();
+      return dataset;
+    }),
+  );
+}
+
+export function scaleMean(): void {
+  activeDatasets.set(
+    get(activeDatasets).map((dataset) => {
+      dataset.scaleMean();
+      return dataset;
+    }),
+  );
 }

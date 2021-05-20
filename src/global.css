@@ -1,7 +1,7 @@
 #epivis {
   display: grid;
   grid-template-areas:
-    'menu menu'
+    'side menu'
     'side main';
   grid-template-columns: auto 1fr;
   grid-template-rows: auto 1fr;

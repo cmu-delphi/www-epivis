@@ -29,3 +29,17 @@
     </div>
   </div>
 </div>
+
+
+<style>
+  .uk-modal-body :global(form > div) {
+    margin: 1em 0;
+  }
+
+  .uk-modal-body :global(.uk-form-label) {
+    font-weight: 700;
+  }
+  .uk-modal-body :global(.uk-form-controls > label) {
+    display: block;
+  }
+</style>

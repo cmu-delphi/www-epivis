@@ -1,8 +1,13 @@
 <script lang="ts">
+import Chart from './components/Chart.svelte';
+
   import LeftMenu from './components/LeftMenu.svelte';
   import TopMenu from './components/TopMenu.svelte';
+  import { activeDatasets, isShowingPoints, navMode } from './store';
+
+  let chart: Chart | null = null;
 </script>
 
-<TopMenu />
-<LeftMenu />
-<main style="grid-area: main">CANVAS</main>
+<TopMenu {chart} style="grid-area: menu"/>
+<LeftMenu style="grid-area: side" />
+<Chart bind:this={chart} style="grid-area: main" bind:showPoints={$isShowingPoints} bind:navMode={$navMode} datasets={$activeDatasets} />

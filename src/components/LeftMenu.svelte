@@ -3,9 +3,11 @@
 
   import ImportDataSetsMenu from './ImportDataSetsMenu.svelte';
   import TreeInnerNode from './TreeInnerNode.svelte';
+
+  export let style = ''
 </script>
 
-<side class="left" style="grid-area: side">
+<side class="left" {style}>
   <ImportDataSetsMenu />
   <TreeInnerNode node={$datasetTree} />
 </side>
