@@ -57,5 +57,5 @@
 {:else if doDialog === 'addLine'}
   <AddLineDialog on:imported={importedDataset} on:close={closeDialog} />
 {:else if doDialog === 'addKernel'}
-  <AddKernelDialog on:close={closeDialog} />
+  <AddKernelDialog on:imported={importedDataset} on:close={closeDialog} />
 {/if}

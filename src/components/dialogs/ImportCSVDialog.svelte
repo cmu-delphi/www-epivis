@@ -1,7 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import importDataSet from '../../data/importDataSet';
-  import type { CSVOptions } from '../../data/importDataSet';
+  import importDataSet from '../../data/importCSV';
+  import type { CSVOptions } from '../../data/importCSV';
 
   import Dialog from './Dialog.svelte';
   import { randomId } from './utils';

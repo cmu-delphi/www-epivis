@@ -43,6 +43,16 @@ export default class EpiDate {
     return this.day;
   }
 
+  compare(that: EpiDate): number {
+    if (that.year !== this.year) {
+      return this.year - that.year;
+    }
+    if (that.month !== this.month) {
+      return this.month - that.month;
+    }
+    return this.day - that.day;
+  }
+
   isLeapYear(): boolean {
     return EpiDate.isLeapYear(this.year);
   }

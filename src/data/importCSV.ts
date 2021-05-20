@@ -22,6 +22,20 @@ export interface CSVOptions {
   groupColumn: number;
 }
 
+interface IDataGroup {
+  title: string;
+  level: number;
+  datasets: (IDataGroup | DataSet)[];
+  parent?: IDataGroup;
+}
+
+function asDataGroup(group: IDataGroup): DataGroup {
+  return new DataGroup(
+    group.title,
+    group.datasets.map((g) => (g instanceof DataSet ? g : asDataGroup(g))),
+  );
+}
+
 export default function importCSV(file: File, fileContent: string, options: CSVOptions): DataGroup {
   let lines = '';
   for (const row of fileContent.split('\n')) {
@@ -76,9 +90,9 @@ export default function importCSV(file: File, fileContent: string, options: CSVO
 
   // parse each group
   if (groups.length === 1) {
-    return parseGroup(file.name, 0, activeGroup.rows, options, labels);
+    return asDataGroup(parseGroup(file.name, 0, activeGroup.rows, options, labels));
   }
-  const root: DataGroup = new DataGroup(file.name, 0, []);
+  const root: IDataGroup = { title: file.name, level: 0, datasets: [] };
   let active = root;
   for (const group of groups) {
     const parsed = parseGroup(group.label, group.level, group.rows, options, labels);
@@ -98,10 +112,10 @@ export default function importCSV(file: File, fileContent: string, options: CSVO
     parsed.parent = active.parent!;
     active = parsed;
   }
-  return root;
+  return asDataGroup(root);
 }
 
-function parseGroup(title: string, level: number, rows: string[][], options: CSVOptions, labels: string[]): DataGroup {
+function parseGroup(title: string, level: number, rows: string[][], options: CSVOptions, labels: string[]): IDataGroup {
   const dates = rows.map((row, i) => parseDate(row, i, options));
   const datasets: DataSet[] = [];
   labels.forEach((label, i) => {
@@ -114,7 +128,7 @@ function parseGroup(title: string, level: number, rows: string[][], options: CSV
     });
     datasets.push(new DataSet(data, label));
   });
-  return new DataGroup(title, level, datasets);
+  return { title, level, datasets };
 }
 
 function splitGroup(rows: string[][], prefix: string, level: number, groupColumn: number) {

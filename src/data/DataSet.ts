@@ -121,11 +121,7 @@ export const SAMPLE_DATASET: DataSet = ((): DataSet => {
 export class DataGroup {
   public parent?: DataGroup;
 
-  constructor(
-    public readonly title: string,
-    public readonly level: number,
-    public readonly datasets: (DataSet | DataGroup)[],
-  ) {}
+  constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
 
   flat(arr: DataSet[]): void {
     for (const child of this.datasets) {
@@ -138,7 +134,7 @@ export class DataGroup {
   }
 }
 
-export const DEFAULT_GROUP: DataGroup = new DataGroup('All Datasets', 0, [SAMPLE_DATASET]);
+export const DEFAULT_GROUP: DataGroup = new DataGroup('All Datasets', [SAMPLE_DATASET]);
 
 export function flatten(dataset: DataSet | DataGroup): DataSet[] {
   if (dataset instanceof DataSet) {
