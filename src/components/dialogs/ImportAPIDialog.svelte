@@ -1,19 +1,27 @@
 <script lang="ts">
-  // import { createEventDispatcher } from 'svelte';
+  import FluSurv from './dataSources/FluSurv.svelte';
+  import FluView from './dataSources/FluView.svelte';
+
+  import { createEventDispatcher } from 'svelte';
 
   import Dialog from './Dialog.svelte';
   import { randomId } from './utils';
+  import type { DataGroup } from '../../data/DataSet';
 
-  // const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
   const id = randomId();
 
-  let dataSource: string = 'fluview';
+  let dataSource: 'fluview' | 'flusurv' | 'gft' | 'twitter' | 'wiki' | 'cdc' | 'quidel' | 'nidss_flu' | 'nidss_denque' | 'sensors' | 'nowcast' | 'covidcast' | 'covid_hosp' = 'fluview';
 
-  // TODO
-
+  let handler: unknown = null;
   function onSubmit(e: Event) {
     e.preventDefault();
+    if (!handler) {
+      return;
+    }
+    // eslint-disable-next-line no-unused-vars
+    (handler as {importDataSet: () => Promise<DataGroup>}).importDataSet().then((ds) => dispatch('imported', ds));
   }
 
   //   const successFunction = (title) => {
@@ -383,325 +391,11 @@
       </div>
     </div>
   </form>
+  {#if dataSource === 'fluview'}
+    <FluView {id} bind:this={handler} />
+  {:else if dataSource === 'flusurv'}
+    <FluSurv {id} bind:this={handler} />
+  {/if}
 
-  TODO
-
-  <div class="csv_options" id="radio_fluview_options">
-    <div class="option_label">
-      <select name="select_fluview_region" id="select_fluview_region"> // TODO </select>
-    </div>
-    <span class="explanation">(region to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <label
-        ><input type="radio" name="fluview_issue_radio" id="radio_fluview_recent" checked /> Most Recent Issue</label
-      >
-    </div>
-    <span class="explanation">(fetch the most up-to-date/stable data)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="fluview_issue_radio" id="radio_fluview_static" /> Specific Issue</label>
-    </div>
-    <span class="explanation">(fetch data "as-of" a specific week)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="fluview_issue_radio" id="radio_fluview_offset" /> Lagged Data</label>
-    </div>
-    <span class="explanation">(fetch data lagged by a number of weeks)</span>
-    <br />
-    <div class="csv_options" id="radio_fluview_recent_options">
-      <span class="explanation">(this option has no additional parameters)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_fluview_static_options" style="display: none;">
-      <div class="option_label">
-        <label
-          ><input type="text" id="text_fluview_static" value="201520" /> What MMWR week should the data come from?</label
-        >
-      </div>
-      <span class="explanation">(format: YYYYWW)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_fluview_offset_options" style="display: none;">
-      <div class="option_label">
-        <label><input type="text" id="text_fluview_offset" value="0" /> How many weeks is the data lagged by?</label>
-      </div>
-      <span class="explanation">(a non-negative integer)</span>
-      <br />
-    </div>
-    <div class="option_label">
-      <input type="text" name="text_fluview_auth" id="text_fluview_auth" size="8" />
-    </div>
-    <span class="explanation"
-      >(authorization token; required for imputed data for non-participating states; in any case, the API will return
-      data for regions and participating states)</span
-    >
-    <br />
-  </div>
-  <div class="csv_options" id="radio_flusurv_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_flusurv_location" id="select_flusurv_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <label
-        ><input type="radio" name="flusurv_issue_radio" id="radio_flusurv_recent" checked /> Most Recent Issue</label
-      >
-    </div>
-    <span class="explanation">(fetch the most up-to-date/stable data)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="flusurv_issue_radio" id="radio_flusurv_static" /> Specific Issue</label>
-    </div>
-    <span class="explanation">(fetch data "as-of" a specific week)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="flusurv_issue_radio" id="radio_flusurv_offset" /> Lagged Data</label>
-    </div>
-    <span class="explanation">(fetch data lagged by a number of weeks)</span>
-    <br />
-    <div class="csv_options" id="radio_flusurv_recent_options">
-      <span class="explanation">(this option has no additional parameters)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_flusurv_static_options" style="display: none;">
-      <div class="option_label">
-        <label
-          ><input type="text" id="text_flusurv_static" value="201520" /> What MMWR week should the data come from?</label
-        >
-      </div>
-      <span class="explanation">(format: YYYYWW)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_flusurv_offset_options" style="display: none;">
-      <div class="option_label">
-        <label><input type="text" id="text_flusurv_offset" value="0" /> How many weeks is the data lagged by?</label>
-      </div>
-      <span class="explanation">(a non-negative integer)</span>
-      <br />
-    </div>
-  </div>
-  <div class="csv_options" id="radio_gft_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_gft_location" id="select_gft_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-    <br />
-  </div>
-  <div class="csv_options" id="radio_ght_options" style="display: none;">
-    <div class="option_label">
-      <input type="text" name="text_ght_auth" id="text_ght_auth" size="8" />
-    </div>
-    <span class="explanation">(authorization token)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_ght_location" id="select_ght_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <input type="text" name="text_ght_query" id="text_ght_query" />
-    </div>
-    <span class="explanation">(search query or topic ID)</span>
-    <br />
-  </div>
-  <div class="csv_options" id="radio_twitter_options" style="display: none;">
-    <div class="option_label">
-      <input type="text" name="text_twitter_auth" id="text_twitter_auth" size="8" />
-    </div>
-    <span class="explanation">(authorization token)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_twitter_location" id="select_twitter_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_twitter_resolution" id="select_twitter_resolution">
-        <option value="daily" selected>Daily</option>
-        <option value="weekly">Weekly</option>
-      </select>
-    </div>
-    <span class="explanation">(temporal resolution)</span>
-    <br />
-  </div>
-  <div class="csv_options" id="radio_wiki_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_wiki_article" id="select_wiki_article" />
-    </div>
-    <span class="explanation">(article to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_wiki_resolution" id="select_wiki_resolution">
-        <option value="daily" selected>Daily</option>
-        <option value="weekly">Weekly</option>
-      </select>
-    </div>
-    <span class="explanation">(temporal resolution)</span>
-    <br />
-    <div class="option_label"><label><input type="checkbox" id="check_wiki_hour" /> Specific Hour</label></div>
-    <span class="explanation">(filter by hour of day, otherwise return sum of all counts)</span>
-    <br />
-    <div class="csv_options" id="check_wiki_hour_options" style="display: none;">
-      <label
-        ><input type="text" id="text_wiki_hour" value="0" /> Which hour should be used?
-        <span class="explanation">(0-23, timezone is UTC)</span></label
-      >
-    </div>
-    <br />
-  </div>
-  <div class="csv_options" id="radio_cdc_options" style="display: none;">
-    <div class="option_label">
-      <input type="text" name="text_cdc_auth" id="text_cdc_auth" size="8" />
-    </div>
-    <span class="explanation">(authorization token)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_cdc_location" id="select_cdc_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-  </div>
-  <div class="csv_options" id="radio_quidel_options" style="display: none;">
-    <div class="option_label">
-      <input type="text" name="text_quidel_auth" id="text_quidel_auth" size="8" />
-    </div>
-    <span class="explanation">(authorization token)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_quidel_location" id="select_quidel_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-  </div>
-  <div class="csv_options" id="radio_nidss_flu_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_nidss_flu_region" id="select_nidss_flu_region" />
-    </div>
-    <span class="explanation">(region to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <label
-        ><input type="radio" name="nidss_flu_issue_radio" id="radio_nidss_flu_recent" checked /> Most Recent Issue</label
-      >
-    </div>
-    <span class="explanation">(fetch the most up-to-date/stable data)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="nidss_flu_issue_radio" id="radio_nidss_flu_static" /> Specific Issue</label>
-    </div>
-    <span class="explanation">(fetch data "as-of" a specific week)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="nidss_flu_issue_radio" id="radio_nidss_flu_offset" /> Lagged Data</label>
-    </div>
-    <span class="explanation">(fetch data lagged by a number of weeks)</span>
-    <br />
-    <div class="csv_options" id="radio_nidss_flu_recent_options">
-      <span class="explanation">(this option has no additional parameters)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_nidss_flu_static_options" style="display: none;">
-      <div class="option_label">
-        <label><input type="text" id="text_nidss_flu_static" value="201530" /> What week was the data published?</label>
-      </div>
-      <span class="explanation">(format: YYYYWW)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_nidss_flu_offset_options" style="display: none;">
-      <div class="option_label">
-        <label><input type="text" id="text_nidss_flu_offset" value="1" /> How many weeks is the data lagged by?</label>
-      </div>
-      <span class="explanation">(a positive integer)</span>
-      <br />
-    </div>
-  </div>
-  <div class="csv_options" id="radio_nidss_dengue_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_nidss_dengue_location" id="select_nidss_dengue_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-  </div>
-  <div class="csv_options" id="radio_sensors_options" style="display: none;">
-    <div class="option_label">
-      <input type="text" name="text_sensors_auth" id="text_sensors_auth" size="8" />
-    </div>
-    <span class="explanation">(authorization token)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_sensors_name" id="select_sensors_name" />
-    </div>
-    <span class="explanation">(data source from which signal is built)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_sensors_location" id="select_sensors_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-  </div>
-  <div class="csv_options" id="radio_nowcast_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_nowcast_location" id="select_nowcast_location" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-  </div>
-  <div class="csv_options" id="radio_covid_hosp_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_covid_hosp_state" id="select_covid_hosp_state" />
-    </div>
-    <span class="explanation">(location to filter data by)</span>
-    <br />
-    <div class="option_label">
-      <label
-        ><input type="radio" name="covid_hosp_issue_radio" id="radio_covid_hosp_recent" checked /> Most Recent Issue</label
-      >
-    </div>
-    <span class="explanation">(fetch the most up-to-date/stable data)</span>
-    <br />
-    <div class="option_label">
-      <label><input type="radio" name="covid_hosp_issue_radio" id="radio_covid_hosp_static" /> Specific Issue</label>
-    </div>
-    <span class="explanation">(fetch data "as-of" a specific date)</span>
-    <br />
-    <div class="csv_options" id="radio_covid_hosp_recent_options">
-      <span class="explanation">(this option has no additional parameters)</span>
-      <br />
-    </div>
-    <div class="csv_options" id="radio_covid_hosp_static_options" style="display: none;">
-      <div class="option_label">
-        <label
-          ><input type="text" id="text_covid_hosp_static" value="20201116" /> What date was the dataset published?</label
-        >
-      </div>
-      <span class="explanation">(format: YYYYMMDD)</span>
-      <br />
-    </div>
-  </div>
-  <div class="csv_options" id="radio_covidcast_options" style="display: none;">
-    <div class="option_label">
-      <select name="select_covidcast_source" id="select_covidcast_data_source">
-        <!-- populated on page load using API endpoint `covidcast_meta` -->
-      </select>
-    </div>
-    <span class="explanation">(upstream data source)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_covidcast_signal" id="select_covidcast_signal">
-        <!-- populated on page load using API endpoint `covidcast_meta` -->
-      </select>
-    </div>
-    <span class="explanation">(delphi indicator name)</span>
-    <br />
-    <div class="option_label">
-      <select name="select_covidcast_geo_type" id="select_covidcast_geo_type">
-        <!-- populated on page load using API endpoint `covidcast_meta` -->
-      </select>
-    </div>
-    <span class="explanation">(geographic resolution)</span>
-    <br />
-    <div class="option_label">
-      <input type="text" name="text_covidcast_geo_value" id="text_covidcast_geo_value" />
-    </div>
-    <span class="explanation">(location, e.g. 'PA' or '42003')</span>
-    <br />
-  </div>
-  <button slot="footer" class="uk-button" type="button" form={id}>Fetch Data</button>
+  <button slot="footer" class="uk-button" type="submit" form={id}>Fetch Data</button>
 </Dialog>

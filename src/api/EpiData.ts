@@ -1,6 +1,7 @@
-export function test(): string {
-  return 'h';
-}
+import DataSet, { DataGroup } from '../data/DataSet';
+import EpiDate from '../data/EpiDate';
+import EpiPoint from '../data/EpiPoint';
+
 // import DataSet from "../data/DataSet";
 // import EpiDate from "../data/EpiDate";
 // import EpiPoint from "../data/EpiPoint";
@@ -15,43 +16,94 @@ export function test(): string {
 // const current_epiweek = (epidate.getEpiYear() * 100) + epidate.getEpiWeek();
 // const current_date = (epidate.getYear() * 10000) + (epidate.getMonth() * 100) + epidate.getDay();
 
-// // generic epidata loader
-// function loadEpidata(epidata: Record<string, unknown>[], columns: string[], params: Record<string,unknown>) {
-//   const datasets: DataSet[] = [];
+declare const process: { env: Record<string, string> };
+const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
 
-//   for(const col of columns) {
-//     const points: EpiPoint[] = [];
-//     for(const row of epidata) {
-//       if(row != null && typeof row.time_value === 'number') {
-//           const timeValue = row.time_value;
-//           if (timeValue.toString().length == 6) {
-//             row.epiweek = timeValue;
-//           } else {
-//             row.date = timeValue.toString();
-//           }
-//       }
-//       let date: EpiDate;
-//       if(row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
-//           date = EpiDate.parse(row.date.toString());
-//       } else if(row != null && typeof row.epiweek === 'number') {
-//           const year = Math.floor(row.epiweek / 100);
-//           const week = row.epiweek % 100;
-//           date = EpiDate.fromEpiweek(year, week);
-//       } else {
-//           throw new Error(`missing date/week column in response`);
-//       }
-//       points.push(new EpiPoint(date, row[col] as number));
-//     }
-//     datasets.push(new DataSet(points, col, params));
-//   }
-//   return datasets;
-// }
+export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
+
+function fetchImpl<T>(url: URL): Promise<T> {
+  const urlGetS = url.toString();
+  if (urlGetS.length < 4096) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return fetch(url.toString(), fetchOptions).then((d) => d.json());
+  }
+  url.searchParams;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return fetch(url.pathname, {
+    ...fetchOptions,
+    method: 'POST',
+    body: url.searchParams,
+  }).then((d) => d.json());
+}
+
+export function loadDataSet(
+  title: string,
+  endpoint: string,
+  params: Record<string, unknown>,
+  columns: string[],
+): Promise<DataGroup> {
+  const url = new URL(ENDPOINT + `/${endpoint}/`);
+  const clean: Record<string, unknown> = {};
+  Object.entries(params).forEach(([key, value]) => {
+    if (value != null) {
+      clean[key] = value;
+      url.searchParams.set(key, String(value));
+    }
+  });
+  url.searchParams.set('format', 'json');
+  return fetchImpl<Record<string, unknown>[]>(url)
+    .then((res) => {
+      return loadEpidata(title, res, columns, clean);
+    })
+    .catch((error) => {
+      console.warn('failed fetching data', error);
+      return new DataGroup(title, []);
+    });
+}
+
+// generic epidata loader
+export function loadEpidata(
+  name: string,
+  epidata: Record<string, unknown>[],
+  columns: string[],
+  params: Record<string, unknown>,
+): DataGroup {
+  const datasets: DataSet[] = [];
+
+  for (const col of columns) {
+    const points: EpiPoint[] = [];
+    for (const row of epidata) {
+      if (row != null && typeof row.time_value === 'number') {
+        const timeValue = row.time_value;
+        if (timeValue.toString().length == 6) {
+          row.epiweek = timeValue;
+        } else {
+          row.date = timeValue.toString();
+        }
+      }
+      let date: EpiDate;
+      if (row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
+        date = EpiDate.parse(row.date.toString());
+      } else if (row != null && typeof row.epiweek === 'number') {
+        const year = Math.floor(row.epiweek / 100);
+        const week = row.epiweek % 100;
+        date = EpiDate.fromEpiweek(year, week);
+      } else {
+        throw new Error(`missing date/week column in response`);
+      }
+      points.push(new EpiPoint(date, row[col] as number));
+    }
+    datasets.push(new DataSet(points, col, params));
+  }
+  return new DataGroup(name, datasets);
+}
 
 // export default class EpiData {
 //   fetchFluView: (onSuccess, onFailure, region, issue, lag, auth) => {
 //       const params = ['fluview', region, issue, lag, auth];
 //   const columns = ['wili', 'ili', 'num_ili', 'num_patients', 'num_providers', 'num_age_0', 'num_age_1', 'num_age_2', 'num_age_3', 'num_age_4', 'num_age_5'];
 //       return fetchAPI(region, )  },
+// fetchCDC
 // ::::: (onSuccess, onFailure, auth, location) => {
 //       const params = ['cdcp', auth, location];
 //       const columns = ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'];
