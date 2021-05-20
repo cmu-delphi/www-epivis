@@ -1,6 +1,6 @@
 <script lang="ts">
-  import type DataSet from '../data/DataSet';
-  import { activeDatasets } from '../store';
+  import type DataSet from '../../data/DataSet';
+  import { activeDatasets } from '../../store';
   import Fa from 'svelte-fa';
   import { faCheckSquare, faSquare } from '@fortawesome/free-solid-svg-icons';
 

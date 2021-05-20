@@ -119,6 +119,8 @@ export const SAMPLE_DATASET: DataSet = ((): DataSet => {
 })();
 
 export class DataGroup {
+  public parent?: DataGroup;
+
   constructor(
     public readonly title: string,
     public readonly level: number,

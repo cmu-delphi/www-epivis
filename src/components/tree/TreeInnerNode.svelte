@@ -1,7 +1,7 @@
 <script lang="ts">
-  import DataSet from '../data/DataSet';
-  import type { DataGroup } from '../data/DataSet';
-  import { expandedDataGroups } from '../store';
+  import DataSet from '../../data/DataSet';
+  import type { DataGroup } from '../../data/DataSet';
+  import { expandedDataGroups } from '../../store';
   import TreeLeafNode from './TreeLeafNode.svelte';
   import Fa from 'svelte-fa';
   import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';

@@ -2,8 +2,8 @@
   import DataSet from '../data/DataSet';
   import { datasetTree } from '../store';
   import ImportDataSetsMenu from './ImportDataSetsMenu.svelte';
-  import TreeInnerNode from './TreeInnerNode.svelte';
-  import TreeLeafNode from './TreeLeafNode.svelte';
+  import TreeInnerNode from './tree/TreeInnerNode.svelte';
+  import TreeLeafNode from './tree/TreeLeafNode.svelte';
 
   export let style = '';
 </script>

@@ -4,7 +4,7 @@
   import type { CSVOptions } from '../../data/importDataSet';
 
   import Dialog from './Dialog.svelte';
-  import { randomId } from '../utils';
+  import { randomId } from './utils';
 
   const dispatch = createEventDispatcher();
 
@@ -128,41 +128,47 @@
     <div>
       <div class="uk-form-label">Transpose Table</div>
       <div class="uk-form-controls uk-form-controls-text">
-        <label><input class="uk-checkbox" type="checkbox" bind:checked={transpose} /> Transpose (treat rows as columns and vice versa)</label>
+        <label
+          ><input class="uk-checkbox" type="checkbox" bind:checked={transpose} /> Transpose (treat rows as columns and vice
+          versa)</label
+        >
       </div>
     </div>
     <div>
       <div class="uk-form-label">Has Header Row</div>
       <div class="uk-form-controls uk-form-controls-text">
-        <label><input class="uk-checkbox" type="checkbox" bind:checked={hasHeader} /> Has Header Row (extract column names, then discard first row)</label>
+        <label
+          ><input class="uk-checkbox" type="checkbox" bind:checked={hasHeader} /> Has Header Row (extract column names, then
+          discard first row)</label
+        >
       </div>
     </div>
     <div>
       <div class="uk-form-label">Date Column Format</div>
       <div class="uk-form-controls uk-form-controls-text">
         <label
-          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="none" /> No Date Column (assume daily starting
-          on 2000-01-01)</label
+          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="none" /> No Date Column (assume
+          daily starting on 2000-01-01)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="simple" /> Date String (format: YYYY-MM-DD;
-          ex: 2015-05-02)</label
+          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="simple" /> Date String (format:
+          YYYY-MM-DD; ex: 2015-05-02)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="epiweek" /> Epiweek (format: YYYYWW; ex:
-          201522)</label
+          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="epiweek" /> Epiweek (format:
+          YYYYWW; ex: 201522)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="epi" /> Epi Week (format: YYYY, WW; ex: 2015,
-          22)</label
+          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="epi" /> Epi Week (format: YYYY,
+          WW; ex: 2015, 22)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="decimal" />Decimal Date (format:
-          YYYY.YYY; ex: 2015.456)</label
+          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="decimal" />Decimal Date
+          (format: YYYY.YYY; ex: 2015.456)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="monthly" />Montly Data (format: YYYY,
-          MM; ex: 2015, 05)</label
+          ><input class="uk-radio" type="radio" name="dateType" bind:group={dateType} value="monthly" />Montly Data
+          (format: YYYY, MM; ex: 2015, 05)</label
         >
       </div>
     </div>
@@ -217,7 +223,10 @@
     <div>
       <div class="uk-form-label">Group By Column?</div>
       <div class="uk-form-controls uk-form-controls-text">
-        <label><input class="uk-checkbox" type="checkbox" bind:checked={hasGroup} /> Group By (for when multiple overlapping time series are in the same file; ex: FluView Regional data)</label>
+        <label
+          ><input class="uk-checkbox" type="checkbox" bind:checked={hasGroup} /> Group By (for when multiple overlapping
+          time series are in the same file; ex: FluView Regional data)</label
+        >
       </div>
     </div>
     {#if hasGroup}

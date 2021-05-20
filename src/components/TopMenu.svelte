@@ -6,18 +6,18 @@
     faCrop,
     faEllipsisH,
     faExpand,
-    faExpandArrowsAlt,
-    faExternalLinkSquareAlt,
     faImage,
     faLink,
     faPaintBrush,
     faReceipt,
+    faSearchPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import UIkit from 'uikit';
-  import { getDirectLink, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
+  import { activeDatasets, getDirectLink, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
+  import RegressionDialog from './dialogs/RegressionDialog.svelte';
 
   export let chart: IChart | null;
 
@@ -46,12 +46,14 @@
     a.click();
     a.remove();
   }
+
+  let doRegressDialog = false;
+  function closeDialog() {
+    doRegressDialog = false;
+  }
 </script>
 
 <div class="menu" {style}>
-  <button type="button" class="uk-button uk-button-default uk-button-small" id="file_fullscreen" style="display: none;">
-    <Fa icon={faExternalLinkSquareAlt} />
-  </button>
   <div class="uk-button-group">
     <button
       type="button"
@@ -66,7 +68,7 @@
       disabled={!chart}
       on:click|preventDefault={() => (chart ? chart.fitData() : null)}
       title="Fit data to screen"
-      uk-tooltip><Fa icon={faExpandArrowsAlt} /></button
+      uk-tooltip><Fa icon={faExpand} /></button
     >
     <button
       type="button"
@@ -76,17 +78,29 @@
       title="Show or Hide points"
       uk-tooltip><Fa icon={faEllipsisH} /></button
     >
-    <button type="button" class="uk-button uk-button-default uk-button-small" on:click|preventDefault={scaleMean}
-      ><Fa icon={faAnchor} /></button
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={scaleMean}
+      title="Scale by 1/mean"
+      uk-tooltip><Fa icon={faAnchor} /></button
     >
-    <button type="button" class="uk-button uk-button-default uk-button-small" id="action_regress"
-      ><Fa icon={faChartLine} /></button
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={() => (doRegressDialog = true)}
+      title="Perform Regression"
+      uk-tootlip
+      disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
     >
-    <button type="button" class="uk-button uk-button-default uk-button-small" on:click|preventDefault={reset}
-      ><Fa icon={faReceipt} /></button
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={reset}
+      title="Reset DataSet Scaling"
+      uk-tooltip><Fa icon={faReceipt} /></button
     >
   </div>
-  <div class="uk-divider" />
   <div class="uk-button-group">
     <button
       type="button"
@@ -105,9 +119,6 @@
       on:click|preventDefault={showDirectLink}><Fa icon={faLink} /></button
     >
   </div>
-
-  <div class="uk-divider" />
-
   <div class="uk-button-group">
     <button
       type="button"
@@ -131,14 +142,21 @@
       class:uk-active={$navMode === NavMode.zoom}
       title="Zoom Mode"
       uk-tooltip
-      on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faExpand} /></button
+      on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
     >
   </div>
 </div>
+
+{#if doRegressDialog}
+  <RegressionDialog on:close={closeDialog} />
+{/if}
 
 <style>
   .menu {
     display: flex;
     justify-content: center;
+  }
+  .uk-button-group {
+    margin: 0 1em;
   }
 </style>

@@ -2,10 +2,10 @@
   import { createEventDispatcher } from 'svelte';
 
   import Dialog from './Dialog.svelte';
-  import { randomId } from '../utils';
-import EpiDate from '../../data/EpiDate';
-import DataSet from '../../data/DataSet';
-import EpiPoint from '../../data/EpiPoint';
+  import { randomId } from './utils';
+  import EpiDate from '../../data/EpiDate';
+  import DataSet from '../../data/DataSet';
+  import EpiPoint from '../../data/EpiPoint';
 
   const dispatch = createEventDispatcher();
 
@@ -13,7 +13,6 @@ import EpiPoint from '../../data/EpiPoint';
 
   let name = 'My Line';
   let startDate = '2014-01-01';
-
 
   let endDate = '2015-01-01';
   let startValue = 0;
@@ -46,15 +45,11 @@ import EpiPoint from '../../data/EpiPoint';
     const v0 = typeof startValue === 'number' ? startValue : Number.parseFloat(String(startValue));
     const v1 = typeof endValue === 'number' ? endValue : Number.parseFloat(String(endValue));
 
-    dispatch('imported', new DataSet([
-      new EpiPoint(x0, v0),
-      new EpiPoint(x1, v1)
-    ], name));
+    dispatch('imported', new DataSet([new EpiPoint(x0, v0), new EpiPoint(x1, v1)], name));
   }
 </script>
 
 <Dialog title="Add Custom Line" on:close>
-
   <form class="uk-form-stacked" {id} on:submit={onSubmit}>
     <div>
       <label class="uk-form-label" for="{id}-f">Descriptive Name</label>

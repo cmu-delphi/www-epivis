@@ -2,7 +2,7 @@
   // import { createEventDispatcher } from 'svelte';
 
   import Dialog from './Dialog.svelte';
-  import { randomId } from '../utils';
+  import { randomId } from './utils';
 
   // const dispatch = createEventDispatcher();
 

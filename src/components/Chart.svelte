@@ -25,12 +25,11 @@
    * not tracked
    */
   const mouse = {
-    forceCrop: false,
-    forceZoom: false,
     pressed: false,
     dragging: false,
     hovering: false,
     down: null as null | { x: number; y: number },
+    oriNavMode: null as NavMode | null,
   };
   let mousePosition = null as null | { x: number; y: number };
 
@@ -74,20 +73,26 @@
   }
 
   function mouseDown(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
     const m = computeMousePosition(e);
     mouse.pressed = true;
     mouse.dragging = false;
     mouse.hovering = false;
     mousePosition = m;
     mouse.down = m;
+    if (e.shiftKey || e.ctrlKey) {
+      mouse.oriNavMode = navMode;
+      if (e.shiftKey) {
+        setNavMode(NavMode.crop);
+      } else if (e.ctrlKey) {
+        setNavMode(NavMode.zoom);
+      }
+    }
     if (navMode == NavMode.crop) {
       navBox = { x: m.x, y: m.y, w: 0, h: 0 };
     }
   }
 
   function mouseMove(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
     const m = computeMousePosition(e);
     mouse.dragging = mouse.pressed;
     mouse.hovering = !mouse.pressed;
@@ -120,7 +125,6 @@
   }
 
   function mouseUp(e: MouseEvent | TouchEvent) {
-    e.preventDefault();
     const m = computeMousePosition(e);
     const m1 = mouse.down;
     const m2 = m;
@@ -150,7 +154,10 @@
         }
       }
     }
-    setNavMode(NavMode.pan);
+    if (mouse.oriNavMode != null) {
+      setNavMode(mouse.oriNavMode);
+      mouse.oriNavMode = null;
+    }
   }
   function mouseOver(e: MouseEvent | TouchEvent) {
     e.preventDefault();
@@ -168,31 +175,13 @@
       canvas.blur();
     }
   }
+
   function mouseClick(m1: { x: number; y: number }, m2: { x: number; y: number }) {
     for (const button of buttons) {
       if (contains(button.box, m1) && contains(button.box, m2)) {
         button.handler();
       }
     }
-  }
-  function keyDown(e: KeyboardEvent) {
-    e.preventDefault();
-    if (e.shiftKey) {
-      mouse.forceCrop = true;
-      setNavMode(NavMode.crop);
-    } else if (e.ctrlKey) {
-      mouse.forceZoom = true;
-      setNavMode(NavMode.zoom);
-    }
-  }
-  function keyUp(e: KeyboardEvent) {
-    e.preventDefault();
-    if (e.shiftKey) {
-      mouse.forceCrop = false;
-    } else if (e.ctrlKey) {
-      mouse.forceZoom = false;
-    }
-    setNavMode(NavMode.pan);
   }
   function mouseWheel(e: WheelEvent) {
     e.preventDefault();
@@ -272,12 +261,6 @@
     }
   }
   function setNavMode(mode: NavMode): void {
-    if (mouse.forceCrop) {
-      mode = NavMode.crop;
-    }
-    if (mouse.forceZoom) {
-      mode = NavMode.zoom;
-    }
     if (mode !== navMode) {
       navMode = mode;
       if (navMode !== NavMode.crop) {
@@ -755,8 +738,6 @@
     on:mouseover={mouseOver}
     on:mouseout={mouseOut}
     on:wheel={mouseWheel}
-    on:keydown={keyDown}
-    on:keyup={keyUp}
   />
 </div>
 

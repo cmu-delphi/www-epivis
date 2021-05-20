@@ -7,7 +7,7 @@ export const activeDatasets = writable([SAMPLE_DATASET]);
 export const expandedDataGroups = writable([DEFAULT_GROUP]);
 
 export const isShowingPoints = writable(false);
-export const navMode = writable(NavMode.crop);
+export const navMode = writable(NavMode.pan);
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);

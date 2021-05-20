@@ -22,7 +22,7 @@ export interface CSVOptions {
   groupColumn: number;
 }
 
-export default function importDataSet(file: File, fileContent: string, options: CSVOptions): DataGroup {
+export default function importCSV(file: File, fileContent: string, options: CSVOptions): DataGroup {
   let lines = '';
   for (const row of fileContent.split('\n')) {
     const trimmed = row.trim();
@@ -78,11 +78,7 @@ export default function importDataSet(file: File, fileContent: string, options: 
   if (groups.length === 1) {
     return parseGroup(file.name, 0, activeGroup.rows, options, labels);
   }
-  const root: DataGroup = {
-    title: file.name,
-    level: 0,
-    datasets: [],
-  };
+  const root: DataGroup = new DataGroup(file.name, 0, []);
   let active = root;
   for (const group of groups) {
     const parsed = parseGroup(group.label, group.level, group.rows, options, labels);
@@ -118,7 +114,7 @@ function parseGroup(title: string, level: number, rows: string[][], options: CSV
     });
     datasets.push(new DataSet(data, label));
   });
-  return { title, level, datasets };
+  return new DataGroup(title, level, datasets);
 }
 
 function splitGroup(rows: string[][], prefix: string, level: number, groupColumn: number) {
