@@ -49,8 +49,6 @@
 </script>
 
 <div class="menu" {style}>
-  <div class="uk-divider" />
-
   <button type="button" class="uk-button uk-button-default uk-button-small" id="file_fullscreen" style="display: none;">
     <Fa icon={faExternalLinkSquareAlt} />
   </button>
@@ -73,6 +71,7 @@
     <button
       type="button"
       class="uk-button uk-button-default uk-button-small"
+      class:uk-active={$isShowingPoints}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
       title="Show or Hide points"
       uk-tooltip><Fa icon={faEllipsisH} /></button

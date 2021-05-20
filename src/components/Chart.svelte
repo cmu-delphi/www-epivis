@@ -1,8 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-
   import type DataSet from '../data/DataSet';
-
   import EpiDate from '../data/EpiDate';
   import { Align, contains, isTouchEvent, NavMode, zeroPad } from './chartUtils';
   import type { IBox } from './chartUtils';
@@ -65,9 +63,13 @@
 
   function computeMousePosition(e: MouseEvent | TouchEvent) {
     const { pageX, pageY } = isTouchEvent(e) ? e.changedTouches[0] : e;
+    if (!canvas) {
+      return { x: pageX, y: pageY };
+    }
+    const bb = canvas.getBoundingClientRect();
     return {
-      x: pageX - (canvas?.offsetLeft ?? 0),
-      y: pageY - (canvas?.offsetTop ?? 0),
+      x: pageX - bb.left,
+      y: pageY - bb.top,
     };
   }
 
@@ -428,7 +430,7 @@
       const value = y2value(y);
       ctx.moveTo(0, y);
       ctx.lineTo(width, y);
-      drawText(ctx,value.toLocaleString(), width - 2, y - 2, 0, Align.right, Align.bottom);
+      drawText(ctx, value.toLocaleString(), width - 2, y - 2, 0, Align.right, Align.bottom);
     }
     ctx.stroke();
   }
@@ -682,7 +684,7 @@
 
   // eslint-disable-next-line no-unused-vars
   function render(_deps: Record<string, unknown>) {
-    if (!ctx ||!canvas) {
+    if (!ctx || !canvas) {
       return;
     }
 
@@ -725,6 +727,7 @@
       width,
       height,
       mousePosition,
+      datasets,
     });
   }
 
@@ -736,26 +739,33 @@
   });
 </script>
 
-<canvas
-  bind:this={canvas}
-  bind:clientWidth={width}
-  bind:clientHeight={height}
-  {style}
-  class={className}
-  on:mousedown={mouseDown}
-  on:touchstart={mouseDown}
-  on:mouseup={mouseUp}
-  on:touchend={mouseUp}
-  on:mousemove={mouseMove}
-  on:touchmove={mouseMove}
-  on:mouseover={mouseOver}
-  on:mouseout={mouseOut}
-  on:wheel={mouseWheel}
-  on:keydown={keyDown}
-  on:keyup={keyUp}
-/>
+<div {style} class="wrapper {className || ''}">
+  <canvas
+    bind:this={canvas}
+    bind:clientWidth={width}
+    bind:clientHeight={height}
+    {style}
+    class={className}
+    on:mousedown={mouseDown}
+    on:touchstart={mouseDown}
+    on:mouseup={mouseUp}
+    on:touchend={mouseUp}
+    on:mousemove={mouseMove}
+    on:touchmove={mouseMove}
+    on:mouseover={mouseOver}
+    on:mouseout={mouseOut}
+    on:wheel={mouseWheel}
+    on:keydown={keyDown}
+    on:keyup={keyUp}
+  />
+</div>
 
 <style>
+  .wrapper {
+    position: relative;
+    overflow: hidden;
+  }
+
   canvas {
     width: 100%;
     height: 100%;

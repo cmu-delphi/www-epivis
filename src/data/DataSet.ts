@@ -10,6 +10,13 @@ function getRandomColor() {
   return '#' + channel() + channel() + channel();
 }
 
+function computeGap(data: readonly EpiPoint[]): number {
+  // median gap distance
+  const gaps = data.slice(1).map((a, i) => a.getDate().getIndex() - data[i].getDate().getIndex());
+  gaps.sort((a, b) => a - b);
+  return gaps.length > 0 ? gaps[Math.floor(gaps.length / 2)] : 1;
+}
+
 export default class DataSet {
   public readonly parentTitle: string = '';
   public color: string = getRandomColor();
@@ -17,12 +24,15 @@ export default class DataSet {
   public scale = 1;
   public verticalOffset = 0;
   public horizontalOffset = 0;
+  public readonly gap: number;
 
   constructor(
-    public readonly data: EpiPoint[],
+    public readonly data: readonly EpiPoint[],
     public readonly title = '',
     public readonly params: Record<string, unknown> | null = null,
-  ) {}
+  ) {
+    this.gap = computeGap(data);
+  }
 
   randomize(): void {
     this.color = getRandomColor();
@@ -89,13 +99,6 @@ export default class DataSet {
     const alpha = y_avg - beta * x_avg;
     this.scaleAndShift(beta * dataset.scale, alpha * dataset.scale);
   }
-
-  get gap(): number {
-    // median gap distance
-    const gaps = this.data.slice(1).map((a, i) => this.data[i].getDate().getIndex() - a.getDate().getIndex());
-    gaps.sort((a, b) => a - b);
-    return gaps.length > 0 ? gaps[Math.floor(gaps.length / 2)] : 1;
-  }
 }
 
 export const SAMPLE_DATASET: DataSet = ((): DataSet => {
@@ -115,7 +118,6 @@ export const SAMPLE_DATASET: DataSet = ((): DataSet => {
   //sampleDataset.color = '#dd3311';
   return ds;
 })();
-
 
 export interface DataGroup {
   title: string;
