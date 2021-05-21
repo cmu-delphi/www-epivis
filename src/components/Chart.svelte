@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type DataSet from '../data/DataSet';
+  import { DEFAULT_VIEWPORT } from '../data/DataSet';
   import EpiDate from '../data/EpiDate';
   import { Align, contains, isTouchEvent, NavMode, zeroPad } from './chartUtils';
   import type { IBox } from './chartUtils';
@@ -15,11 +16,13 @@
 
   export let navMode: NavMode;
 
+  export let initialViewport: [number, number, number, number] | null = DEFAULT_VIEWPORT;
+
   let navBox: IBox | null = null;
-  let xMin = new EpiDate(2014, 1, 1).getIndex();
-  let xMax = new EpiDate(2016, 1, 1).getIndex();
-  let yMin = -1;
-  let yMax = 1;
+  let xMin = DEFAULT_VIEWPORT[0];
+  let xMax = DEFAULT_VIEWPORT[2];
+  let yMin = DEFAULT_VIEWPORT[1];
+  let yMax = DEFAULT_VIEWPORT[3];
 
   const animation = tweened(
     {
@@ -51,6 +54,12 @@
 
   $: {
     updateAnimation($animation);
+  }
+
+  $: {
+    if (initialViewport) {
+      setViewport(initialViewport[0], initialViewport[1], initialViewport[2], initialViewport[3]);
+    }
   }
 
   let width = 100;
@@ -90,7 +99,7 @@
   export function getCanvas() {
     return canvas;
   }
-  export function getViewPort() {
+  export function getViewport() {
     return [xMin, yMin, xMax, yMax];
   }
 
@@ -756,7 +765,9 @@
       // only focus if this is the top-level window (e.g. not in an iframe)
       canvas.focus();
     }
-    fitData(true);
+    if (datasets.length > 0) {
+      fitData(true);
+    }
   });
 </script>
 

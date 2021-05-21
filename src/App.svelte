@@ -2,7 +2,7 @@
   import Chart from './components/Chart.svelte';
   import LeftMenu from './components/LeftMenu.svelte';
   import TopMenu from './components/TopMenu.svelte';
-  import { activeDatasets, isShowingPoints, navMode } from './store';
+  import { activeDatasets, initialViewport, isShowingPoints, navMode } from './store';
   import type { IChart } from './store';
 
   let chart: Chart | null = null;
@@ -16,5 +16,6 @@
   style="grid-area: main"
   bind:showPoints={$isShowingPoints}
   bind:navMode={$navMode}
+  initialViewport={$initialViewport}
   datasets={$activeDatasets}
 />

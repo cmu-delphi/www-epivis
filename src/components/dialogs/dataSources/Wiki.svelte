@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { currentDate, currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
-
-  import { firstDate, firstEpiWeek, wikiArticles } from '../../../data/data';
+  import { importWiki } from '../../../api/EpiData';
+  import { wikiArticles } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
 
   export let id: string;
@@ -20,28 +19,7 @@
   ];
 
   export function importDataSet() {
-    const articleLabel = wikiArticles.find((d) => d.value === articles)?.label ?? '?';
-    let title = `[API] Wiki: ${articleLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
-    if (useHour) {
-      title += ` (${hour})`;
-    }
-    return loadDataSet(
-      title,
-      'wiki',
-      resolution === 'daily'
-        ? {
-            dates: epiRange(firstDate.wiki, currentDate),
-          }
-        : {
-            epiweeks: epiRange(firstEpiWeek.wiki, currentEpiWeek),
-          },
-      {
-        articles,
-        language,
-        hour: useHour ? hour : null,
-      },
-      ['count', 'total', 'value'],
-    );
+    return importWiki({ articles, resolution, hour: useHour ? hour : null, language });
   }
 </script>
 

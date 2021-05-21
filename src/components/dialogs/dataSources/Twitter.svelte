@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { currentDate, currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
-
-  import { firstDate, firstEpiWeek, twitterLocations as regions } from '../../../data/data';
+  import { importTwitter } from '../../../api/EpiData';
+  import { twitterLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
 
@@ -12,24 +11,7 @@
   let resolution: 'daily' | 'weekly' = 'daily';
 
   export function importDataSet() {
-    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `[API] Twitter: ${regionLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
-    return loadDataSet(
-      title,
-      'twitter',
-      resolution === 'daily'
-        ? {
-            dates: epiRange(firstDate.twitter, currentDate),
-          }
-        : {
-            epiweeks: epiRange(firstEpiWeek.twitter, currentEpiWeek),
-          },
-      {
-        auth,
-        locations,
-      },
-      ['num', 'total', 'percent'],
-    );
+    return importTwitter({ auth, locations, resolution });
   }
 </script>
 

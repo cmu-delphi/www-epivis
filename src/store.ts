@@ -1,12 +1,16 @@
 import { get, writable } from 'svelte/store';
 import { NavMode } from './components/chartUtils';
-import DataSet, { DataGroup, DEFAULT_GROUP, SAMPLE_DATASET } from './data/DataSet';
+import DataSet, { DataGroup } from './data/DataSet';
+import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
 
-export const datasetTree = writable<DataGroup>(DEFAULT_GROUP);
-export const activeDatasets = writable([SAMPLE_DATASET]);
-export const expandedDataGroups = writable([DEFAULT_GROUP]);
+const defaults = deriveLinkDefaults();
 
-export const isShowingPoints = writable(false);
+export const datasetTree = writable<DataGroup>(defaults.group);
+export const activeDatasets = writable(defaults.active);
+export const expandedDataGroups = writable([defaults.group]);
+
+export const isShowingPoints = writable(defaults.showPoints);
+export const initialViewport = writable(defaults.viewport);
 export const navMode = writable(NavMode.pan);
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
@@ -23,51 +27,27 @@ export function addDataSet(dataset: DataSet | DataGroup): void {
   }
 }
 
-interface ILinkConfig {
-  chart: {
-    viewport: [number, number, number, number];
-    showPoints: boolean;
-  };
-  datasets: {
-    color: string;
-    title: string;
-    params: Record<string, unknown>;
-  }[];
+if (defaults.loader) {
+  void defaults.loader(addDataSet).then((ds) => {
+    datasetTree.set(get(datasetTree));
+    activeDatasets.set(ds);
+    initialViewport.set(get(initialViewport)); // trigger update
+  });
 }
 
 export interface IChart {
   fitData(animate?: boolean): boolean;
-  getViewPort(): [number, number, number, number];
+  getViewport(): [number, number, number, number];
   getCanvas(): HTMLCanvasElement;
 }
 
 export function getDirectLink(chart: IChart): { url: URL; anySkipped: boolean } {
-  const config: ILinkConfig = {
-    chart: {
-      viewport: chart.getViewPort(),
-      showPoints: get(isShowingPoints),
-    },
-    datasets: [],
-  };
-  let anySkipped = false;
-  get(activeDatasets).forEach((data) => {
-    if (data.params) {
-      config.datasets.push({
-        color: data.color,
-        title: data.title,
-        params: data.params,
-      });
-    } else {
-      console.log('unable to get direct link to dataset:', data.title);
-      anySkipped = true;
-    }
+  return getDirectLinkImpl({
+    group: get(datasetTree),
+    active: get(activeDatasets),
+    showPoints: get(isShowingPoints),
+    viewport: chart.getViewport(),
   });
-  const url = new URL(window.location.href);
-  url.hash = `#${btoa(JSON.stringify(config))}`;
-  return {
-    url,
-    anySkipped,
-  };
 }
 
 export function randomizeColors(): void {
@@ -96,5 +76,3 @@ export function scaleMean(): void {
     }),
   );
 }
-
-// TODO restore from direct link

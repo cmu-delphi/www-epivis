@@ -45,7 +45,16 @@
     const v0 = typeof startValue === 'number' ? startValue : Number.parseFloat(String(startValue));
     const v1 = typeof endValue === 'number' ? endValue : Number.parseFloat(String(endValue));
 
-    dispatch('imported', new DataSet([new EpiPoint(x0, v0), new EpiPoint(x1, v1)], name));
+    dispatch(
+      'imported',
+      new DataSet([new EpiPoint(x0, v0), new EpiPoint(x1, v1)], name, {
+        _type: 'line',
+        x0: x0.getIndex(),
+        x1: x1.getIndex(),
+        v0,
+        v1,
+      }),
+    );
   }
 </script>
 

@@ -18,7 +18,6 @@ function computeGap(data: readonly EpiPoint[]): number {
 }
 
 export default class DataSet {
-  public color: string = getRandomColor();
   public readonly lineWidth = 2;
   public scale = 1;
   public verticalOffset = 0;
@@ -28,7 +27,8 @@ export default class DataSet {
   constructor(
     public readonly data: readonly EpiPoint[],
     public readonly title = '',
-    public readonly params: Record<string, unknown> | null = null,
+    public readonly params: Record<string, unknown> | unknown[] | null = null,
+    public color = getRandomColor(),
   ) {
     this.gap = computeGap(data);
   }
@@ -144,3 +144,10 @@ export function flatten(dataset: DataSet | DataGroup): DataSet[] {
   dataset.flat(arr);
   return arr;
 }
+
+export const DEFAULT_VIEWPORT: [number, number, number, number] = [
+  new EpiDate(2014, 1, 1).getIndex(),
+  -1,
+  new EpiDate(2016, 1, 1).getIndex(),
+  1,
+];

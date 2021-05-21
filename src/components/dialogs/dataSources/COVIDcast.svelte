@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { currentDate, epiRange, fetchCOVIDcastMeta, loadDataSet } from '../../../api/EpiData';
-  import { firstDate } from '../../../data/data';
+  import { fetchCOVIDcastMeta, importCOVIDcast } from '../../../api/EpiData';
   import type { LabelValue } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
@@ -48,22 +47,7 @@
   });
 
   export function importDataSet() {
-    const title = `[API] Delphi CODIVcast: ${geo_value} ${signal} (${data_source})`;
-    return loadDataSet(
-      title,
-      'covidcast',
-      {
-        time_type: 'day',
-        time_values: epiRange(firstDate.covidcast, currentDate),
-      },
-      {
-        geo_value,
-        geo_type,
-        data_source,
-        signal,
-      },
-      ['value', 'stderr', 'sample_size'],
-    );
+    return importCOVIDcast({ data_source, signal, geo_type, geo_value });
   }
 </script>
 

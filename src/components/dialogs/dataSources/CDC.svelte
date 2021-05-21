@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
-
-  import { firstEpiWeek, cdcLocations as regions } from '../../../data/data';
+  import { importCDC } from '../../../api/EpiData';
+  import { cdcLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
 
@@ -11,20 +10,7 @@
   let auth = '';
 
   export function importDataSet() {
-    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `[API] CDC Page Hits: ${regionLabel}`;
-    return loadDataSet(
-      title,
-      'cdc',
-      {
-        epiweeks: epiRange(firstEpiWeek.cdc, currentEpiWeek),
-      },
-      {
-        auth,
-        locations,
-      },
-      ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'],
-    );
+    return importCDC({ locations, auth });
   }
 </script>
 

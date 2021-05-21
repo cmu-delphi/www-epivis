@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
-
-  import { firstEpiWeek, nidssDenqueLocations as regions } from '../../../data/data';
+  import { importNIDSSDenque } from '../../../api/EpiData';
+  import { nidssDenqueLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
 
   export let id: string;
@@ -9,19 +8,7 @@
   let locations = regions[0].value;
 
   export function importDataSet() {
-    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `[API] NIDSS-Denque: ${regionLabel}`;
-    return loadDataSet(
-      title,
-      'nidss_dengue',
-      {
-        epiweeks: epiRange(firstEpiWeek.nidss_dengue, currentEpiWeek),
-      },
-      {
-        locations,
-      },
-      ['count'],
-    );
+    return importNIDSSDenque({ locations });
   }
 </script>
 

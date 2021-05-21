@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
-
-  import { firstEpiWeek, ghtLocations as regions } from '../../../data/data';
+  import { importGHT } from '../../../api/EpiData';
+  import { ghtLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
 
@@ -12,21 +11,7 @@
   let query = '';
 
   export function importDataSet() {
-    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `[API] GHT: ${regionLabel} [${query}]`;
-    return loadDataSet(
-      title,
-      'ght',
-      {
-        epiweeks: epiRange(firstEpiWeek.ght, currentEpiWeek),
-      },
-      {
-        auth,
-        locations,
-        query,
-      },
-      ['value'],
-    );
+    return importGHT({ auth, locations, query });
   }
 </script>
 

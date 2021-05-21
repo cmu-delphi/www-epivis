@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { firstEpiWeek, fluViewRegions } from '../../../data/data';
-  import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
+  import { importFluView } from '../../../api/EpiData';
+  import { fluViewRegions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
   import TextField from '../inputs/TextField.svelte';
-  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
+  import { DEFAULT_ISSUE } from '../utils';
 
   export let id: string;
 
@@ -13,33 +13,7 @@
   let auth: string = '';
 
   export function importDataSet() {
-    const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-    const title = appendIssueToTitle(`[API] FluView: ${regionLabel}`, issue);
-    return loadDataSet(
-      title,
-      'fluview',
-      {
-        epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
-      },
-      {
-        regions,
-        ...issue,
-        auth,
-      },
-      [
-        'wili',
-        'ili',
-        'num_ili',
-        'num_patients',
-        'num_providers',
-        'num_age_0',
-        'num_age_1',
-        'num_age_2',
-        'num_age_3',
-        'num_age_4',
-        'num_age_5',
-      ],
-    );
+    return importFluView({ regions, ...issue, auth });
   }
 </script>
 

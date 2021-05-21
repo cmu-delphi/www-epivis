@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { firstEpiWeek, fluSurvRegions as regions } from '../../../data/data';
-  import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
+  import { importFluSurv } from '../../../api/EpiData';
+
+  import { fluSurvRegions as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
-  import { currentEpiWeek, loadDataSet, epiRange } from '../../../api/EpiData';
+  import { DEFAULT_ISSUE } from '../utils';
 
   export let id: string;
 
@@ -11,20 +12,7 @@
   let issue = DEFAULT_ISSUE;
 
   export function importDataSet() {
-    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, issue);
-    return loadDataSet(
-      title,
-      'flusurv',
-      {
-        epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
-      },
-      {
-        locations,
-        ...issue,
-      },
-      ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'],
-    );
+    return importFluSurv({ locations, ...issue });
   }
 </script>
 

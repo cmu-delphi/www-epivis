@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
-
-  import { firstEpiWeek, sensorLocations as regions, sensorNames } from '../../../data/data';
+  import { importSensors } from '../../../api/EpiData';
+  import { sensorLocations as regions, sensorNames } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
 
@@ -12,22 +11,7 @@
   let names = sensorNames[0].value;
 
   export function importDataSet() {
-    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const namesLabel = sensorNames.find((d) => d.value === names)?.label ?? '?';
-    const title = `[API] Delphi Sensor: ${namesLabel}: ${regionLabel}`;
-    return loadDataSet(
-      title,
-      'sensors',
-      {
-        epiweeks: epiRange(firstEpiWeek.sensors, currentEpiWeek),
-      },
-      {
-        auth,
-        names,
-        locations,
-      },
-      ['value'],
-    );
+    return importSensors({ auth, names, locations });
   }
 </script>
 
