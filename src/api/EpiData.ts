@@ -109,26 +109,7 @@ export function loadDataSet(
       return new DataGroup(title, []);
     });
 }
-//       fetchCDC: (onSuccess, onFailure, auth, location) => {
-//          const params = ['cdcp', auth, location];
-//          const columns = ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'];
-//          api.cdc(getCallback(onSuccess, onFailure, columns, params), auth, [api.range(firstEpiWeek.cdc, current_epiweek)], location);
-//       },
-//       fetchQuidel: (onSuccess, onFailure, auth, location) => {
-//          const params = ['quidel', auth, location];
-//          const columns = ['value'];
-//          api.quidel(getCallback(onSuccess, onFailure, columns, params), auth, [api.range(firstEpiWeek.quidel, current_epiweek)], location);
-//       },
-//       fetchNIDSS_flu: (onSuccess, onFailure, region, issue, lag) => {
-//          const params = ['nidss_flu', region, issue, lag];
-//          const columns = ['visits', 'ili'];
-//          api.nidss_flu(getCallback(onSuccess, onFailure, columns, params), region, [api.range(firstEpiWeek.nidss_flu, current_epiweek)], issue, lag);
-//       },
-//       fetchNIDSS_dengue: (onSuccess, onFailure, location) => {
-//          const params = ['nidss_dengue', location];
-//          const columns = ['count'];
-//          api.nidss_dengue(getCallback(onSuccess, onFailure, columns, params), location, [api.range(firstEpiWeek.nidss_dengue, current_epiweek)]);
-//       },
+
 //       fetchSensors: (onSuccess, onFailure, auth, name, location) => {
 //          const params = ['sensors', auth, name, location];
 //          const columns = ['value'];

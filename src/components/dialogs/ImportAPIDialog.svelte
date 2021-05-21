@@ -11,6 +11,9 @@
   import GHT from './dataSources/GHT.svelte';
   import Twitter from './dataSources/Twitter.svelte';
   import Wiki from './dataSources/Wiki.svelte';
+  import Quidel from './dataSources/Quidel.svelte';
+  import NidssDengue from './dataSources/NIDSSDengue.svelte';
+  import NidssFlu from './dataSources/NIDSSFlu.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -421,6 +424,12 @@
       <Twitter {id} bind:this={handler} />
     {:else if dataSource === 'wiki'}
       <Wiki {id} bind:this={handler} />
+    {:else if dataSource === 'quidel'}
+      <Quidel {id} bind:this={handler} />
+    {:else if dataSource === 'nidss_denque'}
+      <NidssDengue {id} bind:this={handler} />
+    {:else if dataSource === 'nidss_flu'}
+      <NidssFlu {id} bind:this={handler} />
     {/if}
   </form>
 
