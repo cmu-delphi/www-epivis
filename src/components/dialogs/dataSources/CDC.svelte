@@ -1,7 +1,7 @@
 <script lang="ts">
   import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
 
-  import { firstEpiWeek, quidelLocations as regions } from '../../../data/data';
+  import { firstEpiWeek, cdcLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
 
@@ -12,18 +12,18 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `Quidel Data: ${regionLabel}`;
+    const title = `CDC Page Hits: ${regionLabel}`;
     return loadDataSet(
       title,
-      'quidel',
+      'cdc',
       {
-        epiweeks: epiRange(firstEpiWeek.quidel, currentEpiWeek),
+        epiweeks: epiRange(firstEpiWeek.cdc, currentEpiWeek),
       },
       {
         auth,
         locations,
       },
-      ['value'],
+      ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'],
     );
   }
 </script>

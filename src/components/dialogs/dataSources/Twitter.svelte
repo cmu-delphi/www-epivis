@@ -13,7 +13,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `Twitter: ${regionLabel}`;
+    const title = `Twitter: ${regionLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
     return loadDataSet(
       title,
       'twitter',

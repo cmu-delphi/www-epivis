@@ -5,7 +5,7 @@
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
   import TextField from '../inputs/TextField.svelte';
-  import { DEFAULT_ISSUE } from '../utils';
+  import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
 
   export let id: string;
 
@@ -15,7 +15,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `NIDSS Flu: ${regionLabel}`;
+    const title = appendIssueToTitle(`NIDSS-influenza: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'nidss_flu',

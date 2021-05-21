@@ -10,7 +10,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `NIDSS Denque: ${regionLabel}`;
+    const title = `NIDSS-Denque: ${regionLabel}`;
     return loadDataSet(
       title,
       'nidss_dengue',

@@ -1,32 +1,28 @@
 <script lang="ts">
   import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
 
-  import { firstEpiWeek, quidelLocations as regions } from '../../../data/data';
+  import { firstEpiWeek, nowcastLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
-  import TextField from '../inputs/TextField.svelte';
 
   export let id: string;
 
   let locations = regions[0].value;
-  let auth = '';
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `Quidel Data: ${regionLabel}`;
+    const title = `Delphi Nowcast: ${regionLabel}`;
     return loadDataSet(
       title,
-      'quidel',
+      'nowcast',
       {
-        epiweeks: epiRange(firstEpiWeek.quidel, currentEpiWeek),
+        epiweeks: epiRange(firstEpiWeek.nowcast, currentEpiWeek),
       },
       {
-        auth,
         locations,
       },
-      ['value'],
+      ['value', 'std'],
     );
   }
 </script>
 
-<TextField id="{id}-auth" name="auth" label="Authorizaton Token" bind:value={auth} placeholder="authorization token" />
 <SelectField id="{id}-r" label="Location" bind:value={locations} options={regions} />

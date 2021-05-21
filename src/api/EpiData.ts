@@ -21,7 +21,7 @@ const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
 
 export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
 
-function fetchImpl<T>(url: URL): Promise<T> {
+export function fetchImpl<T>(url: URL): Promise<T> {
   const urlGetS = url.toString();
   if (urlGetS.length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -110,80 +110,11 @@ export function loadDataSet(
     });
 }
 
-//       fetchSensors: (onSuccess, onFailure, auth, name, location) => {
-//          const params = ['sensors', auth, name, location];
-//          const columns = ['value'];
-//          api.sensors(getCallback(onSuccess, onFailure, columns, params), auth, name, location, [api.range(firstEpiWeek.sensors, current_epiweek)]);
-//       },
-//       fetchNowcast: (onSuccess, onFailure, location) => {
-//          const params = ['nowcast', location];
-//          const columns = ['value', 'std'];
-//          api.nowcast(getCallback(onSuccess, onFailure, columns, params), location, [api.range(firstEpiWeek.nowcast, current_epiweek)]);
-//       },
-//       fetchCovidcast: (onSuccess, onFailure, dataSource, signal, timeType, geoType, geoValue) => {
-//          const params = ['covidcast', dataSource, signal, timeType, geoType, geoValue];
-//          const columns = ['value', 'stderr', 'sample_size'];
-//          const timeValue = [api.range(first_date.covidcast, current_date)];
-//          api.covidcast(getCallback(onSuccess, onFailure, columns, params), dataSource, signal, timeType, geoType, timeValue, geoValue);
-//       },
-//       fetchCovidHosp: (onSuccess, onFailure, state, issue) => {
-//          const params = ['covid_hosp', state, issue];
-//          const columns = [
-//            'hospital_onset_covid',
-//            'hospital_onset_covid_coverage',
-//            'inpatient_beds',
-//            'inpatient_beds_coverage',
-//            'inpatient_beds_used',
-//            'inpatient_beds_used_coverage',
-//            'inpatient_beds_used_covid',
-//            'inpatient_beds_used_covid_coverage',
-//            'previous_day_admission_adult_covid_confirmed',
-//            'previous_day_admission_adult_covid_confirmed_coverage',
-//            'previous_day_admission_adult_covid_suspected',
-//            'previous_day_admission_adult_covid_suspected_coverage',
-//            'previous_day_admission_pediatric_covid_confirmed',
-//            'previous_day_admission_pediatric_covid_confirmed_coverage',
-//            'previous_day_admission_pediatric_covid_suspected',
-//            'previous_day_admission_pediatric_covid_suspected_coverage',
-//            'staffed_adult_icu_bed_occupancy',
-//            'staffed_adult_icu_bed_occupancy_coverage',
-//            'staffed_icu_adult_patients_confirmed_suspected_covid',
-//            'staffed_icu_adult_patients_confirmed_suspected_covid_coverage',
-//            'staffed_icu_adult_patients_confirmed_covid',
-//            'staffed_icu_adult_patients_confirmed_covid_coverage',
-//            'total_adult_patients_hosp_confirmed_suspected_covid',
-//            'total_adult_patients_hosp_confirmed_suspected_covid_coverage',
-//            'total_adult_patients_hosp_confirmed_covid',
-//            'total_adult_patients_hosp_confirmed_covid_coverage',
-//            'total_pediatric_patients_hosp_confirmed_suspected_covid',
-//            'total_pediatric_patients_hosp_confirmed_suspected_covid_coverage',
-//            'total_pediatric_patients_hosp_confirmed_covid',
-//            'total_pediatric_patients_hosp_confirmed_covid_coverage',
-//            'total_staffed_adult_icu_beds',
-//            'total_staffed_adult_icu_beds_coverage',
-//            'inpatient_beds_utilization',
-//            'inpatient_beds_utilization_coverage',
-//            'inpatient_beds_utilization_numerator',
-//            'inpatient_beds_utilization_denominator',
-//            'percent_of_inpatients_with_covid',
-//            'percent_of_inpatients_with_covid_coverage',
-//            'percent_of_inpatients_with_covid_numerator',
-//            'percent_of_inpatients_with_covid_denominator',
-//            'inpatient_bed_covid_utilization',
-//            'inpatient_bed_covid_utilization_coverage',
-//            'inpatient_bed_covid_utilization_numerator',
-//            'inpatient_bed_covid_utilization_denominator',
-//            'adult_icu_bed_covid_utilization',
-//            'adult_icu_bed_covid_utilization_coverage',
-//            'adult_icu_bed_covid_utilization_numerator',
-//            'adult_icu_bed_covid_utilization_denominator',
-//            'adult_icu_bed_utilization',
-//            'adult_icu_bed_utilization_coverage',
-//            'adult_icu_bed_utilization_numerator',
-//            'adult_icu_bed_utilization_denominator',
-//          ];
-//          const callback = getCallback(onSuccess, onFailure, columns, params);
-//          const dates = [api.range(first_date.covid_hosp, current_date)];
-//          api.covid_hosp(callback, state, dates, issue);
-//       },
-//    };
+export function fetchCOVIDcastMeta(): Promise<{ geo_type: string; signal: string; data_source: string }[]> {
+  const url = new URL(ENDPOINT + `/covidcast_meta/`);
+  url.searchParams.set('format', 'json');
+  return fetchImpl<{ geo_type: string; signal: string; data_source: string }[]>(url).catch((error) => {
+    console.warn('failed fetching data', error);
+    return [];
+  });
+}
