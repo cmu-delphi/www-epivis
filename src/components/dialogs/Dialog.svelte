@@ -30,7 +30,6 @@
   </div>
 </div>
 
-
 <style>
   .uk-modal-body :global(form > div) {
     margin: 1em 0;

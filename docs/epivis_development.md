@@ -76,7 +76,7 @@ It's possible to swap out the live API with a local development instance,
 however this requires some additional work. At a high level:
 
 1. start containers `delphi_database_epidata` and `delphi_web_epidata` as
-  described in the Epidata API development guide
+   described in the Epidata API development guide
 2. edit the Epidata API javascript client, changing the base URL from the
-  production value (like `delphi.cmu.edu`) to a local value (like `localhost`)
+   production value (like `delphi.cmu.edu`) to a local value (like `localhost`)
 3. rebuild and restart the EpiVis container using the `delphi-net` network
