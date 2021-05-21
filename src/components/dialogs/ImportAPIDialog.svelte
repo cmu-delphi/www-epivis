@@ -16,7 +16,7 @@
   import NidssFlu from './dataSources/NIDSSFlu.svelte';
   import Cdc from './dataSources/CDC.svelte';
   import Sensors from './dataSources/Sensors.svelte';
-  import NowCast from './dataSources/NowCast.svelte';
+  import NowCast from './dataSources/Nowcast.svelte';
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
 
