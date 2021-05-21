@@ -13,27 +13,16 @@
     faSearchPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import UIkit from 'uikit';
-  import { activeDatasets, getDirectLink, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
+  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
   import RegressionDialog from './dialogs/RegressionDialog.svelte';
+  import DirectLinkDialog from './dialogs/DirectLinkDialog.svelte';
 
   export let chart: IChart | null;
 
   export let style = '';
 
-  function showDirectLink() {
-    if (!chart) {
-      return;
-    }
-    const r = getDirectLink(chart);
-    const code = `
-    ${r.anySkipped ? `<div class="uk-alert uk-alert-warning">Some datasets could not be linked</div>` : ''}
-    <textarea class="uk-textarea" readonly rows="10">${r.url.href}</textarea>
-    `;
-    UIkit.modal.alert(code);
-  }
   function takeScreenshot() {
     if (!chart) {
       return;
@@ -47,9 +36,10 @@
     a.remove();
   }
 
-  let doRegressDialog = false;
+  let doDialog: 'regress' | null | 'directLink' = null;
+
   function closeDialog() {
-    doRegressDialog = false;
+    doDialog = null;
   }
 </script>
 
@@ -88,7 +78,7 @@
     <button
       type="button"
       class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={() => (doRegressDialog = true)}
+      on:click|preventDefault={() => (doDialog = 'regress')}
       title="Perform Regression"
       uk-tootlip
       disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
@@ -116,7 +106,7 @@
       title="Link to this view"
       disabled={!chart}
       uk-title
-      on:click|preventDefault={showDirectLink}><Fa icon={faLink} /></button
+      on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
     >
   </div>
   <div class="uk-button-group">
@@ -147,8 +137,10 @@
   </div>
 </div>
 
-{#if doRegressDialog}
+{#if doDialog === 'regress'}
   <RegressionDialog on:close={closeDialog} />
+{:else if doDialog === 'directLink'}
+  <DirectLinkDialog {chart} on:close={closeDialog} />
 {/if}
 
 <style>
