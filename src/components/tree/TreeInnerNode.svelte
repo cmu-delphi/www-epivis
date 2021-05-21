@@ -20,7 +20,7 @@
 
 <div class="tv_node">
   <span on:click={toggleExpanded}>
-    <Fa icon={expanded ? faChevronDown : faChevronRight} style="width: 1em" />
+    <Fa icon={expanded ? faChevronDown : faChevronRight} style="width: 0.9em" />
     {node.title}
   </span>
   {#if expanded}

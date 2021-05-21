@@ -15,6 +15,10 @@ export function addDataSet(dataset: DataSet | DataGroup): void {
   datasetTree.set(root); // set tree to trigger updates
   const ds = flatten(dataset);
   activeDatasets.set([...get(activeDatasets), ...ds]);
+  if (dataset instanceof DataGroup) {
+    // auto expand
+    expandedDataGroups.set([...get(expandedDataGroups), dataset]);
+  }
 }
 
 interface ILinkConfig {

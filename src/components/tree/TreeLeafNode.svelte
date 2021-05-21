@@ -14,10 +14,11 @@
     }
   }
   $: selected = $activeDatasets.includes(node);
+  $: color = $activeDatasets.includes(node) ? node.color : undefined;
 </script>
 
 <div class="tv_node" class:selected on:click={toggleSelected}>
-  <Fa icon={selected ? faCheckSquare : faSquare} />
+  <Fa icon={selected ? faCheckSquare : faSquare} {color} />
   {node.title}
 </div>
 
