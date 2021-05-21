@@ -97,7 +97,7 @@
       class="uk-button uk-button-default uk-button-small"
       disabled={!chart}
       title="Take a screenshot"
-      uk-title
+      uk-tooltip
       on:click|preventDefault={takeScreenshot}><Fa icon={faImage} /></button
     >
     <button
@@ -105,7 +105,7 @@
       class="uk-button uk-button-default uk-button-small"
       title="Link to this view"
       disabled={!chart}
-      uk-title
+      uk-tooltip
       on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
     >
   </div>
