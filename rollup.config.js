@@ -44,6 +44,7 @@ export default [
         uikit: 'UIkit',
       },
     },
+    external: ['uikit'],
     plugins: [
       replace({
         values: {
