@@ -155,6 +155,8 @@
   .menu {
     display: flex;
     justify-content: center;
+    padding: 0.5em 1em 0.5em 0.5em;
+    border-bottom: 1px solid grey;
   }
   .uk-button-group {
     margin: 0 1em;

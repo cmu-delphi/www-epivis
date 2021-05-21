@@ -40,32 +40,21 @@
     | 'covidcast'
     | 'covid_hosp' = 'fluview';
 
+  let loading = false;
   let handler: unknown = null;
+
   function onSubmit(e: Event) {
     e.preventDefault();
     if (!handler) {
       return;
     }
     // eslint-disable-next-line no-unused-vars
-    (handler as { importDataSet: () => Promise<DataGroup> }).importDataSet().then((ds) => dispatch('imported', ds));
+    loading = true;
+    (handler as { importDataSet: () => Promise<DataGroup> }).importDataSet().then((ds) => {
+      loading = false;
+      dispatch('imported', ds);
+    });
   }
-
-  //   const successFunction = (title) => {
-  //   return function(datasets) {
-  //     datasets.forEach(data => {
-  //       data.parentTitle = title;
-  //     });
-  //     var info = new CSV.Info();
-  //     info.numCols = datasets.length;
-  //     info.numRows = datasets[0].data.length;
-  //     info.data = new CSV.DataGroup("[API] " + title, datasets);
-  //     info.print();
-  //     var node = new TreeView.Node(info.data.getTitle());
-  //     loadDataGroup(node, info.data.getData());
-  //     tree.append(node);
-  //     closeDialog();
-  //   };
-  // };
 </script>
 
 <Dialog title="Load from Epidata API" on:close>
@@ -176,5 +165,10 @@
     {/if}
   </form>
 
-  <button slot="footer" class="uk-button" type="submit" form={id}>Fetch Data</button>
+  <button slot="footer" class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
+    Fetch Data
+    {#if loading}
+      <div uk-spinner />
+    {/if}
+  </button>
 </Dialog>

@@ -10,7 +10,7 @@
 
 <side class="left" {style}>
   <ImportDataSetsMenu />
-  <div>
+  <div class="tree">
     {#each $datasetTree.datasets as child (child.title)}
       {#if child instanceof DataSet}
         <TreeLeafNode node={child} />
@@ -25,5 +25,11 @@
   .left {
     padding: 0.5em 1em 0.5em 0.5em;
     border-right: 1px solid grey;
+  }
+  .tree {
+    margin-top: 1em;
+  }
+  .tree > :global(div.tv_node) {
+    padding-left: 0 !important;
   }
 </style>

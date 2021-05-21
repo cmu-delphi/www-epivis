@@ -38,8 +38,9 @@
 <div>
   <div class="uk-form-label">Temporal Resolution</div>
   <div class="uk-form-controls uk-form-controls-text">
-    <label><input class="uk-radio" type="radio" name="resolution" value="daily" bind:group={resolution} />Daily</label>
-    <label><input class="uk-radio" type="radio" name="resolution" value="weekly" bind:group={resolution} />Weekly</label
+    <label><input class="uk-radio" type="radio" name="resolution" value="daily" bind:group={resolution} /> Daily</label>
+    <label
+      ><input class="uk-radio" type="radio" name="resolution" value="weekly" bind:group={resolution} /> Weekly</label
     >
   </div>
 </div>

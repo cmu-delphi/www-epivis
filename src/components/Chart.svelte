@@ -65,7 +65,7 @@
     if (!canvas) {
       return { x: pageX, y: pageY };
     }
-    const bb = canvas.getBoundingClientRect();
+    const bb = canvas.parentElement!.getBoundingClientRect();
     return {
       x: pageX - bb.left,
       y: pageY - bb.top,
@@ -722,11 +722,9 @@
   });
 </script>
 
-<div {style} class="wrapper {className || ''}">
+<div {style} class="wrapper {className || ''}" bind:clientWidth={width} bind:clientHeight={height}>
   <canvas
     bind:this={canvas}
-    bind:clientWidth={width}
-    bind:clientHeight={height}
     {style}
     class={className}
     on:mousedown={mouseDown}
@@ -748,6 +746,9 @@
   }
 
   canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
   }

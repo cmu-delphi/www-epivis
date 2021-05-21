@@ -21,19 +21,19 @@
 </script>
 
 <div>
-  <div class="uk-form-label">Most Recent Issue</div>
+  <div class="uk-form-label">Which data should be loaded</div>
   <div class="uk-form-controls uk-form-controls-text">
     <label
-      ><input class="uk-radio" type="radio" name="issue" value="recent" bind:group={recent} />Most Recent Issue (fetch
-      the most up-to-date/stable data)</label
+      ><input class="uk-radio" type="radio" name="issue" value="recent" bind:group={recent} /> Most Recent Issue (fetch the
+      most up-to-date/stable data)</label
     >
     <label
-      ><input class="uk-radio" type="radio" name="issue" value="asof" bind:group={recent} />Specific Issue (fetch data
+      ><input class="uk-radio" type="radio" name="issue" value="asof" bind:group={recent} /> Specific Issue (fetch data
       "as-of" a specific {hasIssueDay ? 'day' : 'week'})</label
     >
     {#if hasLag}
       <label
-        ><input class="uk-radio" type="radio" name="issue" value="lag" bind:group={recent} />Lagged Data Recent Issue
+        ><input class="uk-radio" type="radio" name="issue" value="lag" bind:group={recent} /> Lagged Data Recent Issue
         (fetch data lagged by a number of {hasIssueDay ? 'days' : 'weeks'})</label
       >
     {/if}

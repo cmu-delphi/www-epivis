@@ -1,6 +1,6 @@
 import { get, writable } from 'svelte/store';
 import { NavMode } from './components/chartUtils';
-import DataSet, { DataGroup, DEFAULT_GROUP, SAMPLE_DATASET, flatten } from './data/DataSet';
+import DataSet, { DataGroup, DEFAULT_GROUP, SAMPLE_DATASET } from './data/DataSet';
 
 export const datasetTree = writable<DataGroup>(DEFAULT_GROUP);
 export const activeDatasets = writable([SAMPLE_DATASET]);
@@ -13,11 +13,13 @@ export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);
   root.datasets.push(dataset);
   datasetTree.set(root); // set tree to trigger updates
-  const ds = flatten(dataset);
-  activeDatasets.set([...get(activeDatasets), ...ds]);
+  // const ds = flatten(dataset);
+
   if (dataset instanceof DataGroup) {
     // auto expand
     expandedDataGroups.set([...get(expandedDataGroups), dataset]);
+  } else {
+    activeDatasets.set([...get(activeDatasets), dataset]);
   }
 }
 
