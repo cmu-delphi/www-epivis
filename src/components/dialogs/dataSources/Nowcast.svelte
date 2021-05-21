@@ -10,7 +10,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `Delphi Nowcast: ${regionLabel}`;
+    const title = `[API] Delphi Nowcast: ${regionLabel}`;
     return loadDataSet(
       title,
       'nowcast',

@@ -10,7 +10,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `GFT: ${regionLabel}`;
+    const title = `[API] GFT: ${regionLabel}`;
     return loadDataSet(
       title,
       'gft',

@@ -12,7 +12,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `CDC Page Hits: ${regionLabel}`;
+    const title = `[API] CDC Page Hits: ${regionLabel}`;
     return loadDataSet(
       title,
       'cdc',

@@ -12,7 +12,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `Quidel Data: ${regionLabel}`;
+    const title = `[API] Quidel Data: ${regionLabel}`;
     return loadDataSet(
       title,
       'quidel',

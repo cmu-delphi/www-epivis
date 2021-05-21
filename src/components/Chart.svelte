@@ -406,7 +406,7 @@
       const y = value2y(i * interval);
       ctx.moveTo(0, y);
       ctx.lineTo(width, y);
-      drawText(ctx, String(i * interval), 0, y - 2, 0, Align.left, Align.bottom);
+      drawText(ctx, (i * interval).toLocaleString(), 0, y - 2, 0, Align.left, Align.bottom);
     }
     if (mousePosition !== null) {
       const y = mousePosition.y;
@@ -688,8 +688,8 @@
     ctx.save();
     renderValueAxis(ctx);
     renderDateAxis(ctx);
-    renderDateHighlight(ctx);
     renderData(ctx);
+    renderDateHighlight(ctx);
     renderLegend(ctx);
     renderNavBox(ctx);
     ctx.restore();

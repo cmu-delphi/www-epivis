@@ -12,7 +12,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === states)?.label ?? '?';
-    let title = `COVID Hospitalization: ${regionLabel}`;
+    let title = `[API] COVID Hospitalization: ${regionLabel}`;
     if (issue.issues != null) {
       title += ` (issued on: ${issue.issues})`;
     } else {

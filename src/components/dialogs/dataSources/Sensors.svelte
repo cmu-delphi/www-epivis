@@ -14,7 +14,7 @@
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
     const namesLabel = sensorNames.find((d) => d.value === names)?.label ?? '?';
-    const title = `Delphi Sensor: ${namesLabel}: ${regionLabel}`;
+    const title = `[API] Delphi Sensor: ${namesLabel}: ${regionLabel}`;
     return loadDataSet(
       title,
       'sensors',

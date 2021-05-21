@@ -48,7 +48,7 @@
   });
 
   export function importDataSet() {
-    const title = `Delphi CODIVcast: ${geo_value} ${signal} (${data_source})`;
+    const title = `[API] Delphi CODIVcast: ${geo_value} ${signal} (${data_source})`;
     return loadDataSet(
       title,
       'covidcast',

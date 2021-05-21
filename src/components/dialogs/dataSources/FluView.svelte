@@ -14,7 +14,7 @@
 
   export function importDataSet() {
     const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-    const title = appendIssueToTitle(`FluView: ${regionLabel}`, issue);
+    const title = appendIssueToTitle(`[API] FluView: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'fluview',

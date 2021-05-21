@@ -13,7 +13,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = `GHT: ${regionLabel} [${query}]`;
+    const title = `[API] GHT: ${regionLabel} [${query}]`;
     return loadDataSet(
       title,
       'ght',

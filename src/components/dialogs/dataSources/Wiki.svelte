@@ -21,7 +21,7 @@
 
   export function importDataSet() {
     const articleLabel = wikiArticles.find((d) => d.value === articles)?.label ?? '?';
-    let title = `Wiki: ${articleLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
+    let title = `[API] Wiki: ${articleLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
     if (useHour) {
       title += ` (${hour})`;
     }

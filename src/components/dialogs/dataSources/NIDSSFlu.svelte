@@ -15,7 +15,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = appendIssueToTitle(`NIDSS-influenza: ${regionLabel}`, issue);
+    const title = appendIssueToTitle(`[API] NIDSS-influenza: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'nidss_flu',

@@ -12,7 +12,7 @@
 
   export function importDataSet() {
     const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
-    const title = appendIssueToTitle(`FluSurv: ${regionLabel}`, issue);
+    const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'flusurv',
