@@ -6,7 +6,9 @@
 
 *.zip
 .eslintcache
-/public
+/public/*.js
+*.map
+/public/*.css
 src/**/*.generated.json
 /cypress/videos
 /cypress/screenshots
