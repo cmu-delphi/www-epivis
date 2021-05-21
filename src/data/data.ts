@@ -371,26 +371,26 @@ export const covidHospLocations = [
   { value: 'VI', label: 'Virgin Islands' },
 ];
 
-  // first available epiweek for each data source
+// first available epiweek for each data source
+export const firstEpiWeek = {
+  fluview: 199740,
+  flusurv: 200340,
+  gft: 200340,
+  ght: 200401,
+  twitter: 201148,
+  wiki: 200750,
+  nidss_flu: 200814,
+  nidss_dengue: 200301,
+  cdc: 201301,
+  quidel: 201535,
+  sensors: 201030,
+  nowcast: 200901,
+};
 
-export const first_epiweek = {
-    fluview: 199740,
-    flusurv: 200340,
-    gft: 200340,
-    ght: 200401,
-    twitter: 201148,
-    wiki: 200750,
-    nidss_flu: 200814,
-    nidss_dengue: 200301,
-    cdc: 201301,
-    quidel: 201535,
-    sensors: 201030,
-    nowcast: 200901,
-  };
-  // first available date for each data source
-export const first_date = {
-    twitter: 20111201,
-    wiki: 20071209,
-    covidcast: 20200101,
-    covid_hosp: 20200101,
-  };
+// first available date for each data source
+export const firstDate = {
+  twitter: 20111201,
+  wiki: 20071209,
+  covidcast: 20200101,
+  covid_hosp: 20200101,
+};

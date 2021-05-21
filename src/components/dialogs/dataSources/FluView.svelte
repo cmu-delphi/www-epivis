@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { first_epiweek, fluViewRegions } from '../../../data/data';
+  import { firstEpiWeek, fluViewRegions } from '../../../data/data';
   import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
@@ -14,12 +14,12 @@
 
   export function importDataSet() {
     const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-    let title = appendIssueToTitle(`FluView: ${regionLabel}`, issue);
+    const title = appendIssueToTitle(`FluView: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'fluview',
       {
-        epiweeks: epiRange(first_epiweek.fluview, currentEpiWeek),
+        epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
       },
       {
         regions,
@@ -45,4 +45,11 @@
 
 <SelectField id="{id}-r" label="Region" bind:value={regions} options={fluViewRegions} />
 <SelectIssue {id} bind:value={issue} />
-<TextField id="{id}-auth" label="Auth Key" bind:value={auth} placeholder="authorization token" />
+<TextField
+  id="{id}-auth"
+  name="auth"
+  label="Auth Key"
+  bind:value={auth}
+  required={false}
+  placeholder="authorization token"
+/>

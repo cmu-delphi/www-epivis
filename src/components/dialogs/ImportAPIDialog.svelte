@@ -7,12 +7,30 @@
   import Dialog from './Dialog.svelte';
   import { randomId } from './utils';
   import type { DataGroup } from '../../data/DataSet';
+  import Gft from './dataSources/GFT.svelte';
+  import GHT from './dataSources/GHT.svelte';
+  import Twitter from './dataSources/Twitter.svelte';
+  import Wiki from './dataSources/Wiki.svelte';
 
   const dispatch = createEventDispatcher();
 
   const id = randomId();
 
-  let dataSource: 'fluview' | 'flusurv' | 'gft' | 'twitter' | 'wiki' | 'cdc' | 'quidel' | 'nidss_flu' | 'nidss_denque' | 'sensors' | 'nowcast' | 'covidcast' | 'covid_hosp' = 'fluview';
+  let dataSource:
+    | 'fluview'
+    | 'flusurv'
+    | 'gft'
+    | 'ght'
+    | 'twitter'
+    | 'wiki'
+    | 'cdc'
+    | 'quidel'
+    | 'nidss_flu'
+    | 'nidss_denque'
+    | 'sensors'
+    | 'nowcast'
+    | 'covidcast'
+    | 'covid_hosp' = 'fluview';
 
   let handler: unknown = null;
   function onSubmit(e: Event) {
@@ -21,7 +39,7 @@
       return;
     }
     // eslint-disable-next-line no-unused-vars
-    (handler as {importDataSet: () => Promise<DataGroup>}).importDataSet().then((ds) => dispatch('imported', ds));
+    (handler as { importDataSet: () => Promise<DataGroup> }).importDataSet().then((ds) => dispatch('imported', ds));
   }
 
   //   const successFunction = (title) => {
@@ -390,12 +408,21 @@
         >
       </div>
     </div>
+
+    {#if dataSource === 'fluview'}
+      <FluView {id} bind:this={handler} />
+    {:else if dataSource === 'flusurv'}
+      <FluSurv {id} bind:this={handler} />
+    {:else if dataSource === 'gft'}
+      <Gft {id} bind:this={handler} />
+    {:else if dataSource === 'ght'}
+      <GHT {id} bind:this={handler} />
+    {:else if dataSource === 'twitter'}
+      <Twitter {id} bind:this={handler} />
+    {:else if dataSource === 'wiki'}
+      <Wiki {id} bind:this={handler} />
+    {/if}
   </form>
-  {#if dataSource === 'fluview'}
-    <FluView {id} bind:this={handler} />
-  {:else if dataSource === 'flusurv'}
-    <FluSurv {id} bind:this={handler} />
-  {/if}
 
   <button slot="footer" class="uk-button" type="submit" form={id}>Fetch Data</button>
 </Dialog>

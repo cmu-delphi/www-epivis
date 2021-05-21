@@ -1,10 +1,28 @@
 <script lang="ts">
-  import { gftLocations } from '../../../data/data';
+  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
+
+  import { firstEpiWeek, gftLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
 
   export let id: string;
 
-  let location = gftLocations[0].value;
+  let locations = regions[0].value;
+
+  export function importDataSet() {
+    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
+    const title = `GFT: ${regionLabel}`;
+    return loadDataSet(
+      title,
+      'gft',
+      {
+        epiweeks: epiRange(firstEpiWeek.gft, currentEpiWeek),
+      },
+      {
+        locations,
+      },
+      ['num'],
+    );
+  }
 </script>
 
-<SelectField id="{id}-r" label="Location" bind:value={location} options={gftLocations} />
+<SelectField id="{id}-r" label="Location" bind:value={locations} options={regions} />

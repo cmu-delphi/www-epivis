@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { first_epiweek, fluSurvRegions } from '../../../data/data';
+  import { firstEpiWeek, fluSurvRegions as regions } from '../../../data/data';
   import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
@@ -7,17 +7,17 @@
 
   export let id: string;
 
-  let locations = fluSurvRegions[0].value;
+  let locations = regions[0].value;
   let issue = DEFAULT_ISSUE;
 
   export function importDataSet() {
-    const regionLabel = fluSurvRegions.find((d) => d.value === locations)?.label ?? '?';
-    let title = appendIssueToTitle(`FluSurv: ${regionLabel}`, issue);
+    const regionLabel = regions.find((d) => d.value === locations)?.label ?? '?';
+    const title = appendIssueToTitle(`FluSurv: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'flusurv',
       {
-        epiweeks: epiRange(first_epiweek.flusurv, currentEpiWeek),
+        epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
       },
       {
         locations,
@@ -28,5 +28,5 @@
   }
 </script>
 
-<SelectField id="{id}-r" label="Location" bind:value={locations} options={fluSurvRegions} />
+<SelectField id="{id}-r" label="Location" bind:value={locations} options={regions} />
 <SelectIssue {id} bind:value={issue} />
