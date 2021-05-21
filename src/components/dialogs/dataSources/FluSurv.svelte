@@ -3,7 +3,7 @@
   import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
-  import { currentEpiWeek, loadDataSet, range } from '../../../api/EpiData';
+  import { currentEpiWeek, loadDataSet, epiRange } from '../../../api/EpiData';
 
   export let id: string;
 
@@ -12,17 +12,16 @@
 
   export function importDataSet() {
     const regionLabel = fluSurvRegions.find((d) => d.value === locations)?.label ?? '?';
-    let title = appendIssueToTitle(`FluView: ${regionLabel}`, issue);
+    let title = appendIssueToTitle(`FluSurv: ${regionLabel}`, issue);
     return loadDataSet(
       title,
       'flusurv',
       {
-        epiweeks: range(first_epiweek.flusurv, currentEpiWeek),
+        epiweeks: epiRange(first_epiweek.flusurv, currentEpiWeek),
       },
       {
         locations,
-        issue: issue.mode === 'asof' ? issue.param : null,
-        lag: issue.mode === 'lag' ? issue.param : null,
+        ...issue,
       },
       ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'],
     );

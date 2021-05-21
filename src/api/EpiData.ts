@@ -6,7 +6,7 @@ import EpiPoint from '../data/EpiPoint';
 // import EpiDate from "../data/EpiDate";
 // import EpiPoint from "../data/EpiPoint";
 
-export function range(from: string | number, to: string | number): string {
+export function epiRange(from: string | number, to: string | number): string {
   return `${from}-${to}`;
 }
 
@@ -27,12 +27,13 @@ function fetchImpl<T>(url: URL): Promise<T> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return fetch(url.toString(), fetchOptions).then((d) => d.json());
   }
-  url.searchParams;
+  const params = new URLSearchParams(url.searchParams);
+  url.searchParams.forEach((d) => url.searchParams.delete(d));
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return fetch(url.pathname, {
+  return fetch(url.toString(), {
     ...fetchOptions,
     method: 'POST',
-    body: url.searchParams,
+    body: params,
   }).then((d) => d.json());
 }
 
@@ -76,7 +77,7 @@ function loadEpidata(
 function cleanParams(params: Record<string, unknown>): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
   Object.entries(params).forEach(([key, value]) => {
-    if (value != null) {
+    if (value != null && value !== '') {
       clean[key] = value;
     }
   });

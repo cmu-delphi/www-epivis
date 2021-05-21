@@ -1,23 +1,48 @@
 <script lang="ts">
-  import { fluViewRegions } from '../../../data/data';
-  import { DEFAULT_ISSUE } from '../utils';
+  import { first_epiweek, fluViewRegions } from '../../../data/data';
+  import { appendIssueToTitle, DEFAULT_ISSUE } from '../utils';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
   import TextField from '../inputs/TextField.svelte';
-import type DataSet from '../../../data/DataSet';
+  import { currentEpiWeek, epiRange, loadDataSet } from '../../../api/EpiData';
 
   export let id: string;
 
-  // eslint-disable-next-line no-unused-vars
-  export function importDataSet(callback: (ds: DataSet) => void) {
-    // TODO
-  }
-
-  let region = fluViewRegions[0].value;
+  let regions = fluViewRegions[0].value;
   let issue = DEFAULT_ISSUE;
   let auth: string = '';
+
+  export function importDataSet() {
+    const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
+    let title = appendIssueToTitle(`FluView: ${regionLabel}`, issue);
+    return loadDataSet(
+      title,
+      'fluview',
+      {
+        epiweeks: epiRange(first_epiweek.fluview, currentEpiWeek),
+      },
+      {
+        regions,
+        ...issue,
+        auth,
+      },
+      [
+        'wili',
+        'ili',
+        'num_ili',
+        'num_patients',
+        'num_providers',
+        'num_age_0',
+        'num_age_1',
+        'num_age_2',
+        'num_age_3',
+        'num_age_4',
+        'num_age_5',
+      ],
+    );
+  }
 </script>
 
-<SelectField id="{id}-r" label="Region" bind:value={region} options={fluViewRegions} />
+<SelectField id="{id}-r" label="Region" bind:value={regions} options={fluViewRegions} />
 <SelectIssue {id} bind:value={issue} />
 <TextField id="{id}-auth" label="Auth Key" bind:value={auth} placeholder="authorization token" />

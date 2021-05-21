@@ -1,24 +1,23 @@
 <script lang="ts">
-import { DEFAULT_ISSUE } from "../utils";
-import type { IssueSelection } from "../utils";
-
+  import { DEFAULT_ISSUE } from '../utils';
+  import type { IssueSelection } from '../utils';
 
   export let id: string;
 
   export let value: IssueSelection = DEFAULT_ISSUE;
 
-  let recent: 'recent' | 'asof' | 'lag' = value?.mode ?? 'recent';
-  let lag = value?.mode == 'lag' ? value.param : 0;
-  let asOf = value?.mode === 'asof' ? String(value.param) : '202105';
+  let recent: 'recent' | 'asof' | 'lag' = value?.issue != null ? 'asof' : value?.lag != null ? 'lag' : 'recent';
+  let lag = value?.lag ?? 0;
+  let asOf = value?.issue != null ? String(value.issue) : '202105';
 
   $: {
     value = {
-      mode: recent,
-      param: recent === 'recent' ? 0 : (recent === 'asof' ? Number.parseInt(asOf, 10) : lag),
+      lag: recent === 'lag' ? lag : null,
+      issue: recent === 'asof' ? Number.parseInt(asOf, 10) : null,
     };
   }
-
 </script>
+
 <div>
   <div class="uk-form-label">Most Recent Issue</div>
   <div class="uk-form-controls uk-form-controls-text">
