@@ -11,3 +11,12 @@ export const DEFAULT_ISSUE: IssueSelection = {
   mode: 'recent',
   param: 0,
 };
+
+export function appendIssueToTitle(title: string, issue: IssueSelection): string {
+  if (issue.mode === 'asof') {
+    return `${title} (reported: ${Math.floor(issue.param / 100)}w${issue.param % 100})`;
+  } else if (issue.mode === 'lag') {
+    return `${title} (lagged ${issue.param} week${issue.param != 1 ? 's' : ''})`;
+  }
+  return title;
+}
