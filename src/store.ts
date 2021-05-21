@@ -36,7 +36,7 @@ interface ILinkConfig {
 }
 
 export interface IChart {
-  fitData(): boolean;
+  fitData(animate?: boolean): boolean;
   getViewPort(): [number, number, number, number];
   getCanvas(): HTMLCanvasElement;
 }

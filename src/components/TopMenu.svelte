@@ -66,7 +66,7 @@
       type="button"
       class="uk-button uk-button-default uk-button-small"
       disabled={!chart}
-      on:click|preventDefault={() => (chart ? chart.fitData() : null)}
+      on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
       title="Fit data to screen"
       uk-tooltip><Fa icon={faExpand} /></button
     >

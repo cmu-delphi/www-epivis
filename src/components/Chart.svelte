@@ -4,6 +4,9 @@
   import EpiDate from '../data/EpiDate';
   import { Align, contains, isTouchEvent, NavMode, zeroPad } from './chartUtils';
   import type { IBox } from './chartUtils';
+  import { tweened } from 'svelte/motion';
+  import { cubicInOut } from 'svelte/easing';
+  // import { writable } from 'svelte/store';
 
   export let style: string | undefined = undefined;
   export let className: string | undefined = undefined;
@@ -17,6 +20,39 @@
   let xMax = new EpiDate(2016, 1, 1).getIndex();
   let yMin = -1;
   let yMax = 1;
+
+  const animation = tweened(
+    {
+      xMin,
+      xMax,
+      yMin,
+      yMax,
+    },
+    {
+      duration: 750,
+      easing: cubicInOut,
+    },
+  );
+
+  function updateAnimation(current: { xMin: number; yMin: number; xMax: number; yMax: number }) {
+    if (current.xMin !== xMin) {
+      xMin = current.xMin;
+    }
+    if (current.xMax !== xMax) {
+      xMax = current.xMax;
+    }
+    if (current.yMin !== yMin) {
+      yMin = current.yMin;
+    }
+    if (current.yMax !== yMax) {
+      yMax = current.yMax;
+    }
+  }
+
+  $: {
+    updateAnimation($animation);
+  }
+
   let width = 100;
   let height = 100;
   const buttons: { box: IBox; handler: () => void }[] = [];
@@ -229,20 +265,26 @@
     let xRange = (xMax - xMin) / x;
     xRange = Math.max(1, xRange);
     xRange = Math.min(365.25 * 100, xRange);
-    xMin = xMid - xRange / 2;
-    xMax = xMid + xRange / 2;
     // y-axis
     const yMid = (yMin + yMax) / 2;
     const yRange = (yMax - yMin) / y;
-    yMin = yMid - yRange / 2;
-    yMax = yMid + yRange / 2;
+    setViewport(xMid - xRange / 2, yMid - yRange / 2, xMid + xRange / 2, yMid + yRange / 2);
   }
 
-  function setViewport(x1: number, y1: number, x2: number, y2: number): void {
-    xMin = x1;
-    xMax = x2;
-    yMin = y1;
-    yMax = y2;
+  function setViewport(x1: number, y1: number, x2: number, y2: number, animated = false): void {
+    if (animated) {
+      animation.set({
+        xMin: x1,
+        yMin: y1,
+        xMax: x2,
+        yMax: y2,
+      });
+    } else {
+      xMin = x1;
+      xMax = x2;
+      yMin = y1;
+      yMax = y2;
+    }
   }
 
   function highlight(date: EpiDate | null): void {
@@ -339,13 +381,7 @@
     const cy = (_yMin + _yMax) / 2;
     _yMin = cy - dy / 2;
     _yMax = cy + dy / 2;
-
-    if (shouldAnimate) {
-      // const playAnimation = animatePan(_xMin, _yMin, _xMax, _yMax);
-      // playAnimation();
-    } else {
-      setViewport(_xMin, _yMin, _xMax, _yMax);
-    }
+    setViewport(_xMin, _yMin, _xMax, _yMax, shouldAnimate);
   }
 
   function drawLabel(
@@ -588,10 +624,11 @@
   }
 
   function animateDateRange(x1: number, x2: number) {
-    return () => {
-      console.log(x1, x2);
-      // TODO;
-    };
+    const d1 = x2date(x1);
+    const d2 = x2date(x2);
+    const cx = (d1 + d2) / 2;
+    const dx = (d2 - d1) * 1.25;
+    return () => setViewport(cx - dx / 2, yMin, cx + dx / 2, yMax, true);
   }
 
   function renderDateHighlight(ctx: CanvasRenderingContext2D) {
@@ -719,6 +756,7 @@
       // only focus if this is the top-level window (e.g. not in an iframe)
       canvas.focus();
     }
+    fitData(true);
   });
 </script>
 
