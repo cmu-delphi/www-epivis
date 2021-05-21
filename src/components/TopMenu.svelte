@@ -30,7 +30,7 @@
     const r = getDirectLink(chart);
     const code = `
     ${r.anySkipped ? `<div class="uk-alert uk-alert-warning">Some datasets could not be linked</div>` : ''}
-    <input class="uk-input" value="${r.url.href}" readonly />
+    <textarea class="uk-textarea" readonly rows="10">${r.url.href}</textarea>
     `;
     UIkit.modal.alert(code);
   }

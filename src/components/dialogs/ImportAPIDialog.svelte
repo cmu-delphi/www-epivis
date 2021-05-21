@@ -52,7 +52,11 @@
     loading = true;
     (handler as { importDataSet: () => Promise<DataGroup> }).importDataSet().then((ds) => {
       loading = false;
-      dispatch('imported', ds);
+      if (ds) {
+        dispatch('imported', ds);
+      } else {
+        dispatch('close');
+      }
     });
   }
 </script>

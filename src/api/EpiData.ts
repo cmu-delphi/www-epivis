@@ -1,3 +1,4 @@
+import UIkit from 'uikit';
 import DataSet, { DataGroup } from '../data/DataSet';
 import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
@@ -90,7 +91,7 @@ export function loadDataSet(
   fixedParams: Record<string, unknown>,
   userParams: Record<string, unknown>,
   columns: string[],
-): Promise<DataGroup> {
+): Promise<DataGroup | null> {
   const url = new URL(ENDPOINT + `/${endpoint}/`);
   const params = cleanParams(userParams);
   Object.entries(fixedParams).forEach(([key, value]) => {
@@ -106,7 +107,14 @@ export function loadDataSet(
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
-      return new DataGroup(title, []);
+      return UIkit.modal
+        .alert(
+          `
+      <div class="uk-alert uk-alert-error">
+        Failed to fetch API data from <a href="${url.href}">API Link</a>.
+      </div>`,
+        )
+        .then(() => null);
     });
 }
 
