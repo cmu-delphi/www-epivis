@@ -43,13 +43,14 @@
   }
 </script>
 
-<div class="menu" {style}>
+<div class="menu" {style} data-tour="top">
   <div class="uk-button-group">
     <button
       type="button"
       class="uk-button uk-button-default uk-button-small"
       on:click|preventDefault={randomizeColors}
       title="Randomize Colors"
+      data-tour="random"
       uk-tooltip><Fa icon={faPaintBrush} /></button
     >
     <button
@@ -58,6 +59,7 @@
       disabled={!chart}
       on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
       title="Fit data to screen"
+      data-tour="fit"
       uk-tooltip><Fa icon={faExpand} /></button
     >
     <button
@@ -66,6 +68,7 @@
       class:uk-active={$isShowingPoints}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
       title="Show or Hide points"
+      data-tour="points"
       uk-tooltip><Fa icon={faEllipsisH} /></button
     >
     <button
@@ -98,6 +101,7 @@
       disabled={!chart}
       title="Take a screenshot"
       uk-tooltip
+      data-tour="screenshot"
       on:click|preventDefault={takeScreenshot}><Fa icon={faImage} /></button
     >
     <button
@@ -106,10 +110,11 @@
       title="Link to this view"
       disabled={!chart}
       uk-tooltip
+      data-tour="link"
       on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
     >
   </div>
-  <div class="uk-button-group">
+  <div class="uk-button-group" data-tour="navmode">
     <button
       type="button"
       class="uk-button uk-button-default uk-button-small"

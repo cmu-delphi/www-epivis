@@ -24,6 +24,7 @@
     type="button"
     class="uk-button uk-button-default uk-button-small"
     title="Import dataset from a local CSV File"
+    data-tour="csv"
     uk-tooltip
     on:click|preventDefault={() => (doDialog = 'csv')}><Fa icon={faFolderOpen} /></button
   >
@@ -31,6 +32,7 @@
     type="button"
     class="uk-button uk-button-default uk-button-small"
     title="Import dataset from Delphi API"
+    data-tour="api"
     uk-tooltip
     on:click|preventDefault={() => (doDialog = 'api')}><Fa icon={faDatabase} /></button
   >
@@ -38,6 +40,7 @@
     type="button"
     class="uk-button uk-button-default uk-button-small"
     title="Add a line manually"
+    data-tour="manually"
     uk-tooltip
     on:click|preventDefault={() => (doDialog = 'addLine')}><Fa icon={faPencilAlt} /></button
   >
@@ -45,6 +48,7 @@
     type="button"
     class="uk-button uk-button-default uk-button-small"
     title="Create dataset via kernel function"
+    data-tour="kernel"
     uk-tooltip
     on:click|preventDefault={() => (doDialog = 'addKernel')}><Fa icon={faCode} /></button
   >

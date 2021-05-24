@@ -8,7 +8,7 @@
   export let style = '';
 </script>
 
-<side class="left" {style}>
+<side class="left" {style} data-tour="browser">
   <ImportDataSetsMenu />
   <div class="tree">
     {#each $datasetTree.datasets as child (child.title)}

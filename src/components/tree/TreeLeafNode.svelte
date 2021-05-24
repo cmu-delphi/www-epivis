@@ -2,7 +2,7 @@
   import type DataSet from '../../data/DataSet';
   import { activeDatasets } from '../../store';
   import Fa from 'svelte-fa';
-  import { faCheckSquare, faSquare } from '@fortawesome/free-solid-svg-icons';
+  import { faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons';
 
   export let node: DataSet;
 
@@ -18,7 +18,7 @@
 </script>
 
 <div class="tv_node" class:selected on:click={toggleSelected}>
-  <Fa icon={selected ? faCheckSquare : faSquare} {color} />
+  <Fa icon={selected ? faEye : faEyeSlash} {color} style="width: 1em" />
   {node.title}
 </div>
 

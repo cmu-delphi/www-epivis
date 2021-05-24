@@ -4,9 +4,15 @@
   import TopMenu from './components/TopMenu.svelte';
   import { activeDatasets, initialViewport, isShowingPoints, navMode } from './store';
   import type { IChart } from './store';
+  import { onMount } from 'svelte';
+  import { tour } from './tour';
 
   let chart: Chart | null = null;
   $: ichart = chart as unknown as IChart | null;
+
+  onMount(() => {
+    tour.start();
+  });
 </script>
 
 <TopMenu chart={ichart} style="grid-area: menu" />

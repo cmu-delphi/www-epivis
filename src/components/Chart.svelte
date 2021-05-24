@@ -771,7 +771,7 @@
   });
 </script>
 
-<div {style} class="wrapper {className || ''}" bind:clientWidth={width} bind:clientHeight={height}>
+<div {style} class="wrapper {className || ''}" bind:clientWidth={width} bind:clientHeight={height} data-tour="chart">
   <canvas
     bind:this={canvas}
     {style}
