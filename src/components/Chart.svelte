@@ -282,12 +282,29 @@
 
   function setViewport(x1: number, y1: number, x2: number, y2: number, animated = false): void {
     if (animated) {
-      animation.set({
-        xMin: x1,
-        yMin: y1,
-        xMax: x2,
-        yMax: y2,
-      });
+      // update to current value
+      animation.set(
+        {
+          xMin,
+          yMin,
+          xMax,
+          yMax,
+        },
+        {
+          duration: 0,
+        },
+      );
+      animation.set(
+        {
+          xMin: x1,
+          yMin: y1,
+          xMax: x2,
+          yMax: y2,
+        },
+        {
+          duration: 750,
+        },
+      );
     } else {
       xMin = x1;
       xMax = x2;
