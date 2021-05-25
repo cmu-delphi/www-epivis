@@ -12,6 +12,13 @@
     "type": "git",
     "url": "https://github.com/cmu-delphi/www-epivis.git"
   },
+  "files": [
+    "public/**.js",
+    "public/**.map",
+    "public/**.txt",
+    "public/**.css",
+    "!public/wrapper.*"
+  ],
   "scripts": {
     "build": "rollup -c",
     "start": "rollup -c -w",
