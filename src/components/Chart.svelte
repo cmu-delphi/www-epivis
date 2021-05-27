@@ -470,7 +470,10 @@
       ctx.lineTo(width, y);
       drawText(ctx, (i * interval).toLocaleString(), 0, y - 2, 0, Align.left, Align.bottom);
     }
+    ctx.stroke();
+    ctx.beginPath();
     if (mousePosition !== null) {
+      ctx.fillStyle = '#000';
       ctx.strokeStyle = '#eee';
       const y = mousePosition.y;
       const value = y2value(y);
