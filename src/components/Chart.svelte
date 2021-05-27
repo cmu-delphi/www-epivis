@@ -462,7 +462,7 @@
   function renderValueAxis(ctx: CanvasRenderingContext2D) {
     const interval = Math.pow(2, Math.floor(Math.log((yMax - yMin) / 4) / Math.log(2)));
     ctx.fillStyle = '#888';
-    ctx.strokeStyle = '#ddd';
+    ctx.strokeStyle = '#f0f0f0';
     ctx.beginPath();
     for (let i = Math.ceil(yMin / interval); i <= Math.floor(yMax / interval); i++) {
       const y = value2y(i * interval);
@@ -471,6 +471,7 @@
       drawText(ctx, (i * interval).toLocaleString(), 0, y - 2, 0, Align.left, Align.bottom);
     }
     if (mousePosition !== null) {
+      ctx.strokeStyle = '#eee';
       const y = mousePosition.y;
       const value = y2value(y);
       ctx.moveTo(0, y);
@@ -716,7 +717,7 @@
     let labelOffset = 0;
     for (const ds of datasets) {
       ctx.fillStyle = ds.color;
-      const label = `-${ds.title}`;
+      const label = `— ${ds.title}`;
       drawText(ctx, label, width - 10, height - 10 - labelOffset, 0, Align.right, Align.bottom);
       labelOffset += 12;
     }

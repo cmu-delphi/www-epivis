@@ -17,7 +17,13 @@
   $: color = $activeDatasets.includes(node) ? node.color : undefined;
 </script>
 
-<div class="tv_node" class:selected on:click={toggleSelected}>
+<div
+  class="tv_node"
+  class:selected
+  on:click={toggleSelected}
+  title="click to toggle the visibility of this dataset"
+  uk-tooltip="pos: right"
+>
   <Fa icon={selected ? faEye : faEyeSlash} {color} style="width: 1em" />
   {node.title}
 </div>
@@ -26,5 +32,16 @@
   div.tv_node {
     padding-left: 1em;
     cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.125s ease-in-out;
+  }
+  div.tv_node.selected {
+    opacity: 1;
+  }
+  div.tv_node:hover {
+    opacity: 1;
+  }
+  div.tv_node.selected:hover {
+    opacity: 0.8;
   }
 </style>
