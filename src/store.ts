@@ -3,6 +3,10 @@ import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
 
+declare const __VERSION__: string;
+
+export const version = __VERSION__;
+
 const defaults = deriveLinkDefaults();
 
 export const datasetTree = writable<DataGroup>(defaults.group);
