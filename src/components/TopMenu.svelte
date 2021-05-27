@@ -41,6 +41,31 @@
   function closeDialog() {
     doDialog = null;
   }
+
+  function keyPress(e: KeyboardEvent) {
+    switch (e.key) {
+      case 'f':
+        if (chart) {
+          chart.fitData(true);
+        }
+        break;
+      case 'p':
+        $navMode = NavMode.pan;
+        break;
+      case 'z':
+        $navMode = NavMode.zoom;
+        break;
+      case 'c':
+        $navMode = NavMode.crop;
+        break;
+      case 'r':
+        randomizeColors();
+        break;
+      case 's':
+        $isShowingPoints = !$isShowingPoints;
+        break;
+    }
+  }
 </script>
 
 <div class="menu" {style} data-tour="top">
@@ -49,7 +74,7 @@
       type="button"
       class="uk-button uk-button-default uk-button-small"
       on:click|preventDefault={randomizeColors}
-      title="Randomize Colors"
+      title="Randomize Colors<br/>(Keyboard Shortcut: r)"
       data-tour="random"
       uk-tooltip><Fa icon={faPaintBrush} /></button
     >
@@ -58,7 +83,7 @@
       class="uk-button uk-button-default uk-button-small"
       disabled={!chart}
       on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
-      title="Fit data to screen"
+      title="Fit Data to Screen<br/>(Keyboard Shortcut: f)"
       data-tour="fit"
       uk-tooltip><Fa icon={faExpand} /></button
     >
@@ -67,7 +92,7 @@
       class="uk-button uk-button-default uk-button-small"
       class:uk-active={$isShowingPoints}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
-      title="Show or Hide points"
+      title="Show or Hide points<br/>(Keyboard Shortcut: s)"
       data-tour="points"
       uk-tooltip><Fa icon={faEllipsisH} /></button
     >
@@ -119,7 +144,7 @@
       type="button"
       class="uk-button uk-button-default uk-button-small"
       class:uk-active={$navMode === NavMode.pan}
-      title="Pan Mode"
+      title="Pan Mode<br/>(Keyboard Shortcut: p)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.pan)}><Fa icon={faArrowsAlt} /></button
     >
@@ -127,7 +152,7 @@
       type="button"
       class="uk-button uk-button-default uk-button-small"
       class:uk-active={$navMode === NavMode.crop}
-      title="Crop Mode"
+      title="Crop Mode<br/>(Keyboard Shortcut: c)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.crop)}><Fa icon={faCrop} /></button
     >
@@ -135,7 +160,7 @@
       type="button"
       class="uk-button uk-button-default uk-button-small"
       class:uk-active={$navMode === NavMode.zoom}
-      title="Zoom Mode"
+      title="Zoom Mode<br/>(Keyboard Shortcut: z)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
     >
@@ -147,6 +172,8 @@
 {:else if doDialog === 'directLink'}
   <DirectLinkDialog {chart} on:close={closeDialog} />
 {/if}
+
+<svelte:window on:keypress={keyPress} />
 
 <style>
   .menu {

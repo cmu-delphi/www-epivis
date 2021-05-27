@@ -118,7 +118,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Randomize Colors',
-  text: `This action will recolor all visible datasets`,
+  text: `This action will recolor all visible datasets. Keyboard Shortcut: r`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -127,7 +127,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Fit Data to Screen',
-  text: `This action will changes the chart view such that all selected datasets are fully shown`,
+  text: `This action will changes the chart view such that all selected datasets are fully shown. Keyboard Shortcut: f`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -136,7 +136,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Toggle Point Rendering',
-  text: `This action will change whether points should be rendered representing individual data points of the time series`,
+  text: `This action will change whether points should be rendered representing individual data points of the time series. Keyboard Shortcut: s`,
   buttons: nextCancel,
 });
 
