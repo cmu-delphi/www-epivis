@@ -10,10 +10,7 @@ The current stable `main` version is deployed at https://cmu-delphi-epivis.netli
 
 The next `dev` version is deployed at https://dev--cmu-delphi-epivis.netlify.app/.
 
-For development, see the
-[EpiVis development guide](docs/epivis_development.md).
-
-Little piece of trivia: the first version of EpiVis was written on 2014-12-22.
+_Little piece of trivia_: the first version of EpiVis was written on 2014-12-22.
 See the git history of this file for a legacy changelog which describes changes
 made prior to the migration to git around 2017.
 
@@ -33,6 +30,12 @@ To lint or check for styling, run
 
 ```sh
 npm run lint
+```
+
+To fix all possible linting errors, run
+
+```sh
+npm run fix
 ```
 
 To run unit test, run
