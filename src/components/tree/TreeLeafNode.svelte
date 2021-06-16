@@ -24,8 +24,10 @@
   title="click to toggle the visibility of this dataset"
   uk-tooltip="pos: right"
 >
-  <Fa icon={selected ? faEye : faEyeSlash} {color} style="width: 1em" />
-  {node.title}
+  <Fa icon={selected ? faEye : faEyeSlash} {color} style="width: 1em; margin-right: 0.5em" />
+  <span>
+    {node.title}
+  </span>
 </div>
 
 <style>
@@ -34,6 +36,8 @@
     cursor: pointer;
     opacity: 0.8;
     transition: opacity 0.125s ease-in-out;
+    display: flex;
+    align-items: center;
   }
   div.tv_node.selected {
     opacity: 1;
