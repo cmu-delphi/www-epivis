@@ -20,8 +20,10 @@
 
 <div class="tv_node">
   <span on:click={toggleExpanded}>
-    <Fa icon={expanded ? faChevronDown : faChevronRight} style="width: 0.9em" />
-    {node.title}
+    <Fa icon={expanded ? faChevronDown : faChevronRight} style="width: 0.9em; margin-right: 0.5em" />
+    <span>
+      {node.title}
+    </span>
   </span>
   {#if expanded}
     {#each node.datasets as child (child.title)}
@@ -40,5 +42,7 @@
   }
   div.tv_node > span {
     cursor: pointer;
+    display: flex;
+    align-items: center;
   }
 </style>

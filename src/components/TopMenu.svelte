@@ -43,6 +43,9 @@
   }
 
   function keyPress(e: KeyboardEvent) {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+      return;
+    }
     switch (e.key) {
       case 'f':
         if (chart) {

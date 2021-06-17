@@ -33,6 +33,7 @@
     border-right: 1px solid grey;
     display: flex;
     flex-direction: column;
+    max-width: 20em;
   }
   .tree {
     margin-top: 1em;
