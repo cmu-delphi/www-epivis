@@ -37,26 +37,27 @@ function asDataGroup(group: IDataGroup): DataGroup {
 }
 
 export default function importCSV(file: File, fileContent: string, options: CSVOptions): DataGroup {
-  let lines = '';
+  const lines: string[] = [];
   for (const row of fileContent.split('\n')) {
     const trimmed = row.trim();
     if (trimmed[0] === '#') {
       continue;
     }
-    lines += trimmed;
+    lines.push(trimmed);
   }
-  let rows = csvParseRows(lines);
+  let rows = csvParseRows(lines.join('\n'));
   let numColumns = rows.reduce((acc, v) => Math.max(acc, v.length), 0);
   if (options.transpose) {
     numColumns = rows.length;
     rows = transpose(rows, numColumns);
   }
 
-  let labels = Array(numColumns).map((_, i) => `Column ${i}`);
+  let labels = Array(numColumns)
+    .fill(0)
+    .map((_, i) => `Column ${i}`);
 
   let groups: { label: string; level: number; rows: string[][] }[] = [{ label: file.name, level: 0, rows: [] }];
   let activeGroup = groups[0];
-  groups.push(activeGroup);
 
   let foundHeader = false;
   for (const row of rows) {
@@ -207,7 +208,7 @@ function parseDate(values: string[], lineIndex: number, options: CSVOptions): Ep
     }
     return new EpiDate(2000, 1, 1).addDays(lineIndex);
   } catch (error) {
-    console.error('invalid date in row', values, options);
+    console.error('invalid date in row', values, options, error);
     return null;
   }
 }

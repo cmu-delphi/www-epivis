@@ -32,7 +32,7 @@
         transpose,
         hasHeader,
         dateType: dateType == 'none' ? null : dateType,
-        dateFormat: dateType == 'simple' ? 'YYYY-MM-DD' : 'undefined',
+        dateFormat: dateType == 'simple' ? 'yyyy-MM-dd' : 'undefined',
         dateCol1: Number.parseInt(dateColumn, 10),
         dateCol2: Number.parseInt(dateColumn1, 10),
         hasGroup,
