@@ -5,4 +5,4 @@
   EPIDATA_ENDPOINT_URL = "https://api.covidcast.cmu.edu/epidata"
 
 [context.deploy-preview.environment]
-  EPIDATA_ENDPOINT_URL = "https://api.covidcast.cmu.edu/epidata"
+  EPIDATA_ENDPOINT_URL = "https://staging.delphi.cmu.edu/prodv4/epidata"
