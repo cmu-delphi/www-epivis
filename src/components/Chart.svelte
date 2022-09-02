@@ -793,6 +793,7 @@
 </script>
 
 <div {style} class="wrapper {className || ''}" bind:clientWidth={width} bind:clientHeight={height} data-tour="chart">
+  <!-- svelte-ignore a11y-mouse-events-have-key-events -->
   <canvas
     bind:this={canvas}
     {style}
