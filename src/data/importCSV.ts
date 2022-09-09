@@ -123,7 +123,7 @@ function parseGroup(title: string, level: number, rows: string[][], options: CSV
   const dates = rows.map((row, i) => parseDate(row, i, options));
   const datasets: DataSet[] = [];
   labels.forEach((label, i) => {
-    if (isDateColumn(i, options)) {
+    if (isDateColumn(i, options) || (options.hasGroup && options.groupColumn === i)) {
       return;
     }
     const data = rows.map((row, j) => {
