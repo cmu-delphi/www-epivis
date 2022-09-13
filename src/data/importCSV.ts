@@ -40,7 +40,7 @@ export default function importCSV(file: File, fileContent: string, options: CSVO
   const lines: string[] = [];
   for (const row of fileContent.split('\n')) {
     const trimmed = row.trim();
-    if (trimmed[0] === '#') {
+    if (trimmed[0] === '#' || trimmed.length === 0) {
       continue;
     }
     lines.push(trimmed);
@@ -94,10 +94,13 @@ export default function importCSV(file: File, fileContent: string, options: CSVO
     return asDataGroup(parseGroup(file.name, 0, activeGroup.rows, options, labels));
   }
   const root: IDataGroup = { title: file.name, level: 0, datasets: [] };
+  // shift to have at least under the root
+  const levelOffset = groups.reduce((acc, g) => Math.min(acc, g.level), Number.POSITIVE_INFINITY) - 1;
+
   let active = root;
   for (const group of groups) {
-    const parsed = parseGroup(group.label, group.level, group.rows, options, labels);
-    if (group.level > active.level) {
+    const parsed = parseGroup(group.label, group.level - levelOffset, group.rows, options, labels);
+    if (parsed.level > active.level) {
       // child
       active.datasets.push(parsed);
       parsed.parent = active;
@@ -105,7 +108,7 @@ export default function importCSV(file: File, fileContent: string, options: CSVO
       continue;
     }
     // multiple levels up
-    while (group.level < active.level) {
+    while (parsed.level < active.level) {
       active = active.parent!;
     }
     // sibling
@@ -120,7 +123,7 @@ function parseGroup(title: string, level: number, rows: string[][], options: CSV
   const dates = rows.map((row, i) => parseDate(row, i, options));
   const datasets: DataSet[] = [];
   labels.forEach((label, i) => {
-    if (isDateColumn(i, options)) {
+    if (isDateColumn(i, options) || (options.hasGroup && options.groupColumn === i)) {
       return;
     }
     const data = rows.map((row, j) => {
@@ -132,32 +135,31 @@ function parseGroup(title: string, level: number, rows: string[][], options: CSV
   return { title, level, datasets };
 }
 
-function splitGroup(rows: string[][], prefix: string, level: number, groupColumn: number) {
+function splitGroup(
+  rows: string[][],
+  prefix: string,
+  level: number,
+  groupColumn: number,
+): { label: string; level: number; rows: string[][] }[] {
   if (rows.length === 0) {
     return [];
   }
-  const r: { label: string; level: number; rows: string[][] }[] = [
-    {
-      label: prefix + String(rows[0][groupColumn]),
-      level,
-      rows: [],
-    },
-  ];
-  let active = r[0];
+  const groups: Map<string, { label: string; level: number; rows: string[][] }> = new Map();
+
   for (const row of rows) {
     const group = prefix + String(row[groupColumn]);
-    if (group != active.label) {
-      r.push({
+    const g = groups.get(group);
+    if (g) {
+      g.rows.push(row);
+    } else {
+      groups.set(group, {
         label: group,
         level,
         rows: [row],
       });
-      active = r[r.length - 1];
-    } else {
-      active.rows.push(row);
     }
   }
-  return r;
+  return Array.from(groups.values());
 }
 
 function isDateColumn(column: number, options: CSVOptions) {
