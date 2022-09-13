@@ -407,6 +407,28 @@
     const cy = (_yMin + _yMax) / 2;
     _yMin = cy - dy / 2;
     _yMax = cy + dy / 2;
+
+    // patch for straight lines
+    if (_xMin === _xMax) {
+      if (_xMin !== 0) {
+        _xMin *= 0.95;
+        _xMax *= 1.05;
+      } else {
+        _xMin = -0.5;
+        _xMax = 0.5;
+      }
+    }
+
+    if (_yMin === _yMax) {
+      if (_yMin !== 0) {
+        _yMin *= 0.95;
+        _yMax *= 1.05;
+      } else {
+        _yMin = -0.5;
+        _yMax = 0.5;
+      }
+    }
+
     setViewport(_xMin, _yMin, _xMax, _yMax, shouldAnimate);
   }
 
