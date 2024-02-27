@@ -1,12 +1,14 @@
 <script lang="ts">
   import DataSet from '../../data/DataSet';
   import type { DataGroup } from '../../data/DataSet';
+  import type { IChart } from '../store';
   import { expandedDataGroups } from '../../store';
   import TreeLeafNode from './TreeLeafNode.svelte';
   import Fa from 'svelte-fa';
   import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
   export let node: DataGroup;
+  export let chart: IChart | null;
 
   function toggleExpanded() {
     if (expanded) {
@@ -28,7 +30,7 @@
   {#if expanded}
     {#each node.datasets as child (child.title)}
       {#if child instanceof DataSet}
-        <TreeLeafNode node={child} />
+        <TreeLeafNode {chart} node={child} />
       {:else}
         <svelte:self node={child} />
       {/if}

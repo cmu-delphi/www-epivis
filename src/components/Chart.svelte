@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import type DataSet from '../data/DataSet';
+  import type DataGroup from '../data/DataSet';
   import { DEFAULT_VIEWPORT } from '../data/DataSet';
   import EpiDate from '../data/EpiDate';
   import { Align, contains, isTouchEvent, NavMode, zeroPad } from './chartUtils';
@@ -380,7 +381,11 @@
     return { x: x + dx, y: y + dy - h, w: w, h: h };
   }
 
-  export function fitData(shouldAnimate = false, extras: DataSet[] = []): void {
+  export function fitData(
+    shouldAnimate = false,
+    include: DataSet | DataGroup | null = null,
+    exclude: DataSet | DataGroup | null = null,
+  ): void {
     if (datasets.length === 0) {
       return;
     }
@@ -389,7 +394,14 @@
     let _xMax = temp[temp.length - 1].getDate().getIndex() + 0.5;
     let _yMin = datasets[0].getPointValue(0);
     let _yMax = _yMin;
-    let dss = [...datasets, ...extras];
+    let dss = null;
+    if (include) {
+      dss = [...datasets, include];
+    } else if (exclude) {
+      dss = datasets.filter((d) => d !== exclude);
+    } else {
+      dss = datasets;
+    }
     for (const ds of dss) {
       const data = ds.data;
       _xMin = Math.min(_xMin, data[0].getDate().getIndex() - 0.5);

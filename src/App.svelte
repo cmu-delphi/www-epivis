@@ -31,7 +31,7 @@
         // reset active datasets to fluview -> ili
         $activeDatasets = [ds.datasets[1]];
         if (chart) {
-          chart.fitData(true, [ds.datasets[1]]);
+          chart.fitData(true, ds.datasets[1]);
         }
       }
     });
@@ -39,7 +39,7 @@
 </script>
 
 <TopMenu chart={ichart} style="grid-area: menu" />
-<LeftMenu style="grid-area: side" />
+<LeftMenu chart={ichart} style="grid-area: side" />
 <Chart
   bind:this={chart}
   style="grid-area: main"

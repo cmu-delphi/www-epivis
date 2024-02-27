@@ -3,14 +3,22 @@
   import { activeDatasets } from '../../store';
   import Fa from 'svelte-fa';
   import { faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons';
+  import type { IChart } from '../store';
 
   export let node: DataSet;
+  export let chart: IChart | null;
 
   function toggleSelected() {
     if (selected) {
       $activeDatasets = $activeDatasets.filter((d) => d !== node);
+      if (chart) {
+        chart.fitData(true, null, node);
+      }
     } else {
       $activeDatasets = [node, ...$activeDatasets];
+      if (chart) {
+        chart.fitData(true, node);
+      }
     }
   }
   $: selected = $activeDatasets.includes(node);
