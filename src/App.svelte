@@ -11,7 +11,9 @@
   $: ichart = chart as unknown as IChart | null;
 
   onMount(() => {
-    tour.start();
+    if (!localStorage.getItem('shepherd-tour')) {
+      tour.start();
+    }
   });
 </script>
 

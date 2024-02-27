@@ -16,6 +16,15 @@ export const tour = new Shepherd.Tour({
 const next = tour.next.bind(tour);
 const cancel = tour.cancel.bind(tour);
 
+// Dismiss tour on future runs once it is cancelled or completed.
+function dismissTour() {
+  if (!localStorage.getItem('shepherd-tour')) {
+    localStorage.setItem('shepherd-tour', 'yes');
+  }
+}
+tour.on('cancel', dismissTour);
+tour.on('complete', dismissTour);
+
 const nextCancel = [
   {
     text: 'Next',
