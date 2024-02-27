@@ -386,13 +386,23 @@
     include: DataSet | DataGroup | null = null,
     exclude: DataSet | DataGroup | null = null,
   ): void {
-    if (datasets.length === 0) {
+    if (datasets.length === 0 && !include) {
       return;
     }
-    const temp = datasets[0].data;
-    let _xMin = temp[0].getDate().getIndex() - 0.5;
-    let _xMax = temp[temp.length - 1].getDate().getIndex() + 0.5;
-    let _yMin = datasets[0].getPointValue(0);
+    if (datasets.length === 1 && exclude) {
+      return;
+    }
+    let temp = null;
+    if (datasets.length === 0 && include) {
+      temp = include;
+    } else if (datasets[0] && datasets[0] == exclude) {
+      temp = datasets[1];
+    } else {
+      temp = datasets[0];
+    }
+    let _xMin = temp.data[0].getDate().getIndex() - 0.5;
+    let _xMax = temp.data[temp.data.length - 1].getDate().getIndex() + 0.5;
+    let _yMin = temp.getPointValue(0);
     let _yMax = _yMin;
     let dss = null;
     if (include) {
