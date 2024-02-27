@@ -6,6 +6,10 @@
   import type { IChart } from './store';
   import { onMount } from 'svelte';
   import { tour } from './tour';
+  import { addDataSet } from './store';
+  import { fluViewRegions } from './data/data';
+  import { DEFAULT_ISSUE } from './components/dialogs/utils';
+  import { importFluView } from './api/EpiData';
 
   let chart: Chart | null = null;
   $: ichart = chart as unknown as IChart | null;
@@ -14,6 +18,23 @@
     if (!localStorage.getItem('shepherd-tour')) {
       tour.start();
     }
+
+    // Try fetching the default FluView dataset!
+    let regions = fluViewRegions[0].value;
+    let issue = DEFAULT_ISSUE;
+    let auth: string = '';
+
+    importFluView({ regions, ...issue, auth }).then((ds) => {
+      if (ds) {
+        // add the dataset itself
+        addDataSet(ds);
+        // reset active datasets to fluview -> ili
+        $activeDatasets = [ds.datasets[1]];
+        if (chart) {
+          chart.fitData(true, [ds.datasets[1]]);
+        }
+      }
+    });
   });
 </script>
 

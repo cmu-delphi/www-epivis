@@ -380,7 +380,7 @@
     return { x: x + dx, y: y + dy - h, w: w, h: h };
   }
 
-  export function fitData(shouldAnimate = false): void {
+  export function fitData(shouldAnimate = false, extras: DataSet[] = []): void {
     if (datasets.length === 0) {
       return;
     }
@@ -389,7 +389,8 @@
     let _xMax = temp[temp.length - 1].getDate().getIndex() + 0.5;
     let _yMin = datasets[0].getPointValue(0);
     let _yMax = _yMin;
-    for (const ds of datasets) {
+    let dss = [...datasets, ...extras];
+    for (const ds of dss) {
       const data = ds.data;
       _xMin = Math.min(_xMin, data[0].getDate().getIndex() - 0.5);
       _xMax = Math.max(_xMax, data[data.length - 1].getDate().getIndex() + 0.5);
