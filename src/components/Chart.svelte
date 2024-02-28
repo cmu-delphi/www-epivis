@@ -381,23 +381,31 @@
     return { x: x + dx, y: y + dy - h, w: w, h: h };
   }
 
+  // Fit viewport to the currently available datasets.
+  // As the store can take a while to update, the arguments here include extra datasets
+  // to be included (in case a new one was just selected) or excluded (de-selected)
   export function fitData(
     shouldAnimate = false,
     include: DataSet | DataGroup | null = null,
     exclude: DataSet | DataGroup | null = null,
   ): void {
+    // No data, nothing to fit
     if (datasets.length === 0 && !include) {
       return;
     }
+    // Just deselected the only dataset, nothing to fit
     if (datasets.length === 1 && exclude) {
       return;
     }
     let temp = null;
     if (datasets.length === 0 && include) {
+      // If no previous data, set dataset to the new one
       temp = include;
     } else if (datasets[0] && datasets[0] == exclude) {
+      // If we just deselected the first dataset, don't fit to that one
       temp = datasets[1];
     } else {
+      // Generally fit to the first dataset
       temp = datasets[0];
     }
     let _xMin = temp.data[0].getDate().getIndex() - 0.5;
