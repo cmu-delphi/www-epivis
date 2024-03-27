@@ -35,6 +35,7 @@ export interface SharedState {
   active: DataSet[];
   viewport: null | [number, number, number, number];
   showPoints: boolean;
+  autoFit: boolean;
 }
 
 const DEFAULT_VALUES: SharedState = {
@@ -42,6 +43,7 @@ const DEFAULT_VALUES: SharedState = {
   active: [SAMPLE_DATASET],
   viewport: DEFAULT_VIEWPORT,
   showPoints: false,
+  autoFit: true,
 };
 
 const lookups = {
