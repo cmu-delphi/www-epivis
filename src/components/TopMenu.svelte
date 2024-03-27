@@ -3,19 +3,22 @@
     faAnchor,
     faArrowsAlt,
     faChartLine,
+    faCog,
     faCrop,
     faEllipsisH,
     faExpand,
     faImage,
     faLink,
     faPaintBrush,
+    faQuestion,
     faReceipt,
     faSearchPlus,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
+  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean, autoFit } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
+  import { tour } from '../tour';
   import RegressionDialog from './dialogs/RegressionDialog.svelte';
   import DirectLinkDialog from './dialogs/DirectLinkDialog.svelte';
 
@@ -67,6 +70,9 @@
       case 's':
         $isShowingPoints = !$isShowingPoints;
         break;
+      case 'a':
+        $autoFit = !$autoFit;
+        break;
     }
   }
 </script>
@@ -89,6 +95,16 @@
       title="Fit Data to Screen<br/>(Keyboard Shortcut: f)"
       data-tour="fit"
       uk-tooltip><Fa icon={faExpand} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      disabled={!chart}
+      class:uk-active={$autoFit === true}
+      on:click|preventDefault={() => ($autoFit = !$autoFit)}
+      title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
+      data-tour="autofit"
+      uk-tooltip><Fa icon={faCog} /></button
     >
     <button
       type="button"
@@ -166,6 +182,17 @@
       title="Zoom Mode<br/>(Keyboard Shortcut: z)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
+    >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      disabled={!chart}
+      title="View introductory tour"
+      uk-tooltip
+      data-tour="datatour"
+      on:click|preventDefault={() => tour.start()}><Fa icon={faQuestion} /></button
     >
   </div>
 </div>

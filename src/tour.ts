@@ -37,8 +37,14 @@ const nextCancel = [
 ];
 
 tour.addStep({
+  attachTo: {
+    element: '[data-tour=datatour]',
+    on: 'auto',
+  },
   title: 'Welcome to EpiVis',
-  text: `<p>EpiVis is an interactive tool for visualizing epidemiological time-series data. This tour will introduce its main features</p>`,
+  text: `<p>EpiVis is an interactive tool for visualizing epidemiological time-series data. This tour will introduce its main features.</p>
+  
+  <p>To review this information later on, use the "?" button in the upper right corner of the interface, or the 'h' hotkey.</p>`,
   buttons: nextCancel,
 });
 
@@ -49,7 +55,7 @@ tour.addStep({
   },
   title: 'Data Browser',
   text: `<p>
-    The left shows shows the loaded datasets. One has several options to load new datasets which are going to be explained as part of this tour.
+    The left panel shows the loaded datasets. It has several options to load new datasets, which are going to be explained as part of this tour.
   </p>
   <p>
     The datasets are organized in a hierarchial structure. Each dataset can be individually shown in the chart by clicking on it.
@@ -64,9 +70,9 @@ tour.addStep({
   },
   title: 'Main Chart',
   text: `<p>
-    The main views shows the time series of the selected datasets. The view is freely navigable using mouse or touch.
+    The main view shows a time-based chart of the selected datasets. This view is freely navigable using mouse or touch controls.
   </p><p>
-    The axis on the left side and on the top shows the currently selected date / value range.
+    The axes on the left side and on the top show the currently selected date / value range.
   </p>`,
   buttons: nextCancel,
 });
@@ -77,7 +83,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Chart Menu',
-  text: `The menu on top of the chart allows customizing the chart, such as changing colors or exporting the image`,
+  text: `The menu on top of the chart features several different options, such as changing colors or exporting the chart as an image.`,
   buttons: nextCancel,
 });
 
@@ -87,7 +93,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Load CSV File',
-  text: `EpiVis allows one to upload CSV files to explore custom datasets`,
+  text: `EpiVis supports loading CSV files to explore custom datasets.`,
   buttons: nextCancel,
 });
 
@@ -97,7 +103,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Load Data from EpiData API',
-  text: `The more common option is to load existing time series from the numerous data sources provided by the EpiData API`,
+  text: `A more common option is to load existing time series from numerous data sources provided by the EpiData API.`,
   buttons: nextCancel,
 });
 
@@ -107,7 +113,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Draw a custom line (Advanced)',
-  text: `A more advanced option is to define a custom line that should be drawn in the chart`,
+  text: `Another, more advanced option is to define a custom line that should be drawn in the chart.`,
   buttons: nextCancel,
 });
 
@@ -117,7 +123,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Derive via a kernel function (Advanced)',
-  text: `Another option is to derive one dataset by applying a kernel function to combine other datasets. For example, create a new dataset representing the average of two other datasets.`,
+  text: `And another option is to derive one dataset by applying a kernel function to combine other datasets. For example, create a new dataset representing the average of two other datasets.`,
   buttons: nextCancel,
 });
 
@@ -141,6 +147,15 @@ tour.addStep({
 });
 tour.addStep({
   attachTo: {
+    element: '[data-tour=autofit]',
+    on: 'auto',
+  },
+  title: 'Automatically Fit Data',
+  text: `This action changes whether the chart should be re-scaled every time a dataset is added or removed, to ensure all datasets are fully shown. Keyboard Shortcut: a`,
+  buttons: nextCancel,
+});
+tour.addStep({
+  attachTo: {
     element: '[data-tour=points]',
     on: 'auto',
   },
@@ -155,7 +170,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Download Screenshot',
-  text: `This action will download the current view in PNG format`,
+  text: `This action will download the current view in a PNG format.`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -164,7 +179,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Create Shareable Link',
-  text: `This action will show a shareable link that can be used to reproduce the current view (if possible)`,
+  text: `This action will show a shareable link that can be used to reproduce the current view (if possible).`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -173,7 +188,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Toggle between Navigation Modes',
-  text: `EpiVis supports three navigation modes: Pan, Crop, and Zoom to manipulate the view`,
+  text: `EpiVis supports three navigation modes: Pan, Crop, and Zoom to manipulate the view.`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -191,7 +206,7 @@ tour.addStep({
     on: 'bottom-end',
   },
   title: 'Mouse Cropping',
-  text: `Dragging the mouse while the <code>Shift</code> key is pressed will temporarily switch to the Crop navigation mode allowing to span a rectangle of interest`,
+  text: `Dragging the mouse while the <code>Shift</code> key is pressed will temporarily switch to the Crop navigation mode, which can span a rectangle of interest.`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -200,13 +215,13 @@ tour.addStep({
     on: 'bottom-end',
   },
   title: 'Mouse Zooming',
-  text: `Dragging the mouse while pressing the <code>Ctrl/Control</code> key is pressed will temporarily switch to the zoom mode. Moving the mouse up will zoom in and down will zoom out in the value domain. Similarly moving the mouse left will zoom in the date domain and moving right out of the date domain.`,
+  text: `Dragging the mouse while the <code>Ctrl/Control</code> key is pressed will temporarily switch to the zoom mode. Moving the mouse up will zoom in and down will zoom out in the value domain. Similarly, moving the mouse left will zoom in the date domain, and moving right - out of the date domain.`,
   buttons: nextCancel,
 });
 
 tour.addStep({
   title: 'Finish',
-  text: `This concludes this overview about EpiVis. Have fun exploring time-series data`,
+  text: `This concludes this overview about EpiVis. Have fun exploring time-series data!`,
   buttons: [
     {
       text: 'Finish',

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type DataSet from '../../data/DataSet';
-  import { activeDatasets } from '../../store';
+  import { activeDatasets, autoFit } from '../../store';
   import Fa from 'svelte-fa';
   import { faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons';
   import type { IChart } from '../store';
@@ -11,12 +11,12 @@
   function toggleSelected() {
     if (selected) {
       $activeDatasets = $activeDatasets.filter((d) => d !== node);
-      if (chart) {
+      if (chart && $autoFit === true) {
         chart.fitData(true, null, node);
       }
     } else {
       $activeDatasets = [node, ...$activeDatasets];
-      if (chart) {
+      if (chart && $autoFit === true) {
         chart.fitData(true, node);
       }
     }

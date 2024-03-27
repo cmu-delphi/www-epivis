@@ -382,8 +382,9 @@
   }
 
   // Fit viewport to the currently available datasets.
-  // As the store can take a while to update, the arguments here include extra datasets
-  // to be included (in case a new one was just selected) or excluded (de-selected)
+  // Since there is a delay to new changes propagating to the datasets variable, the
+  // include and exclude arguments are used to make sure a recently selected
+  // or de-selected dataset is properly accounted for.
   export function fitData(
     shouldAnimate = false,
     include: DataSet | DataGroup | null = null,
