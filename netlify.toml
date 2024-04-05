@@ -1,8 +1,8 @@
 [context.production.environment]
-  EPIDATA_ENDPOINT_URL = "https://api.covidcast.cmu.edu/epidata"
+  EPIDATA_ENDPOINT_URL = "https://api.delphi.cmu.edu/epidata"
 
 [context.branch-deploy.environment]
-  EPIDATA_ENDPOINT_URL = "https://api.covidcast.cmu.edu/epidata"
+  EPIDATA_ENDPOINT_URL = "https://api.delphi.cmu.edu/epidata"
 
 [context.deploy-preview.environment]
-  EPIDATA_ENDPOINT_URL = "https://api.covidcast.cmu.edu/epidata"
+  EPIDATA_ENDPOINT_URL = "https://api.delphi.cmu.edu/epidata"
