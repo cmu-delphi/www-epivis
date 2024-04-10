@@ -26,7 +26,7 @@ export default class DataSet {
 
   constructor(
     public readonly data: readonly EpiPoint[],
-    public readonly title = '',
+    public title = '',
     public readonly params: Record<string, unknown> | unknown[] | null = null,
     public color = getRandomColor(),
   ) {

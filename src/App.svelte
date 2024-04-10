@@ -19,22 +19,26 @@
       tour.start();
     }
 
-    // Try fetching the default FluView dataset!
-    let regions = fluViewRegions[0].value;
-    let issue = DEFAULT_ISSUE;
-    let auth: string = '';
+    // Try fetching the default FluView dataset! (unless the URL has a shared dataset in it)
+    const url = new URL(location.href);
+    const hash = url.hash.slice(1);
+    if (!hash) {
+      let regions = fluViewRegions[0].value;
+      let issue = DEFAULT_ISSUE;
+      let auth: string = '';
 
-    importFluView({ regions, ...issue, auth }).then((ds) => {
-      if (ds) {
-        // add the dataset itself
-        addDataSet(ds);
-        // reset active datasets to fluview -> ili
-        $activeDatasets = [ds.datasets[1]];
-        if (chart) {
-          chart.fitData(true, ds.datasets[1]);
+      importFluView({ regions, ...issue, auth }).then((ds) => {
+        if (ds) {
+          // add the dataset itself
+          addDataSet(ds);
+          // reset active datasets to fluview -> ili
+          $activeDatasets = [ds.datasets[1]];
+          if (chart) {
+            chart.fitData(true, ds.datasets[1]);
+          }
         }
-      }
-    });
+      });
+    }
   });
 </script>
 
