@@ -100,24 +100,6 @@ export default class DataSet {
   }
 }
 
-export const SAMPLE_DATASET: DataSet = ((): DataSet => {
-  // initial dataset, just for fun
-  const data = new Array<EpiPoint>(365);
-  const now = new Date();
-  const baseIndex = new EpiDate(now.getFullYear(), now.getMonth() + 1, now.getDate()).getIndex() - 182;
-  for (let i = 0; i < data.length; i++) {
-    const x = 6 - (12 * i) / (data.length - 1);
-    const xp = x * Math.PI;
-    const v = x === 0 ? 1 : Math.sin(xp) / xp;
-    data[i] = new EpiPoint(EpiDate.fromIndex(baseIndex + i), v);
-  }
-  const ds = new DataSet(data, 'EpiVis Sample');
-
-  //sampleDataset.lineWidth = 5;
-  //sampleDataset.color = '#dd3311';
-  return ds;
-})();
-
 export class DataGroup {
   public parent?: DataGroup;
 
@@ -134,7 +116,7 @@ export class DataGroup {
   }
 }
 
-export const DEFAULT_GROUP: DataGroup = new DataGroup('All Datasets', [SAMPLE_DATASET]);
+export const DEFAULT_GROUP: DataGroup = new DataGroup('All Datasets', []);
 
 export function flatten(dataset: DataSet | DataGroup): DataSet[] {
   if (dataset instanceof DataSet) {
