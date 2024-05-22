@@ -3,7 +3,6 @@
     faAnchor,
     faArrowsAlt,
     faChartLine,
-    faCog,
     faCrop,
     faEllipsisH,
     faExpand,
@@ -13,6 +12,7 @@
     faQuestion,
     faReceipt,
     faSearchPlus,
+    faUpDown,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean, autoFit } from '../store';
@@ -73,6 +73,10 @@
       case 'a':
         $autoFit = !$autoFit;
         break;
+      case 'h':
+        tour.cancel();
+        tour.start();
+        break;
     }
   }
 </script>
@@ -104,7 +108,7 @@
       on:click|preventDefault={() => ($autoFit = !$autoFit)}
       title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
       data-tour="autofit"
-      uk-tooltip><Fa icon={faCog} /></button
+      uk-tooltip><Fa icon={faUpDown} /></button
     >
     <button
       type="button"
@@ -189,10 +193,13 @@
       type="button"
       class="uk-button uk-button-default uk-button-small"
       disabled={!chart}
-      title="View introductory tour"
+      title="View introductory tour<br/>(Keyboard Shortcut: h)"
       uk-tooltip
       data-tour="datatour"
-      on:click|preventDefault={() => tour.start()}><Fa icon={faQuestion} /></button
+      on:click|preventDefault={() => {
+        tour.cancel();
+        tour.start();
+      }}><Fa icon={faQuestion} /></button
     >
   </div>
 </div>
