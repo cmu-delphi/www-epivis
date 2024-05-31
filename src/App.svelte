@@ -43,7 +43,7 @@
 </script>
 
 <TopMenu chart={ichart} style="grid-area: menu" />
-<LeftMenu chart={ichart} style="grid-area: side" />
+<LeftMenu chart={ichart} style="grid-area: side; max-height: 100vh; overflow: scroll" />
 <Chart
   bind:this={chart}
   style="grid-area: main"
