@@ -8,6 +8,7 @@
   import { tweened } from 'svelte/motion';
   import { cubicInOut } from 'svelte/easing';
   // import { writable } from 'svelte/store';
+  import activeDatasets from '../store';
 
   export let style: string | undefined = undefined;
   export let className: string | undefined = undefined;
@@ -81,7 +82,8 @@
   export let showPoints = false;
   export let interpolate = false;
   export let highlightedDate: EpiDate | null = null;
-  export let datasets: DataSet[] = [];
+
+  $: datasets = $activeDatasets;
 
   function date2x(date: number): number {
     return ((date - xMin) / (xMax - xMin)) * width;

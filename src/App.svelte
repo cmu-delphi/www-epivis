@@ -50,5 +50,4 @@
   bind:showPoints={$isShowingPoints}
   bind:navMode={$navMode}
   initialViewport={$initialViewport}
-  datasets={$activeDatasets}
 />
