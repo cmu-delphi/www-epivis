@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { activeDatasets } from '../store';
   import type DataSet from '../data/DataSet';
-  import type DataGroup from '../data/DataSet';
   import { DEFAULT_VIEWPORT } from '../data/DataSet';
   import EpiDate from '../data/EpiDate';
   import { Align, contains, isTouchEvent, NavMode, zeroPad } from './chartUtils';
@@ -82,7 +82,8 @@
   export let showPoints = false;
   export let interpolate = false;
   export let highlightedDate: EpiDate | null = null;
-  export let datasets: DataSet[] = [];
+
+  $: datasets = $activeDatasets;
 
   function date2x(date: number): number {
     return ((date - xMin) / (xMax - xMin)) * width;
@@ -381,47 +382,17 @@
     return { x: x + dx, y: y + dy - h, w: w, h: h };
   }
 
-  // Fit viewport to the currently available datasets.
-  // Since there is a delay to new changes propagating to the datasets variable, the
-  // include and exclude arguments are used to make sure a recently selected
-  // or de-selected dataset is properly accounted for.
-  export function fitData(
-    shouldAnimate = false,
-    include: DataSet | DataGroup | null = null,
-    exclude: DataSet | DataGroup | null = null,
-  ): void {
-    // No data, nothing to fit
-    if (datasets.length === 0 && !include) {
+  export function fitData(shouldAnimate = false): void {
+    datasets = $activeDatasets; // force an update
+    if (datasets.length === 0) {
       return;
     }
-    // Just deselected the only dataset, nothing to fit
-    if (datasets.length === 1 && exclude) {
-      return;
-    }
-    let temp = null;
-    if (datasets.length === 0 && include) {
-      // If no previous data, set dataset to the new one
-      temp = include;
-    } else if (datasets[0] && datasets[0] == exclude) {
-      // If we just deselected the first dataset, don't fit to that one
-      temp = datasets[1];
-    } else {
-      // Generally fit to the first dataset
-      temp = datasets[0];
-    }
-    let _xMin = temp.data[0].getDate().getIndex() - 0.5;
-    let _xMax = temp.data[temp.data.length - 1].getDate().getIndex() + 0.5;
-    let _yMin = temp.getPointValue(0);
+    const temp = datasets[0].data;
+    let _xMin = temp[0].getDate().getIndex() - 0.5;
+    let _xMax = temp[temp.length - 1].getDate().getIndex() + 0.5;
+    let _yMin = datasets[0].getPointValue(0);
     let _yMax = _yMin;
-    let dss = null;
-    if (include) {
-      dss = [...datasets, include];
-    } else if (exclude) {
-      dss = datasets.filter((d) => d !== exclude);
-    } else {
-      dss = datasets;
-    }
-    for (const ds of dss) {
+    for (const ds of datasets) {
       const data = ds.data;
       _xMin = Math.min(_xMin, data[0].getDate().getIndex() - 0.5);
       _xMax = Math.max(_xMax, data[data.length - 1].getDate().getIndex() + 0.5);
