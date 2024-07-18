@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { activeDatasets } from '../store';
   import type DataSet from '../data/DataSet';
   import { DEFAULT_VIEWPORT } from '../data/DataSet';
   import EpiDate from '../data/EpiDate';
@@ -8,7 +9,6 @@
   import { tweened } from 'svelte/motion';
   import { cubicInOut } from 'svelte/easing';
   // import { writable } from 'svelte/store';
-  import activeDatasets from '../store';
 
   export let style: string | undefined = undefined;
   export let className: string | undefined = undefined;

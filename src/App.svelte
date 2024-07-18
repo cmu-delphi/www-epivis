@@ -34,7 +34,7 @@
           // reset active datasets to fluview -> ili
           $activeDatasets = [ds.datasets[1]];
           if (chart) {
-            chart.fitData(true, ds.datasets[1]);
+            chart.fitData(true);
           }
         }
       });
