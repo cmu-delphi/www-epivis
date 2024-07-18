@@ -113,7 +113,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Draw a custom line (Advanced)',
-  text: `Another, more advanced option is to define a custom line that should be drawn in the chart.`,
+  text: `Another more advanced option is to define a custom line that should be drawn in the chart.`,
   buttons: nextCancel,
 });
 
@@ -170,7 +170,7 @@ tour.addStep({
     on: 'auto',
   },
   title: 'Download Screenshot',
-  text: `This action will download the current view in a PNG format.`,
+  text: `This action will download the current view in PNG format.`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -206,7 +206,7 @@ tour.addStep({
     on: 'bottom-end',
   },
   title: 'Mouse Cropping',
-  text: `Dragging the mouse while the <code>Shift</code> key is pressed will temporarily switch to the Crop navigation mode, which can span a rectangle of interest.`,
+  text: `Dragging the mouse while the <code>Shift</code> key is pressed will temporarily switch to the Crop navigation mode, which will span a rectangle of interest.`,
   buttons: nextCancel,
 });
 tour.addStep({
@@ -215,7 +215,7 @@ tour.addStep({
     on: 'bottom-end',
   },
   title: 'Mouse Zooming',
-  text: `Dragging the mouse while the <code>Ctrl/Control</code> key is pressed will temporarily switch to the zoom mode. Moving the mouse up will zoom in and down will zoom out in the value domain. Similarly, moving the mouse left will zoom in the date domain, and moving right - out of the date domain.`,
+  text: `Dragging the mouse while the <code>Ctrl/Control</code> key is pressed will temporarily switch to the zoom mode. Moving the mouse up will zoom in and down will zoom out in the value domain. Similarly, moving the mouse left or right will zoom in or out on the date domain.`,
   buttons: nextCancel,
 });
 

@@ -105,6 +105,8 @@
       class="uk-button uk-button-default uk-button-small"
       disabled={!chart}
       class:uk-active={$autoFit === true}
+      class:uk-button-secondary={$autoFit === true}
+      class:uk-button-default={$autoFit === false}
       on:click|preventDefault={() => ($autoFit = !$autoFit)}
       title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
       data-tour="autofit"
@@ -131,7 +133,7 @@
       class="uk-button uk-button-default uk-button-small"
       on:click|preventDefault={() => (doDialog = 'regress')}
       title="Perform Regression"
-      uk-tootlip
+      uk-tooltip
       disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
     >
     <button
