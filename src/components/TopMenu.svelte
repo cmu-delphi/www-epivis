@@ -102,7 +102,7 @@
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       disabled={!chart}
       class:uk-active={$autoFit === true}
       class:uk-button-secondary={$autoFit === true}
@@ -114,8 +114,10 @@
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$isShowingPoints}
+      class:uk-button-secondary={$isShowingPoints === true}
+      class:uk-button-default={$isShowingPoints === false}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
       title="Show or Hide points<br/>(Keyboard Shortcut: s)"
       data-tour="points"
@@ -167,24 +169,30 @@
   <div class="uk-button-group" data-tour="navmode">
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$navMode === NavMode.pan}
       title="Pan Mode<br/>(Keyboard Shortcut: p)"
+      class:uk-button-secondary={$navMode === NavMode.pan}
+      class:uk-button-default={$navMode !== NavMode.pan}
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.pan)}><Fa icon={faArrowsAlt} /></button
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$navMode === NavMode.crop}
+      class:uk-button-secondary={$navMode === NavMode.crop}
+      class:uk-button-default={$navMode !== NavMode.crop}
       title="Crop Mode<br/>(Keyboard Shortcut: c)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.crop)}><Fa icon={faCrop} /></button
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$navMode === NavMode.zoom}
+      class:uk-button-secondary={$navMode === NavMode.zoom}
+      class:uk-button-default={$navMode !== NavMode.zoom}
       title="Zoom Mode<br/>(Keyboard Shortcut: z)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
