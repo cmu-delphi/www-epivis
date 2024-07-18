@@ -11,14 +11,14 @@
   function toggleSelected() {
     if (selected) {
       $activeDatasets = $activeDatasets.filter((d) => d !== node);
-      if (chart && $autoFit === true) {
-        chart.fitData(true);
-      }
     } else {
       $activeDatasets = [node, ...$activeDatasets];
-      if (chart && $autoFit === true) {
-        chart.fitData(true);
-      }
+    }
+  }
+  $: {
+    // runs whenever $activeDatasets is updated
+    if ($activeDatasets && chart && $autoFit === true) {
+      chart.fitData(true);
     }
   }
   $: selected = $activeDatasets.includes(node);

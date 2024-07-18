@@ -383,6 +383,7 @@
   }
 
   export function fitData(shouldAnimate = false): void {
+    datasets = $activeDatasets; // force an update
     if (datasets.length === 0) {
       return;
     }
