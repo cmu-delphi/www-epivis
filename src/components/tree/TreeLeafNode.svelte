@@ -12,12 +12,12 @@
     if (selected) {
       $activeDatasets = $activeDatasets.filter((d) => d !== node);
       if (chart && $autoFit === true) {
-        chart.fitData(true);
+        chart.fitData(true, null, node);
       }
     } else {
       $activeDatasets = [node, ...$activeDatasets];
       if (chart && $autoFit === true) {
-        chart.fitData(true);
+        chart.fitData(true, node);
       }
     }
   }

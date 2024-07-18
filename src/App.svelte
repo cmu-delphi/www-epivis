@@ -34,7 +34,7 @@
           // reset active datasets to fluview -> ili
           $activeDatasets = [ds.datasets[1]];
           if (chart) {
-            chart.fitData(true);
+            chart.fitData(true, ds.datasets[1]);
           }
         }
       });
@@ -50,4 +50,5 @@
   bind:showPoints={$isShowingPoints}
   bind:navMode={$navMode}
   initialViewport={$initialViewport}
+  datasets={$activeDatasets}
 />
