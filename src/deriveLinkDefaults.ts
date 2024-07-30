@@ -14,7 +14,7 @@ import {
   importTwitter,
   importWiki,
 } from './api/EpiData';
-import DataSet, { DataGroup, DEFAULT_GROUP, flatten, SAMPLE_DATASET, DEFAULT_VIEWPORT } from './data/DataSet';
+import DataSet, { DataGroup, DEFAULT_GROUP, flatten, DEFAULT_VIEWPORT } from './data/DataSet';
 import EpiDate from './data/EpiDate';
 import EpiPoint from './data/EpiPoint';
 
@@ -35,13 +35,15 @@ export interface SharedState {
   active: DataSet[];
   viewport: null | [number, number, number, number];
   showPoints: boolean;
+  autoFit: boolean;
 }
 
 const DEFAULT_VALUES: SharedState = {
   group: DEFAULT_GROUP,
-  active: [SAMPLE_DATASET],
+  active: [],
   viewport: DEFAULT_VIEWPORT,
   showPoints: false,
+  autoFit: true,
 };
 
 const lookups = {
@@ -130,11 +132,6 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     }
 
     for (const ds of datasets) {
-      if (ds.title === SAMPLE_DATASET.title) {
-        SAMPLE_DATASET.color = ds.color;
-        resolvedDataSets.push(SAMPLE_DATASET);
-        continue;
-      }
       if (ds.params && ds.params._type === 'line') {
         const d = new DataSet(
           [
@@ -158,7 +155,17 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
     }
 
-    return Promise.all(resolvedDataSets).then((data) => data.filter((d): d is DataSet => d != null));
+    return Promise.all(resolvedDataSets).then((data) => {
+      const cleaned = data.filter((d): d is DataSet => d != null);
+      cleaned.forEach((d) => {
+        if (d.params && !Array.isArray(d.params) && d.params._endpoint && d.params.regions) {
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          d.title = `${d.params._endpoint} | ${d.params.regions} | ${d.title}`;
+        }
+        add(d);
+      });
+      return cleaned;
+    });
   };
 }
 
@@ -194,10 +201,6 @@ export function getDirectLinkImpl(state: SharedState): { url: URL; anySkipped: b
   };
   let anySkipped = false;
   state.active.forEach((data) => {
-    if (data === SAMPLE_DATASET) {
-      config.datasets.push({ title: data.title, color: data.color, params: {} });
-      return;
-    }
     if (data.params) {
       config.datasets.push({
         color: data.color,

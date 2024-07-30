@@ -1,11 +1,13 @@
 <script lang="ts">
   import DataSet from '../data/DataSet';
+  import type { IChart } from '../store';
   import { datasetTree, version } from '../store';
   import ImportDataSetsMenu from './ImportDataSetsMenu.svelte';
   import TreeInnerNode from './tree/TreeInnerNode.svelte';
   import TreeLeafNode from './tree/TreeLeafNode.svelte';
 
   export let style = '';
+  export let chart: IChart | null;
 </script>
 
 <side class="left" {style} data-tour="browser">
@@ -13,9 +15,9 @@
   <div class="tree">
     {#each $datasetTree.datasets as child (child.title)}
       {#if child instanceof DataSet}
-        <TreeLeafNode node={child} />
+        <TreeLeafNode {chart} node={child} />
       {:else}
-        <TreeInnerNode node={child} />
+        <TreeInnerNode {chart} node={child} />
       {/if}
     {/each}
   </div>

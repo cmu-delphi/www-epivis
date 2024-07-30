@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { activeDatasets } from '../store';
   import type DataSet from '../data/DataSet';
   import { DEFAULT_VIEWPORT } from '../data/DataSet';
   import EpiDate from '../data/EpiDate';
@@ -81,7 +82,8 @@
   export let showPoints = false;
   export let interpolate = false;
   export let highlightedDate: EpiDate | null = null;
-  export let datasets: DataSet[] = [];
+
+  $: datasets = $activeDatasets;
 
   function date2x(date: number): number {
     return ((date - xMin) / (xMax - xMin)) * width;
@@ -381,6 +383,7 @@
   }
 
   export function fitData(shouldAnimate = false): void {
+    datasets = $activeDatasets; // force an update
     if (datasets.length === 0) {
       return;
     }

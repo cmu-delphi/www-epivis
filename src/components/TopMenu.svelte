@@ -9,13 +9,16 @@
     faImage,
     faLink,
     faPaintBrush,
+    faQuestion,
     faReceipt,
     faSearchPlus,
+    faUpDown,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
+  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean, autoFit } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
+  import { tour } from '../tour';
   import RegressionDialog from './dialogs/RegressionDialog.svelte';
   import DirectLinkDialog from './dialogs/DirectLinkDialog.svelte';
 
@@ -67,6 +70,13 @@
       case 's':
         $isShowingPoints = !$isShowingPoints;
         break;
+      case 'a':
+        $autoFit = !$autoFit;
+        break;
+      case 'h':
+        tour.cancel();
+        tour.start();
+        break;
     }
   }
 </script>
@@ -92,8 +102,22 @@
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
+      disabled={!chart}
+      class:uk-active={$autoFit}
+      class:uk-button-secondary={$autoFit}
+      class:uk-button-default={!$autoFit}
+      on:click|preventDefault={() => ($autoFit = !$autoFit)}
+      title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
+      data-tour="autofit"
+      uk-tooltip><Fa icon={faUpDown} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-small"
       class:uk-active={$isShowingPoints}
+      class:uk-button-secondary={$isShowingPoints}
+      class:uk-button-default={!$isShowingPoints}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
       title="Show or Hide points<br/>(Keyboard Shortcut: s)"
       data-tour="points"
@@ -111,7 +135,7 @@
       class="uk-button uk-button-default uk-button-small"
       on:click|preventDefault={() => (doDialog = 'regress')}
       title="Perform Regression"
-      uk-tootlip
+      uk-tooltip
       disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
     >
     <button
@@ -145,27 +169,47 @@
   <div class="uk-button-group" data-tour="navmode">
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$navMode === NavMode.pan}
       title="Pan Mode<br/>(Keyboard Shortcut: p)"
+      class:uk-button-secondary={$navMode === NavMode.pan}
+      class:uk-button-default={$navMode !== NavMode.pan}
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.pan)}><Fa icon={faArrowsAlt} /></button
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$navMode === NavMode.crop}
+      class:uk-button-secondary={$navMode === NavMode.crop}
+      class:uk-button-default={$navMode !== NavMode.crop}
       title="Crop Mode<br/>(Keyboard Shortcut: c)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.crop)}><Fa icon={faCrop} /></button
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       class:uk-active={$navMode === NavMode.zoom}
+      class:uk-button-secondary={$navMode === NavMode.zoom}
+      class:uk-button-default={$navMode !== NavMode.zoom}
       title="Zoom Mode<br/>(Keyboard Shortcut: z)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
+    >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      disabled={!chart}
+      title="View introductory tour<br/>(Keyboard Shortcut: h)"
+      uk-tooltip
+      data-tour="datatour"
+      on:click|preventDefault={() => {
+        tour.cancel();
+        tour.start();
+      }}><Fa icon={faQuestion} /></button
     >
   </div>
 </div>

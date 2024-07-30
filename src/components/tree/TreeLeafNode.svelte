@@ -1,16 +1,24 @@
 <script lang="ts">
   import type DataSet from '../../data/DataSet';
-  import { activeDatasets } from '../../store';
+  import { activeDatasets, autoFit } from '../../store';
   import Fa from 'svelte-fa';
   import { faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons';
+  import type { IChart } from '../store';
 
   export let node: DataSet;
+  export let chart: IChart | null;
 
   function toggleSelected() {
     if (selected) {
       $activeDatasets = $activeDatasets.filter((d) => d !== node);
     } else {
       $activeDatasets = [node, ...$activeDatasets];
+    }
+  }
+  $: {
+    // runs whenever $activeDatasets is updated
+    if ($activeDatasets && chart && $autoFit) {
+      chart.fitData(true);
     }
   }
   $: selected = $activeDatasets.includes(node);

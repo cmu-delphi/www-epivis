@@ -21,6 +21,8 @@ import {
 import DataSet, { DataGroup } from '../data/DataSet';
 import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
+import { get } from 'svelte/store';
+import { expandedDataGroups } from '../store';
 
 // import DataSet from "../data/DataSet";
 // import EpiDate from "../data/EpiDate";
@@ -111,6 +113,17 @@ export function loadDataSet(
   userParams: Record<string, unknown>,
   columns: string[],
 ): Promise<DataGroup | null> {
+  const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
+  if (duplicates.length > 0) {
+    return UIkit.modal
+      .alert(
+        `
+    <div class="uk-alert uk-alert-error">
+      Cannot import duplicate dataset: <b>${title}.</b>
+    </div>`,
+      )
+      .then(() => null);
+  }
   const url = new URL(ENDPOINT + `/${endpoint}/`);
   const params = cleanParams(userParams);
   Object.entries(fixedParams).forEach(([key, value]) => {
