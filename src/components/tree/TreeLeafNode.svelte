@@ -17,7 +17,7 @@
   }
   $: {
     // runs whenever $activeDatasets is updated
-    if ($activeDatasets && chart && $autoFit === true) {
+    if ($activeDatasets && chart && $autoFit) {
       chart.fitData(true);
     }
   }

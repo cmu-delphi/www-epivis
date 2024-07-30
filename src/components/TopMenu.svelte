@@ -104,9 +104,9 @@
       type="button"
       class="uk-button uk-button-small"
       disabled={!chart}
-      class:uk-active={$autoFit === true}
-      class:uk-button-secondary={$autoFit === true}
-      class:uk-button-default={$autoFit === false}
+      class:uk-active={$autoFit}
+      class:uk-button-secondary={$autoFit}
+      class:uk-button-default={!$autoFit}
       on:click|preventDefault={() => ($autoFit = !$autoFit)}
       title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
       data-tour="autofit"
@@ -116,8 +116,8 @@
       type="button"
       class="uk-button uk-button-small"
       class:uk-active={$isShowingPoints}
-      class:uk-button-secondary={$isShowingPoints === true}
-      class:uk-button-default={$isShowingPoints === false}
+      class:uk-button-secondary={$isShowingPoints}
+      class:uk-button-default={!$isShowingPoints}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
       title="Show or Hide points<br/>(Keyboard Shortcut: s)"
       data-tour="points"
