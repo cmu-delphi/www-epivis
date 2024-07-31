@@ -1,6 +1,6 @@
 {
   "name": "www-epivis",
-  "version": "2.0.3",
+  "version": "2.1.1",
   "private": true,
   "license": "MIT",
   "description": "",
@@ -27,7 +27,8 @@
     "lint": "eslint src --ext .ts,.js,.svelte && prettier --check \"**/*\"",
     "fix": "eslint src --ext .ts,.js,.svelte --fix && prettier --write \"**/*\"",
     "prepare": "husky install",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "prettier": "prettier --write \"**/*\""
   },
   "devDependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.1.2",

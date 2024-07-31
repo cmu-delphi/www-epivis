@@ -51,7 +51,7 @@ export default [
           'process.env.NODE_ENV': JSON.stringify(production ? 'production' : 'development'),
           __VERSION__: JSON.stringify(pkg.version),
           'process.env.EPIDATA_ENDPOINT_URL': JSON.stringify(
-            process.env.EPIDATA_ENDPOINT_URL || 'https://api.covidcast.cmu.edu/epidata',
+            process.env.EPIDATA_ENDPOINT_URL || 'https://api.delphi.cmu.edu/epidata',
           ),
         },
         preventAssignment: true,
