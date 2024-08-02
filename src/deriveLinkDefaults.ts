@@ -158,9 +158,9 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
-        if (d.params && !Array.isArray(d.params) && d.params._endpoint && d.params.regions) {
+        if (d.params) {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-          d.title = `${d.params._endpoint} | ${d.params.regions} | ${d.title}`;
+          d.title = `${Object.values(d.params).join(' > ')} > ${d.title}`;
         }
         add(d);
       });

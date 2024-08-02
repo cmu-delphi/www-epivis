@@ -34,7 +34,7 @@ export function epiRange(from: string | number, to: string | number): string {
 
 // find the current epiweek and date
 const date = new Date();
-const epidate = new EpiDate(date.getFullYear() + 1900, date.getMonth() + 1, date.getDate());
+const epidate = new EpiDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 export const currentEpiWeek = epidate.getEpiYear() * 100 + epidate.getEpiWeek();
 export const currentDate = epidate.getYear() * 10000 + epidate.getMonth() * 100 + epidate.getDay();
 
@@ -150,13 +150,17 @@ export function loadDataSet(
     });
 }
 
-export function fetchCOVIDcastMeta(): Promise<{ geo_type: string; signal: string; data_source: string }[]> {
+export function fetchCOVIDcastMeta(): Promise<
+  { geo_type: string; signal: string; data_source: string; time_type?: string }[]
+> {
   const url = new URL(ENDPOINT + `/covidcast_meta/`);
   url.searchParams.set('format', 'json');
-  return fetchImpl<{ geo_type: string; signal: string; data_source: string }[]>(url).catch((error) => {
-    console.warn('failed fetching data', error);
-    return [];
-  });
+  return fetchImpl<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]>(url).catch(
+    (error) => {
+      console.warn('failed fetching data', error);
+      return [];
+    },
+  );
 }
 
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
@@ -182,18 +186,24 @@ export function importCOVIDcast({
 }: {
   data_source: string;
   signal: string;
-  time_type?: 'day';
+  time_type?: string;
   geo_type: string;
   geo_value: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] Delphi CODIDcast: ${geo_value} ${signal} (${data_source})`;
+  const title = `[API] Delphi COVIDcast: ${geo_value} ${signal} (${data_source}) ${time_type}`;
+  console.log(epiRange(firstEpiWeek.covidcast, currentEpiWeek));
   return loadDataSet(
     title,
     'covidcast',
-    {
-      time_type: 'day',
-      time_values: epiRange(firstDate.covidcast, currentDate),
-    },
+    time_type === 'day'
+      ? {
+          time_type: 'day',
+          time_values: epiRange(firstDate.covidcast, currentDate),
+        }
+      : {
+          time_type: 'week',
+          time_values: epiRange(firstEpiWeek.covidcast, currentEpiWeek),
+        },
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
   );

@@ -47,7 +47,11 @@
   });
 
   export function importDataSet() {
-    return importCOVIDcast({ data_source, signal, geo_type, geo_value });
+    return fetchCOVIDcastMeta().then((res) => {
+      const meta = res.filter((row) => row.data_source === data_source && row.signal === signal);
+      const time_type = meta[0].time_type || 'day';
+      return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type });
+    });
   }
 </script>
 
