@@ -1,9 +1,10 @@
 <script lang="ts">
   import type DataSet from '../../data/DataSet';
-  import { activeDatasets, autoFit } from '../../store';
+  import { activeDatasets, navMode } from '../../store';
   import Fa from 'svelte-fa';
   import { faEyeSlash, faEye } from '@fortawesome/free-solid-svg-icons';
-  import type { IChart } from '../store';
+  import type { IChart } from '../../store';
+  import { NavMode } from '../chartUtils';
 
   export let node: DataSet;
   export let chart: IChart | null;
@@ -17,7 +18,7 @@
   }
   $: {
     // runs whenever $activeDatasets is updated
-    if ($activeDatasets && chart && $autoFit) {
+    if ($activeDatasets && chart && $navMode == NavMode.autofit) {
       chart.fitData(true);
     }
   }

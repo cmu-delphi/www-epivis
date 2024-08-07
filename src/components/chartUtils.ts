@@ -1,7 +1,8 @@
 export enum NavMode {
-  pan = 0,
-  crop = 1,
-  zoom = 2,
+  autofit = 0,
+  pan = 1,
+  crop = 2,
+  zoom = 3,
 }
 
 export enum Align {
