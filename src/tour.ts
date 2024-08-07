@@ -81,6 +81,7 @@ tour.addStep({
   text: `EpiVis supports four navigation modes. Autofit ensures that all enabled datasets are fully displayed on the chart; while Pan, Crop, and Zoom can be used to manipulate the view.`,
   buttons: nextCancel,
 });
+
 tour.addStep({
   attachTo: {
     element: '[data-tour=chart]',
@@ -90,6 +91,7 @@ tour.addStep({
   text: `Pressing the mouse and dragging it will pan the view. Using the mouse wheel will zoom the view.`,
   buttons: nextCancel,
 });
+
 tour.addStep({
   attachTo: {
     element: '[data-tour=chart]',
@@ -99,6 +101,7 @@ tour.addStep({
   text: `Dragging the mouse while the <code>Shift</code> key is pressed will temporarily switch to the Crop navigation mode, which will span a rectangle of interest.`,
   buttons: nextCancel,
 });
+
 tour.addStep({
   attachTo: {
     element: '[data-tour=chart]',
@@ -118,15 +121,17 @@ tour.addStep({
   text: `This action will recolor all visible datasets. Keyboard Shortcut: r`,
   buttons: nextCancel,
 });
+
 tour.addStep({
   attachTo: {
     element: '[data-tour=fit]',
     on: 'auto',
   },
   title: 'Fit Data to Screen',
-  text: `This action will changes the chart view such that all selected datasets are fully shown. Keyboard Shortcut: f`,
+  text: `This action will change the chart view such that all selected datasets are fully shown. Keyboard Shortcut: f`,
   buttons: nextCancel,
 });
+
 tour.addStep({
   attachTo: {
     element: '[data-tour=points]',
@@ -139,6 +144,16 @@ tour.addStep({
 
 tour.addStep({
   attachTo: {
+    element: '[data-tour=scale]',
+    on: 'auto',
+  },
+  title: 'Dataset Scaling',
+  text: `The "Scale by 1/mean" action will bring all currently enabled signals within a more similar range, while "Reset Dataset Scaling" will reset them to their actual magnitudes.`,
+  buttons: nextCancel,
+});
+
+tour.addStep({
+  attachTo: {
     element: '[data-tour=screenshot]',
     on: 'auto',
   },
@@ -146,6 +161,7 @@ tour.addStep({
   text: `This action will download the current view in PNG format.`,
   buttons: nextCancel,
 });
+
 tour.addStep({
   attachTo: {
     element: '[data-tour=link]',

@@ -82,81 +82,6 @@
 </script>
 
 <div class="menu" {style} data-tour="top">
-  <div class="uk-button-group">
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={randomizeColors}
-      title="Randomize Colors<br/>(Keyboard Shortcut: r)"
-      data-tour="random"
-      uk-tooltip><Fa icon={faPaintBrush} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      disabled={!chart}
-      on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
-      title="Fit Data to Screen<br/>(Keyboard Shortcut: f)"
-      data-tour="fit"
-      uk-tooltip><Fa icon={faExpand} /></button
-    >
-
-    <button
-      type="button"
-      class="uk-button uk-button-small"
-      class:uk-active={$isShowingPoints}
-      class:uk-button-secondary={$isShowingPoints}
-      class:uk-button-default={!$isShowingPoints}
-      on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
-      title="Show or Hide Points<br/>(Keyboard Shortcut: s)"
-      data-tour="points"
-      uk-tooltip><Fa icon={faEllipsisH} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={() => (doDialog = 'regress')}
-      title="Perform Regression"
-      uk-tooltip
-      disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
-    >
-  </div>
-  <div class="uk-button-group">
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={scaleMean}
-      title="Scale by 1/mean"
-      uk-tooltip><Fa icon={faMinimize} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={reset}
-      title="Reset Dataset Scaling"
-      uk-tooltip><Fa icon={faShuffle} /></button
-    >
-  </div>
-  <div class="uk-button-group">
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      disabled={!chart}
-      title="Take a screenshot"
-      uk-tooltip
-      data-tour="screenshot"
-      on:click|preventDefault={takeScreenshot}><Fa icon={faImage} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      title="Link to this view"
-      disabled={!chart}
-      uk-tooltip
-      data-tour="link"
-      on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
-    >
-  </div>
   <div class="uk-button-group" data-tour="navmode">
     <button
       type="button"
@@ -198,6 +123,81 @@
       title="Zoom Mode<br/>(Keyboard Shortcut: z)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
+    >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={randomizeColors}
+      title="Randomize Colors<br/>(Keyboard Shortcut: r)"
+      data-tour="random"
+      uk-tooltip><Fa icon={faPaintBrush} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      disabled={!chart}
+      on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
+      title="Fit Data to Screen<br/>(Keyboard Shortcut: f)"
+      data-tour="fit"
+      uk-tooltip><Fa icon={faExpand} /></button
+    >
+
+    <button
+      type="button"
+      class="uk-button uk-button-small"
+      class:uk-active={$isShowingPoints}
+      class:uk-button-secondary={$isShowingPoints}
+      class:uk-button-default={!$isShowingPoints}
+      on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
+      title="Show or Hide Points<br/>(Keyboard Shortcut: s)"
+      data-tour="points"
+      uk-tooltip><Fa icon={faEllipsisH} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={() => (doDialog = 'regress')}
+      title="Perform Regression"
+      uk-tooltip
+      disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
+    >
+  </div>
+  <div class="uk-button-group" data-tour="scale">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={scaleMean}
+      title="Scale by 1/mean"
+      uk-tooltip><Fa icon={faMinimize} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={reset}
+      title="Reset Dataset Scaling"
+      uk-tooltip><Fa icon={faShuffle} /></button
+    >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      disabled={!chart}
+      title="Take a screenshot"
+      uk-tooltip
+      data-tour="screenshot"
+      on:click|preventDefault={takeScreenshot}><Fa icon={faImage} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      title="Link to this view"
+      disabled={!chart}
+      uk-tooltip
+      data-tour="link"
+      on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
     >
   </div>
   <div class="uk-button-group">
