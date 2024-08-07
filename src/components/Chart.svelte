@@ -134,7 +134,9 @@
         setNavMode(NavMode.zoom);
       }
     }
-    if (navMode == NavMode.crop) {
+    if (navMode == NavMode.autofit) {
+      navMode = NavMode.pan;
+    } else if (navMode == NavMode.crop) {
       navBox = { x: m.x, y: m.y, w: 0, h: 0 };
     }
   }

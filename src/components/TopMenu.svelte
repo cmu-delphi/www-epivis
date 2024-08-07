@@ -1,21 +1,21 @@
 <script lang="ts">
   import {
-    faAnchor,
     faArrowsAlt,
     faChartLine,
     faCrop,
     faEllipsisH,
     faExpand,
     faImage,
+    faMinimize,
     faLink,
     faPaintBrush,
     faQuestion,
-    faReceipt,
     faSearchPlus,
+    faShuffle,
     faUpDown,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean, autoFit } from '../store';
+  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
   import { tour } from '../tour';
@@ -55,6 +55,9 @@
           chart.fitData(true);
         }
         break;
+      case 'a':
+        $navMode = NavMode.autofit;
+        break;
       case 'p':
         $navMode = NavMode.pan;
         break;
@@ -69,9 +72,6 @@
         break;
       case 's':
         $isShowingPoints = !$isShowingPoints;
-        break;
-      case 'a':
-        $autoFit = !$autoFit;
         break;
       case 'h':
         tour.cancel();
@@ -100,18 +100,7 @@
       data-tour="fit"
       uk-tooltip><Fa icon={faExpand} /></button
     >
-    <button
-      type="button"
-      class="uk-button uk-button-small"
-      disabled={!chart}
-      class:uk-active={$autoFit}
-      class:uk-button-secondary={$autoFit}
-      class:uk-button-default={!$autoFit}
-      on:click|preventDefault={() => ($autoFit = !$autoFit)}
-      title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
-      data-tour="autofit"
-      uk-tooltip><Fa icon={faUpDown} /></button
-    >
+
     <button
       type="button"
       class="uk-button uk-button-small"
@@ -119,16 +108,9 @@
       class:uk-button-secondary={$isShowingPoints}
       class:uk-button-default={!$isShowingPoints}
       on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
-      title="Show or Hide points<br/>(Keyboard Shortcut: s)"
+      title="Show or Hide Points<br/>(Keyboard Shortcut: s)"
       data-tour="points"
       uk-tooltip><Fa icon={faEllipsisH} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={scaleMean}
-      title="Scale by 1/mean"
-      uk-tooltip><Fa icon={faAnchor} /></button
     >
     <button
       type="button"
@@ -138,12 +120,21 @@
       uk-tooltip
       disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
     >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={scaleMean}
+      title="Scale by 1/mean"
+      uk-tooltip><Fa icon={faMinimize} /></button
+    >
     <button
       type="button"
       class="uk-button uk-button-default uk-button-small"
       on:click|preventDefault={reset}
-      title="Reset DataSet Scaling"
-      uk-tooltip><Fa icon={faReceipt} /></button
+      title="Reset Dataset Scaling"
+      uk-tooltip><Fa icon={faShuffle} /></button
     >
   </div>
   <div class="uk-button-group">
@@ -167,6 +158,17 @@
     >
   </div>
   <div class="uk-button-group" data-tour="navmode">
+    <button
+      type="button"
+      class="uk-button uk-button-small"
+      disabled={!chart}
+      class:uk-active={$navMode === NavMode.autofit}
+      class:uk-button-secondary={$navMode === NavMode.autofit}
+      class:uk-button-default={$navMode !== NavMode.autofit}
+      on:click|preventDefault={() => ($navMode = NavMode.autofit)}
+      title="Autofit Mode<br/>(Keyboard Shortcut: a)"
+      uk-tooltip><Fa icon={faUpDown} /></button
+    >
     <button
       type="button"
       class="uk-button uk-button-small"
