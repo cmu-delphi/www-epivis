@@ -270,6 +270,9 @@
     dx = ((xMax - xMin) / 2) * fx;
     dy = ((yMax - yMin) / 2) * fy;
     setViewport(xMin - dx, yMin - dy, xMax - dx, yMax - dy);
+    if (navMode == NavMode.autofit) {
+      navMode = NavMode.pan;
+    }
   }
 
   function zoom(x: number, y: number): void {
