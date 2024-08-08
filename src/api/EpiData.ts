@@ -190,20 +190,17 @@ export function importCOVIDcast({
   geo_type: string;
   geo_value: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] Delphi COVIDcast: ${geo_value} ${signal} (${data_source}) ${time_type}`;
-  console.log(epiRange(firstEpiWeek.covidcast, currentEpiWeek));
+  const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
   return loadDataSet(
     title,
     'covidcast',
-    time_type === 'day'
-      ? {
-          time_type: 'day',
-          time_values: epiRange(firstDate.covidcast, currentDate),
-        }
-      : {
-          time_type: 'week',
-          time_values: epiRange(firstEpiWeek.covidcast, currentEpiWeek),
-        },
+    {
+      time_type: time_type,
+      time_values:
+        time_type === 'day'
+          ? epiRange(firstDate.covidcast, currentDate)
+          : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
+    },
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
   );
