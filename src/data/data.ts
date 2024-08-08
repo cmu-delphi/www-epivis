@@ -385,6 +385,7 @@ export const firstEpiWeek = {
   quidel: 201535,
   sensors: 201030,
   nowcast: 200901,
+  covidcast: 202001,
 };
 
 // first available date for each data source
