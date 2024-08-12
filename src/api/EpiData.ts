@@ -112,6 +112,7 @@ export function loadDataSet(
   fixedParams: Record<string, unknown>,
   userParams: Record<string, unknown>,
   columns: string[],
+  api_key = '',
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -124,7 +125,11 @@ export function loadDataSet(
       )
       .then(() => null);
   }
-  const url = new URL(ENDPOINT + `/${endpoint}/`);
+  let url_string = ENDPOINT + `/${endpoint}/`;
+  if (api_key !== '') {
+    url_string += `?api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
   const params = cleanParams(userParams);
   Object.entries(fixedParams).forEach(([key, value]) => {
     url.searchParams.set(key, String(value));
@@ -150,8 +155,12 @@ export function loadDataSet(
     });
 }
 
-export function fetchCOVIDcastMeta(): Promise<{ geo_type: string; signal: string; data_source: string }[]> {
-  const url = new URL(ENDPOINT + `/covidcast_meta/`);
+export function fetchCOVIDcastMeta(api_key = ''): Promise<{ geo_type: string; signal: string; data_source: string }[]> {
+  let url_string = ENDPOINT + `/covidcast_meta/`;
+  if (api_key !== '') {
+    url_string += `?api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
   url.searchParams.set('format', 'json');
   return fetchImpl<{ geo_type: string; signal: string; data_source: string }[]>(url).catch((error) => {
     console.warn('failed fetching data', error);
@@ -179,12 +188,14 @@ export function importCOVIDcast({
   geo_value,
   signal,
   time_type = 'day',
+  api_key,
 }: {
   data_source: string;
   signal: string;
   time_type?: 'day';
   geo_type: string;
   geo_value: string;
+  api_key: string;
 }): Promise<DataGroup | null> {
   const title = `[API] Delphi CODIDcast: ${geo_value} ${signal} (${data_source})`;
   return loadDataSet(
@@ -196,6 +207,7 @@ export function importCOVIDcast({
     },
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
+    api_key,
   );
 }
 
