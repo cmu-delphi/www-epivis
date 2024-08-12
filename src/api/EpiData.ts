@@ -34,7 +34,7 @@ export function epiRange(from: string | number, to: string | number): string {
 
 // find the current epiweek and date
 const date = new Date();
-const epidate = new EpiDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+const epidate = new EpiDate(date.getFullYear() + 1900, date.getMonth() + 1, date.getDate());
 export const currentEpiWeek = epidate.getEpiYear() * 100 + epidate.getEpiWeek();
 export const currentDate = epidate.getYear() * 10000 + epidate.getMonth() * 100 + epidate.getDay();
 

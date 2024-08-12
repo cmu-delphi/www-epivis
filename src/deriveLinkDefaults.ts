@@ -159,16 +159,20 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
         if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          /* eslint-disable @typescript-eslint/restrict-template-expressions */
+          const col_name = d.title;
           d.title = `${d.params._endpoint}`;
           if (d.params.data_source && d.params.signal) {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             d.title += ` > ${d.params.data_source}:${d.params.signal}`;
           }
           if (d.params.geo_type && d.params.geo_value) {
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
             d.title += ` > ${d.params.geo_type}:${d.params.geo_value}`;
           }
+          if (d.params.regions) {
+            d.title += ` > ${d.params.regions}`;
+          }
+          d.title += ` > ${col_name}`;
+          /* eslint-enable @typescript-eslint/restrict-template-expressions */
         }
         add(d);
       });
