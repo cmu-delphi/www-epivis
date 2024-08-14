@@ -150,13 +150,17 @@ export function loadDataSet(
     });
 }
 
-export function fetchCOVIDcastMeta(): Promise<{ geo_type: string; signal: string; data_source: string }[]> {
+export function fetchCOVIDcastMeta(): Promise<
+  { geo_type: string; signal: string; data_source: string; time_type?: string }[]
+> {
   const url = new URL(ENDPOINT + `/covidcast_meta/`);
   url.searchParams.set('format', 'json');
-  return fetchImpl<{ geo_type: string; signal: string; data_source: string }[]>(url).catch((error) => {
-    console.warn('failed fetching data', error);
-    return [];
-  });
+  return fetchImpl<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]>(url).catch(
+    (error) => {
+      console.warn('failed fetching data', error);
+      return [];
+    },
+  );
 }
 
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
@@ -182,17 +186,20 @@ export function importCOVIDcast({
 }: {
   data_source: string;
   signal: string;
-  time_type?: 'day';
+  time_type?: string;
   geo_type: string;
   geo_value: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] Delphi CODIDcast: ${geo_value} ${signal} (${data_source})`;
+  const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
   return loadDataSet(
     title,
     'covidcast',
     {
-      time_type: 'day',
-      time_values: epiRange(firstDate.covidcast, currentDate),
+      time_type: time_type,
+      time_values:
+        time_type === 'day'
+          ? epiRange(firstDate.covidcast, currentDate)
+          : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
     },
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
