@@ -1,18 +1,17 @@
 <script lang="ts">
   import {
+    faAnchor,
     faArrowsAlt,
     faChartLine,
     faCrop,
     faEllipsisH,
     faExpand,
     faImage,
-    faMinimize,
     faLink,
     faPaintBrush,
     faQuestion,
     faSearchPlus,
     faShuffle,
-    faUpDown,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
@@ -92,7 +91,7 @@
       class:uk-button-default={$navMode !== NavMode.autofit}
       on:click|preventDefault={() => ($navMode = NavMode.autofit)}
       title="Autofit Mode<br/>(Keyboard Shortcut: a)"
-      uk-tooltip><Fa icon={faUpDown} /></button
+      uk-tooltip><Fa icon={faExpand} /></button
     >
     <button
       type="button"
@@ -136,16 +135,6 @@
     >
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
-      disabled={!chart}
-      on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
-      title="Fit Data to Screen<br/>(Keyboard Shortcut: f)"
-      data-tour="fit"
-      uk-tooltip><Fa icon={faExpand} /></button
-    >
-
-    <button
-      type="button"
       class="uk-button uk-button-small"
       class:uk-active={$isShowingPoints}
       class:uk-button-secondary={$isShowingPoints}
@@ -170,7 +159,7 @@
       class="uk-button uk-button-default uk-button-small"
       on:click|preventDefault={scaleMean}
       title="Scale by 1/mean"
-      uk-tooltip><Fa icon={faMinimize} /></button
+      uk-tooltip><Fa icon={faAnchor} /></button
     >
     <button
       type="button"

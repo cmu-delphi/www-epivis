@@ -64,26 +64,6 @@ tour.addStep({
 
 tour.addStep({
   attachTo: {
-    element: '[data-tour=top]',
-    on: 'auto',
-  },
-  title: 'Chart Menu',
-  text: `The menu on top of the chart features several different options, such as changing colors or exporting the chart as an image.`,
-  buttons: nextCancel,
-});
-
-tour.addStep({
-  attachTo: {
-    element: '[data-tour=navmode]',
-    on: 'auto',
-  },
-  title: 'Toggle between Navigation Modes',
-  text: `EpiVis supports four navigation modes. Autofit ensures that all enabled datasets are fully displayed on the chart; while Pan, Crop, and Zoom can be used to manipulate the view.`,
-  buttons: nextCancel,
-});
-
-tour.addStep({
-  attachTo: {
     element: '[data-tour=chart]',
     on: 'bottom-end',
   },
@@ -114,21 +94,31 @@ tour.addStep({
 
 tour.addStep({
   attachTo: {
-    element: '[data-tour=random]',
+    element: '[data-tour=top]',
     on: 'auto',
   },
-  title: 'Randomize Colors',
-  text: `This action will recolor all visible datasets. Keyboard Shortcut: r`,
+  title: 'Chart Menu',
+  text: `The menu on top of the chart features several different options, such as changing colors or exporting the chart as an image.`,
   buttons: nextCancel,
 });
 
 tour.addStep({
   attachTo: {
-    element: '[data-tour=fit]',
+    element: '[data-tour=navmode]',
     on: 'auto',
   },
-  title: 'Fit Data to Screen',
-  text: `This action will change the chart view such that all selected datasets are fully shown. Keyboard Shortcut: f`,
+  title: 'Toggle between Navigation Modes',
+  text: `EpiVis supports four navigation modes: Autofit (the default) ensures that all enabled datasets are fully displayed within the chart, while Pan, Crop, and Zoom can be used to manipulate the view.`,
+  buttons: nextCancel,
+});
+
+tour.addStep({
+  attachTo: {
+    element: '[data-tour=random]',
+    on: 'auto',
+  },
+  title: 'Randomize Colors',
+  text: `This action will recolor all visible datasets. Keyboard Shortcut: r`,
   buttons: nextCancel,
 });
 
