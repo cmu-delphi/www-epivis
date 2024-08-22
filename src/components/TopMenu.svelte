@@ -10,12 +10,11 @@
     faLink,
     faPaintBrush,
     faQuestion,
-    faReceipt,
     faSearchPlus,
-    faUpDown,
+    faShuffle,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean, autoFit } from '../store';
+  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
   import { tour } from '../tour';
@@ -55,6 +54,9 @@
           chart.fitData(true);
         }
         break;
+      case 'a':
+        $navMode = NavMode.autofit;
+        break;
       case 'p':
         $navMode = NavMode.pan;
         break;
@@ -70,9 +72,6 @@
       case 's':
         $isShowingPoints = !$isShowingPoints;
         break;
-      case 'a':
-        $autoFit = !$autoFit;
-        break;
       case 'h':
         tour.cancel();
         tour.start();
@@ -82,91 +81,18 @@
 </script>
 
 <div class="menu" {style} data-tour="top">
-  <div class="uk-button-group">
+  <div class="uk-button-group" data-tour="navmode">
     <button
       type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={randomizeColors}
-      title="Randomize Colors<br/>(Keyboard Shortcut: r)"
-      data-tour="random"
-      uk-tooltip><Fa icon={faPaintBrush} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
+      class="uk-button uk-button-small"
       disabled={!chart}
-      on:click|preventDefault={() => (chart ? chart.fitData(true) : null)}
-      title="Fit Data to Screen<br/>(Keyboard Shortcut: f)"
-      data-tour="fit"
+      class:uk-active={$navMode === NavMode.autofit}
+      class:uk-button-secondary={$navMode === NavMode.autofit}
+      class:uk-button-default={$navMode !== NavMode.autofit}
+      on:click|preventDefault={() => ($navMode = NavMode.autofit)}
+      title="Autofit Mode<br/>(Keyboard Shortcut: a)"
       uk-tooltip><Fa icon={faExpand} /></button
     >
-    <button
-      type="button"
-      class="uk-button uk-button-small"
-      disabled={!chart}
-      class:uk-active={$autoFit}
-      class:uk-button-secondary={$autoFit}
-      class:uk-button-default={!$autoFit}
-      on:click|preventDefault={() => ($autoFit = !$autoFit)}
-      title="Automatically Fit Data<br/>(Keyboard Shortcut: a)"
-      data-tour="autofit"
-      uk-tooltip><Fa icon={faUpDown} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-small"
-      class:uk-active={$isShowingPoints}
-      class:uk-button-secondary={$isShowingPoints}
-      class:uk-button-default={!$isShowingPoints}
-      on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
-      title="Show or Hide points<br/>(Keyboard Shortcut: s)"
-      data-tour="points"
-      uk-tooltip><Fa icon={faEllipsisH} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={scaleMean}
-      title="Scale by 1/mean"
-      uk-tooltip><Fa icon={faAnchor} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={() => (doDialog = 'regress')}
-      title="Perform Regression"
-      uk-tooltip
-      disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      on:click|preventDefault={reset}
-      title="Reset DataSet Scaling"
-      uk-tooltip><Fa icon={faReceipt} /></button
-    >
-  </div>
-  <div class="uk-button-group">
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      disabled={!chart}
-      title="Take a screenshot"
-      uk-tooltip
-      data-tour="screenshot"
-      on:click|preventDefault={takeScreenshot}><Fa icon={faImage} /></button
-    >
-    <button
-      type="button"
-      class="uk-button uk-button-default uk-button-small"
-      title="Link to this view"
-      disabled={!chart}
-      uk-tooltip
-      data-tour="link"
-      on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
-    >
-  </div>
-  <div class="uk-button-group" data-tour="navmode">
     <button
       type="button"
       class="uk-button uk-button-small"
@@ -196,6 +122,71 @@
       title="Zoom Mode<br/>(Keyboard Shortcut: z)"
       uk-tooltip
       on:click|preventDefault={() => ($navMode = NavMode.zoom)}><Fa icon={faSearchPlus} /></button
+    >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={randomizeColors}
+      title="Randomize Colors<br/>(Keyboard Shortcut: r)"
+      data-tour="random"
+      uk-tooltip><Fa icon={faPaintBrush} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-small"
+      class:uk-active={$isShowingPoints}
+      class:uk-button-secondary={$isShowingPoints}
+      class:uk-button-default={!$isShowingPoints}
+      on:click|preventDefault={() => ($isShowingPoints = !$isShowingPoints)}
+      title="Show or Hide Points<br/>(Keyboard Shortcut: s)"
+      data-tour="points"
+      uk-tooltip><Fa icon={faEllipsisH} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={() => (doDialog = 'regress')}
+      title="Perform Regression"
+      uk-tooltip
+      disabled={$activeDatasets.length < 2}><Fa icon={faChartLine} /></button
+    >
+  </div>
+  <div class="uk-button-group" data-tour="scale">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={scaleMean}
+      title="Scale by 1/mean"
+      uk-tooltip><Fa icon={faAnchor} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      on:click|preventDefault={reset}
+      title="Reset Dataset Scaling"
+      uk-tooltip><Fa icon={faShuffle} /></button
+    >
+  </div>
+  <div class="uk-button-group">
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      disabled={!chart}
+      title="Take a screenshot"
+      uk-tooltip
+      data-tour="screenshot"
+      on:click|preventDefault={takeScreenshot}><Fa icon={faImage} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-default uk-button-small"
+      title="Link to this view"
+      disabled={!chart}
+      uk-tooltip
+      data-tour="link"
+      on:click|preventDefault={() => (doDialog = 'directLink')}><Fa icon={faLink} /></button
     >
   </div>
   <div class="uk-button-group">
