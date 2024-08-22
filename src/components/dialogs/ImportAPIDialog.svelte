@@ -19,6 +19,8 @@
   import NowCast from './dataSources/Nowcast.svelte';
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
+  import { navMode } from '../../store';
+  import { NavMode } from '../chartUtils';
 
   const dispatch = createEventDispatcher();
 
@@ -54,6 +56,8 @@
       loading = false;
       if (ds) {
         dispatch('imported', ds);
+        // reset viewport and make sure new data is displayed
+        $navMode = NavMode.autofit;
       } else {
         dispatch('close');
       }
