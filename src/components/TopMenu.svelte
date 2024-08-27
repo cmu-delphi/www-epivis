@@ -49,11 +49,6 @@
       return;
     }
     switch (e.key) {
-      case 'f':
-        if (chart) {
-          chart.fitData(true);
-        }
-        break;
       case 'a':
         $navMode = NavMode.autofit;
         break;
