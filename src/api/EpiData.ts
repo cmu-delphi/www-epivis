@@ -139,7 +139,6 @@ export function loadDataSet(
     .then((res) => {
       const data = loadEpidata(title, res, columns, { _endpoint: endpoint, ...params });
       if (data.datasets.length == 0) {
-        console.warn('empty datasets');
         return UIkit.modal
           .alert(
             `
