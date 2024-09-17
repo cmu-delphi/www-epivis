@@ -64,9 +64,11 @@ function loadEpidata(
   name: string,
   epidata: Record<string, unknown>[],
   columns: string[],
+  columnNames: Record<string, string>,
   params: Record<string, unknown>,
 ): DataGroup {
   const datasets: DataSet[] = [];
+  const colNames = new Map(Object.entries(columnNames));
 
   for (const col of columns) {
     const points: EpiPoint[] = [];
@@ -91,7 +93,9 @@ function loadEpidata(
       }
       points.push(new EpiPoint(date, row[col] as number));
     }
-    datasets.push(new DataSet(points, col, params));
+    // overwrite default column name if there's an overwrite in columnNames
+    const title = colNames.has(col) ? colNames.get(col) : col;
+    datasets.push(new DataSet(points, title, params));
   }
   return new DataGroup(name, datasets);
 }
@@ -112,6 +116,7 @@ export function loadDataSet(
   fixedParams: Record<string, unknown>,
   userParams: Record<string, unknown>,
   columns: string[],
+  columnNames: Record<string, string> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -135,7 +140,7 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      return loadEpidata(title, res, columns, { _endpoint: endpoint, ...params });
+      return loadEpidata(title, res, columns, columnNames, { _endpoint: endpoint, ...params });
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
@@ -318,7 +323,7 @@ export function importFluView({
   auth?: string;
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] FluView: ${regionLabel}`, { issues, lag });
+  const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
   return loadDataSet(
     title,
     'fluview',
@@ -339,6 +344,10 @@ export function importFluView({
       'num_age_4',
       'num_age_5',
     ],
+    {
+      wili: '%wILI',
+      ili: '%ILI',
+    },
   );
 }
 
