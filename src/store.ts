@@ -2,6 +2,7 @@ import { get, writable } from 'svelte/store';
 import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
+import { getFormSelections } from './components/dialogs/formSelections';
 
 declare const __VERSION__: string;
 
@@ -16,6 +17,11 @@ export const expandedDataGroups = writable([defaults.group]);
 export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
 export const navMode = writable(NavMode.autofit);
+
+export const formSelections = writable(getFormSelections());
+formSelections.subscribe((val) => {
+  localStorage.setItem('form', JSON.stringify(val));
+});
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);

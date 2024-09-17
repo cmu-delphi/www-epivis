@@ -3,17 +3,17 @@
   import { nidssFluLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
-  import { DEFAULT_ISSUE } from '../utils';
+  import { formSelections } from '../../../store';
 
   export let id: string;
 
-  let locations = regions[0].value;
-  let issue = DEFAULT_ISSUE;
+  let locations = $formSelections.nidssFlu.locations;
+  let issue = $formSelections.nidssFlu.issue;
 
   export function importDataSet() {
     return importNIDSSFlu({ regions: locations, ...issue });
   }
 </script>
 
-<SelectField id="{id}-r" label="Region" bind:value={locations} options={regions} />
-<SelectIssue {id} bind:value={issue} />
+<SelectField id="{id}-r" label="Region" bind:value={$formSelections.nidssFlu.locations} options={regions} />
+<SelectIssue {id} bind:value={$formSelections.nidssFlu.issue} />
