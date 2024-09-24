@@ -64,11 +64,11 @@ function loadEpidata(
   name: string,
   epidata: Record<string, unknown>[],
   columns: string[],
-  columnNames: Record<string, string>,
+  columnRenamings: Record<string, string>,
   params: Record<string, unknown>,
 ): DataGroup {
   const datasets: DataSet[] = [];
-  const colNames = new Map(Object.entries(columnNames));
+  const colRenamings = new Map(Object.entries(columnRenamings));
 
   for (const col of columns) {
     const points: EpiPoint[] = [];
@@ -93,8 +93,8 @@ function loadEpidata(
       }
       points.push(new EpiPoint(date, row[col] as number));
     }
-    // overwrite default column name if there's an overwrite in columnNames
-    const title = colNames.has(col) ? colNames.get(col) : col;
+    // overwrite default column name if there's an overwrite in columnRenamings
+    const title = colRenamings.has(col) ? colRenamings.get(col) : col;
     datasets.push(new DataSet(points, title, params));
   }
   return new DataGroup(name, datasets);
@@ -116,7 +116,7 @@ export function loadDataSet(
   fixedParams: Record<string, unknown>,
   userParams: Record<string, unknown>,
   columns: string[],
-  columnNames: Record<string, string> = {},
+  columnRenamings: Record<string, string> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -140,7 +140,7 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      return loadEpidata(title, res, columns, columnNames, { _endpoint: endpoint, ...params });
+      return loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
