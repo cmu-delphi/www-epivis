@@ -93,9 +93,11 @@ function loadEpidata(
       }
       points.push(new EpiPoint(date, row[col] as number));
     }
-    // overwrite default column name if there's an overwrite in columnRenamings
-    const title = colRenamings.has(col) ? colRenamings.get(col) : col;
-    datasets.push(new DataSet(points, title, params));
+    if (points.length > 0) {
+      // overwrite default column name if there's an overwrite in columnRenamings
+      const title = colRenamings.has(col) ? colRenamings.get(col) : col;
+      datasets.push(new DataSet(points, title, params));
+    }
   }
   return new DataGroup(name, datasets);
 }
@@ -140,7 +142,18 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      return loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+      const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+      if (data.datasets.length == 0) {
+        return UIkit.modal
+          .alert(
+            `
+        <div class="uk-alert uk-alert-error">
+          <a href="${url.href}">API Link</a> returned no data.
+        </div>`,
+          )
+          .then(() => null);
+      }
+      return data;
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
