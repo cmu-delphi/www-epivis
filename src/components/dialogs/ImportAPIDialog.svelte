@@ -36,7 +36,7 @@
     | 'cdc'
     | 'quidel'
     | 'nidss_flu'
-    | 'nidss_denque'
+    | 'nidss_dengue'
     | 'sensors'
     | 'nowcast'
     | 'covidcast'
@@ -156,7 +156,7 @@
       <Wiki {id} bind:this={handler} />
     {:else if dataSource === 'quidel'}
       <Quidel {id} bind:this={handler} />
-    {:else if dataSource === 'nidss_denque'}
+    {:else if dataSource === 'nidss_dengue'}
       <NidssDengue {id} bind:this={handler} />
     {:else if dataSource === 'nidss_flu'}
       <NidssFlu {id} bind:this={handler} />

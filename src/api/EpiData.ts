@@ -9,7 +9,7 @@ import {
   fluViewRegions,
   gftLocations,
   ghtLocations,
-  nidssDenqueLocations,
+  nidssDengueLocations,
   nidssFluLocations,
   nowcastLocations,
   quidelLocations,
@@ -391,9 +391,9 @@ export function importGHT({
   );
 }
 
-export function importNIDSSDenque({ locations }: { locations: string }): Promise<DataGroup | null> {
-  const regionLabel = nidssDenqueLocations.find((d) => d.value === locations)?.label ?? '?';
-  const title = `[API] NIDSS-Denque: ${regionLabel}`;
+export function importNIDSSDengue({ locations }: { locations: string }): Promise<DataGroup | null> {
+  const regionLabel = nidssDengueLocations.find((d) => d.value === locations)?.label ?? '?';
+  const title = `[API] NIDSS-Dengue: ${regionLabel}`;
   return loadDataSet(
     title,
     'nidss_dengue',
