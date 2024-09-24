@@ -91,7 +91,9 @@ function loadEpidata(
       }
       points.push(new EpiPoint(date, row[col] as number));
     }
-    datasets.push(new DataSet(points, col, params));
+    if (points.length > 0) {
+      datasets.push(new DataSet(points, col, params));
+    }
   }
   return new DataGroup(name, datasets);
 }
@@ -135,7 +137,18 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      return loadEpidata(title, res, columns, { _endpoint: endpoint, ...params });
+      const data = loadEpidata(title, res, columns, { _endpoint: endpoint, ...params });
+      if (data.datasets.length == 0) {
+        return UIkit.modal
+          .alert(
+            `
+        <div class="uk-alert uk-alert-error">
+          <a href="${url.href}">API Link</a> returned no data.
+        </div>`,
+          )
+          .then(() => null);
+      }
+      return data;
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
