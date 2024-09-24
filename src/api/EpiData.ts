@@ -64,9 +64,11 @@ function loadEpidata(
   name: string,
   epidata: Record<string, unknown>[],
   columns: string[],
+  columnRenamings: Record<string, string>,
   params: Record<string, unknown>,
 ): DataGroup {
   const datasets: DataSet[] = [];
+  const colRenamings = new Map(Object.entries(columnRenamings));
 
   for (const col of columns) {
     const points: EpiPoint[] = [];
@@ -92,7 +94,9 @@ function loadEpidata(
       points.push(new EpiPoint(date, row[col] as number));
     }
     if (points.length > 0) {
-      datasets.push(new DataSet(points, col, params));
+      // overwrite default column name if there's an overwrite in columnRenamings
+      const title = colRenamings.has(col) ? colRenamings.get(col) : col;
+      datasets.push(new DataSet(points, title, params));
     }
   }
   return new DataGroup(name, datasets);
@@ -114,6 +118,7 @@ export function loadDataSet(
   fixedParams: Record<string, unknown>,
   userParams: Record<string, unknown>,
   columns: string[],
+  columnRenamings: Record<string, string> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -137,7 +142,7 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      const data = loadEpidata(title, res, columns, { _endpoint: endpoint, ...params });
+      const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
       if (data.datasets.length == 0) {
         return UIkit.modal
           .alert(
@@ -331,7 +336,7 @@ export function importFluView({
   auth?: string;
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] FluView: ${regionLabel}`, { issues, lag });
+  const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
   return loadDataSet(
     title,
     'fluview',
@@ -352,6 +357,10 @@ export function importFluView({
       'num_age_4',
       'num_age_5',
     ],
+    {
+      wili: '%wILI',
+      ili: '%ILI',
+    },
   );
 }
 
