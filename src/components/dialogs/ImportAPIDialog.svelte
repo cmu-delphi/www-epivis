@@ -63,7 +63,7 @@
             bind:group={$formSelections.dataSource}
             value="fluview"
           />
-          FluView (source:
+          ILINet (aka FluView) (source:
           <a target="_blank" href="https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html">cdc.gov</a>)
         </label>
         <label
