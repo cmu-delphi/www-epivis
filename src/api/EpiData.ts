@@ -156,7 +156,7 @@ export function loadDataSet(
 }
 
 export function fetchCOVIDcastMeta(
-  api_key = '',
+  api_key: string,
 ): Promise<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]> {
   let url_string = ENDPOINT + `/covidcast_meta/`;
   if (api_key !== '') {

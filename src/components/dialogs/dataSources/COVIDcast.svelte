@@ -13,7 +13,7 @@
   let geo_type = '';
   let geo_value = '';
   let form_key = '';
-  let invalid_key = false;
+  let valid_key = true;
 
   let dataSources: (LabelValue & { signals: string[] })[] = [];
   let geoTypes: string[] = [];
@@ -26,10 +26,21 @@
     }
   }
 
+  // Helper function; delay invoking "fn" until "ms" milliseconds have passed
+  const debounce = (fn: Function, ms = 500) => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    return function (this: any, ...args: any[]) {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => fn.apply(this, args), ms);
+    };
+  };
+
   function fetchMetadata() {
-    fetchCOVIDcastMeta((api_key = form_key)).then((res) => {
-      if (res.length !== 0) {
-        invalid_key = false;
+    fetchCOVIDcastMeta(form_key).then((res) => {
+      if (res.length == 0) {
+        valid_key = form_key == ''; // mark key as valid if it's empty, otherwise invalid
+      } else {
+        valid_key = true;
         api_key = form_key; // API key is valid -> use it to fetch data later on
         geoTypes = [...new Set(res.map((d) => d.geo_type))];
         const byDataSource = new Map<string, LabelValue & { signals: string[] }>();
@@ -49,8 +60,6 @@
           entry.signals.sort();
         });
         dataSources = [...byDataSource.values()].sort((a, b) => a.value.localeCompare(b.value));
-      } else {
-        invalid_key = api_key != ''; // mark field as invalid, unless it's empty
       }
     });
   }
@@ -60,7 +69,7 @@
   });
 
   export function importDataSet() {
-    return fetchCOVIDcastMeta((api_key = api_key)).then((res) => {
+    return fetchCOVIDcastMeta(api_key).then((res) => {
       const meta = res.filter((row) => row.data_source === data_source && row.signal === signal);
       const time_type = meta[0].time_type;
       return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type, api_key });
@@ -69,21 +78,21 @@
 </script>
 
 <div>
-  <label class="uk-form-label" for="{id}-api">
+  <label class="uk-form-label" for="{id}-apikey">
     <a href="https://cmu-delphi.github.io/delphi-epidata/api/api_keys.html">API Key</a> (optional)
   </label>
   <div class="uk-form-controls">
     <input
-      id="{id}-api"
+      id="{id}-apikey"
       type="text"
       class="uk-input"
-      class:uk-form-danger={invalid_key}
+      class:uk-form-danger={!valid_key}
       name="api_key"
       required={false}
       bind:value={form_key}
-      on:change={() => fetchMetadata()}
+      on:input={debounce(() => fetchMetadata(), 500)}
     />
-    {#if invalid_key}
+    {#if !valid_key}
       <div class="invalid">API key is invalid - ignoring</div>
     {/if}
   </div>
