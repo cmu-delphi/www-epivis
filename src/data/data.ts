@@ -315,7 +315,7 @@ export const nidssFluLocations = [
   { value: 'taipei', label: 'Taipei' },
 ];
 
-export const nidssDenqueLocations = [
+export const nidssDengueLocations = [
   { value: 'nationwide', label: 'Taiwan National' },
   { value: 'central', label: 'Central' },
   { value: 'eastern', label: 'Eastern' },

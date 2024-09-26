@@ -36,7 +36,7 @@
     | 'cdc'
     | 'quidel'
     | 'nidss_flu'
-    | 'nidss_denque'
+    | 'nidss_dengue'
     | 'sensors'
     | 'nowcast'
     | 'covidcast'
@@ -72,7 +72,7 @@
       <div class="uk-form-controls uk-form-controls-text">
         <label
           ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="fluview" />
-          FluView (source:
+          ILINet (aka FluView) (source:
           <a target="_blank" href="https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html">cdc.gov</a>)
         </label>
         <label
@@ -156,7 +156,7 @@
       <Wiki {id} bind:this={handler} />
     {:else if dataSource === 'quidel'}
       <Quidel {id} bind:this={handler} />
-    {:else if dataSource === 'nidss_denque'}
+    {:else if dataSource === 'nidss_dengue'}
       <NidssDengue {id} bind:this={handler} />
     {:else if dataSource === 'nidss_flu'}
       <NidssFlu {id} bind:this={handler} />
