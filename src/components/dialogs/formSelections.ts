@@ -120,12 +120,12 @@ export default class FormSelections {
 
 export function getFormSelections() {
   try {
-    if (localStorage.getItem('form')) {
-      return JSON.parse(localStorage.getItem('form')!) as FormSelections;
+    if (sessionStorage.getItem('form')) {
+      return JSON.parse(sessionStorage.getItem('form')!) as FormSelections;
     }
     return new FormSelections();
   } catch {
-    localStorage.removeItem('form');
+    sessionStorage.removeItem('form');
     return new FormSelections();
   }
 }
