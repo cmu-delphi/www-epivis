@@ -2,7 +2,7 @@ import { get, writable } from 'svelte/store';
 import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
-import ApiKeySelections, { getApiKeySelections } from './components/dialogs/apiKeySelections';
+import { getApiKeySelections, getStoreApiKeys } from './components/dialogs/apiKeySelections';
 
 declare const __VERSION__: string;
 
@@ -18,12 +18,13 @@ export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
 export const navMode = writable(NavMode.autofit);
 
-export const storeApiKeys = writable(true);
+export const storeApiKeys = writable(getStoreApiKeys());
 storeApiKeys.subscribe((val) => {
   if (!val) {
     // reset local storage if user decides not to store API keys
     localStorage.removeItem('api');
   }
+  localStorage.setItem('store-api', val.toString());
 });
 export const apiKeySelections = writable(getApiKeySelections());
 apiKeySelections.subscribe((val) => {
