@@ -38,7 +38,7 @@
   function fetchMetadata() {
     fetchCOVIDcastMeta(form_key).then((res) => {
       if (res.length == 0) {
-        valid_key = form_key == ''; // mark key as valid if it's empty, otherwise invalid
+        valid_key = false;
       } else {
         valid_key = true;
         api_key = form_key; // API key is valid -> use it to fetch data later on
