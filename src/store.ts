@@ -20,7 +20,7 @@ export const navMode = writable(NavMode.autofit);
 
 export const formSelections = writable(getFormSelections());
 formSelections.subscribe((val) => {
-  localStorage.setItem('form', JSON.stringify(val));
+  sessionStorage.setItem('form', JSON.stringify(val));
 });
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
