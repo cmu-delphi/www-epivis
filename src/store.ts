@@ -15,8 +15,7 @@ export const expandedDataGroups = writable([defaults.group]);
 
 export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
-export const navMode = writable(NavMode.pan);
-export const autoFit = writable(defaults.autoFit);
+export const navMode = writable(NavMode.autofit);
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);

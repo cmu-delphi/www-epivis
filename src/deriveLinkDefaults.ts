@@ -6,7 +6,7 @@ import {
   importFluView,
   importGFT,
   importGHT,
-  importNIDSSDenque,
+  importNIDSSDengue,
   importNIDSSFlu,
   importNowcast,
   importQuidel,
@@ -35,7 +35,6 @@ export interface SharedState {
   active: DataSet[];
   viewport: null | [number, number, number, number];
   showPoints: boolean;
-  autoFit: boolean;
 }
 
 const DEFAULT_VALUES: SharedState = {
@@ -43,7 +42,6 @@ const DEFAULT_VALUES: SharedState = {
   active: [],
   viewport: DEFAULT_VIEWPORT,
   showPoints: false,
-  autoFit: true,
 };
 
 const lookups = {
@@ -55,7 +53,7 @@ const lookups = {
   fluview: importFluView,
   gft: importGFT,
   ght: importGHT,
-  nidss_denque: importNIDSSDenque,
+  nidss_dengue: importNIDSSDengue,
   nidss_flu: importNIDSSFlu,
   nowcast: importNowcast,
   quidel: importQuidel,
