@@ -19,7 +19,7 @@
   import NowCast from './dataSources/Nowcast.svelte';
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
-  import { navMode } from '../../store';
+  import { navMode, storeApiKeys } from '../../store';
   import { NavMode } from '../chartUtils';
 
   const dispatch = createEventDispatcher();
@@ -68,6 +68,14 @@
 <Dialog title="Load from Epidata API" on:close>
   <form class="uk-form-stacked" {id} on:submit={onSubmit}>
     <div>
+      <div class="uk-form-controls uk-form-controls-text">
+        <div class="uk-form-controls uk-form-controls-text api">
+          <label
+            ><input class="uk-checkbox" type="checkbox" bind:checked={$storeApiKeys} />
+            Save API keys & auth tokens</label
+          >
+        </div>
+      </div>
       <div class="uk-form-label">Data Source</div>
       <div class="uk-form-controls uk-form-controls-text">
         <label
@@ -180,3 +188,9 @@
     {/if}
   </button>
 </Dialog>
+
+<style>
+  .api {
+    float: right;
+  }
+</style>
