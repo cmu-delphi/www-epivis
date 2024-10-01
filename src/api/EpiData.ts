@@ -369,6 +369,7 @@ export function importFluView({
       'num_age_4',
       'num_age_5',
     ],
+    '',
     {
       wili: '%wILI',
       ili: '%ILI',
