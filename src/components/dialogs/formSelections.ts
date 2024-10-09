@@ -117,15 +117,3 @@ export default class FormSelections {
   twitter = new TwitterSelections();
   wiki = new WikiSelections();
 }
-
-export function getFormSelections() {
-  try {
-    if (sessionStorage.getItem('form')) {
-      return JSON.parse(sessionStorage.getItem('form')!) as FormSelections;
-    }
-    return new FormSelections();
-  } catch {
-    sessionStorage.removeItem('form');
-    return new FormSelections();
-  }
-}
