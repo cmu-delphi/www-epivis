@@ -68,14 +68,6 @@
 <Dialog title="Load from Epidata API" on:close>
   <form class="uk-form-stacked" {id} on:submit={onSubmit}>
     <div>
-      <div class="uk-form-controls uk-form-controls-text">
-        <div class="uk-form-controls uk-form-controls-text api">
-          <label
-            ><input class="uk-checkbox" type="checkbox" bind:checked={$storeApiKeys} />
-            Save API keys & auth tokens</label
-          >
-        </div>
-      </div>
       <div class="uk-form-label">Data Source</div>
       <div class="uk-form-controls uk-form-controls-text">
         <label
@@ -181,16 +173,26 @@
     {/if}
   </form>
 
-  <button slot="footer" class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
-    Fetch Data
-    {#if loading}
-      <div uk-spinner />
-    {/if}
-  </button>
+  <div slot="footer">
+    <div class="uk-form-controls uk-form-controls-text container">
+      <button class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
+        Fetch Data
+        {#if loading}
+          <div uk-spinner />
+        {/if}
+      </button>
+      <label
+        ><input class="uk-checkbox" type="checkbox" bind:checked={$storeApiKeys} />
+        Save API keys & auth tokens</label
+      >
+    </div>
+  </div>
 </Dialog>
 
 <style>
-  .api {
-    float: right;
+  .container {
+    display: flex;
+    align-items: center;
+    column-gap: 2em;
   }
 </style>

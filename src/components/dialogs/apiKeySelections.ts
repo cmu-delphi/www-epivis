@@ -1,32 +1,23 @@
-export default class ApiKeySelections {
-  cdc = '';
-  fluView = '';
-  ght = '';
-  quidel = '';
-  sensors = '';
-  twitter = '';
-}
-
 export function getStoreApiKeys() {
   try {
     if (localStorage.getItem('store-api')) {
       return JSON.parse(localStorage.getItem('store-api')!) as boolean;
     }
-    return true;
+    return false;
   } catch {
     localStorage.removeItem('store-api');
-    return true;
+    return false;
   }
 }
 
-export function getApiKeySelections() {
+export function getApiKey() {
   try {
     if (localStorage.getItem('api')) {
-      return JSON.parse(localStorage.getItem('api')!) as ApiKeySelections;
+      return JSON.parse(localStorage.getItem('api')!) as string;
     }
-    return new ApiKeySelections();
+    return '';
   } catch {
     localStorage.removeItem('api');
-    return new ApiKeySelections();
+    return '';
   }
 }
