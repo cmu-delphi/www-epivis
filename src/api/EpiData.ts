@@ -199,8 +199,9 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
     {
       epiweeks: epiRange(firstEpiWeek.cdc, currentEpiWeek),
     },
-    { auth, locations },
+    { locations },
     ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'],
+    auth,
   );
 }
 
@@ -355,7 +356,7 @@ export function importFluView({
     {
       epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
     },
-    { regions, issues, lag, auth },
+    { regions, issues, lag },
     [
       'wili',
       'ili',
@@ -369,7 +370,7 @@ export function importFluView({
       'num_age_4',
       'num_age_5',
     ],
-    '',
+    auth,
     {
       wili: '%wILI',
       ili: '%ILI',
@@ -408,8 +409,9 @@ export function importGHT({
     {
       epiweeks: epiRange(firstEpiWeek.ght, currentEpiWeek),
     },
-    { auth, locations, query },
+    { locations, query },
     ['value'],
+    auth,
   );
 }
 
@@ -469,8 +471,9 @@ export function importQuidel({ auth, locations }: { auth: string; locations: str
     {
       epiweeks: epiRange(firstEpiWeek.quidel, currentEpiWeek),
     },
-    { auth, locations },
+    { locations },
     ['value'],
+    auth,
   );
 }
 export function importSensors({
@@ -491,8 +494,9 @@ export function importSensors({
     {
       epiweeks: epiRange(firstEpiWeek.sensors, currentEpiWeek),
     },
-    { auth, names, locations },
+    { names, locations },
     ['value'],
+    auth,
   );
 }
 // twtr
@@ -517,8 +521,9 @@ export function importTwitter({
       : {
           epiweeks: epiRange(firstEpiWeek.twitter, currentEpiWeek),
         },
-    { auth, locations, resolution },
+    { locations, resolution },
     ['num', 'total', 'percent'],
+    auth,
   );
 }
 export function importWiki({
