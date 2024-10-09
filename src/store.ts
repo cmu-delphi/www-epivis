@@ -2,6 +2,7 @@ import { get, writable } from 'svelte/store';
 import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
+import { getApiKey, getApiKeySelections, getStoreApiKeys } from './components/dialogs/apiKeySelections';
 
 declare const __VERSION__: string;
 
@@ -16,6 +17,19 @@ export const expandedDataGroups = writable([defaults.group]);
 export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
 export const navMode = writable(NavMode.autofit);
+
+export const storeApiKeys = writable(getStoreApiKeys());
+storeApiKeys.subscribe((val) => {
+  if (!val) {
+    // reset local storage if user decides not to store API keys
+    localStorage.removeItem('api');
+  }
+  localStorage.setItem('store-api', val.toString());
+});
+export const apiKey = writable(getApiKey());
+apiKey.subscribe((val) => {
+  localStorage.setItem('api', val.toString());
+});
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);
