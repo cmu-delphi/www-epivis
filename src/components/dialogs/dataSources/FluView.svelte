@@ -4,12 +4,12 @@
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
   import TextField from '../inputs/TextField.svelte';
-  import { DEFAULT_ISSUE } from '../utils';
+  import { formSelections } from '../../../store';
 
   export let id: string;
 
-  let regions = fluViewRegions[0].value;
-  let issue = DEFAULT_ISSUE;
+  let regions = $formSelections.fluView.locations;
+  let issue = $formSelections.fluView.issue;
   let auth: string = '';
 
   export function importDataSet() {
@@ -17,8 +17,8 @@
   }
 </script>
 
-<SelectField id="{id}-r" label="Region" bind:value={regions} options={fluViewRegions} />
-<SelectIssue {id} bind:value={issue} />
+<SelectField id="{id}-r" label="Region" bind:value={$formSelections.fluView.locations} options={fluViewRegions} />
+<SelectIssue {id} bind:value={$formSelections.fluView.issue} />
 <TextField
   id="{id}-auth"
   name="auth"
