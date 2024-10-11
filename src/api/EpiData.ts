@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import UIkit from 'uikit';
 import { appendIssueToTitle } from '../components/dialogs/utils';
 import {
@@ -142,18 +143,42 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
-      if (data.datasets.length == 0) {
+      try {
+        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+        if (data.datasets.length == 0) {
+          return UIkit.modal
+            .alert(
+              `
+        <div class="uk-alert uk-alert-error">
+          <a href="${url.href}">API Link</a> returned no data.
+        </div>`,
+            )
+            .then(() => null);
+        }
+        return data;
+      } catch (error) {
+        console.warn('failed loading data', error);
+        // EpiData API error - JSON with "message" property
+        if ('message' in res) {
+          return UIkit.modal
+            .alert(
+              `
+          <div class="uk-alert uk-alert-error">
+            Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/>${res['message']}
+          </div>`,
+            )
+            .then(() => null);
+        }
+        // Fallback for generic error
         return UIkit.modal
           .alert(
             `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data.
+          Failed to fetch API data from <a href="${url.href}">API Link</a>.
         </div>`,
           )
           .then(() => null);
       }
-      return data;
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
