@@ -40,6 +40,7 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-unnecessary-type-assertion': 'off', // generate as a bunch of false positives
+        '@typescript-eslint/no-base-to-string': 'off', // false positives in deriveLinkDefaults
       },
     },
   ],

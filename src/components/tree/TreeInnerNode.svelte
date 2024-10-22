@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataSet from '../../data/DataSet';
   import type { DataGroup } from '../../data/DataSet';
-  import type { IChart } from '../store';
+  import type { IChart } from '../../store';
   import { expandedDataGroups } from '../../store';
   import TreeLeafNode from './TreeLeafNode.svelte';
   import Fa from 'svelte-fa';
@@ -21,7 +21,18 @@
 </script>
 
 <div class="tv_node">
-  <span on:click={toggleExpanded}>
+  <span
+    on:click={toggleExpanded}
+    role="button"
+    tabindex="0"
+    on:keydown={(e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault();
+      if (e.target != null) {
+        e.target.click();
+      }
+    }}
+  >
     <Fa icon={expanded ? faChevronDown : faChevronRight} style="width: 0.9em; margin-right: 0.5em" />
     <span>
       {node.title}
