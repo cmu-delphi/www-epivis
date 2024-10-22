@@ -23,6 +23,14 @@ module.exports = {
   },
   overrides: [
     {
+      files: ['*.svelte'],
+      parser: 'svelte-eslint-parser',
+      // Parse the `<script>` in `.svelte` as TypeScript by adding the following configuration.
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+      },
+    },
+    {
       files: ['*.ts'],
       extends: [
         'eslint:recommended',
