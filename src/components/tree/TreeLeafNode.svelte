@@ -30,6 +30,15 @@
   class="tv_node"
   class:selected
   on:click={toggleSelected}
+  role="button"
+  tabindex="0"
+  on:keydown={(e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    if (e.target != null) {
+      e.target.click();
+    }
+  }}
   title="click to toggle the visibility of this dataset"
   uk-tooltip="pos: right"
 >
