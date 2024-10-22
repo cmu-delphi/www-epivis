@@ -26,6 +26,7 @@
     "validate": "svelte-check",
     "lint": "eslint src --ext .ts,.js,.svelte && prettier --check \"**/*\"",
     "fix": "eslint src --ext .ts,.js,.svelte --fix && prettier --write \"**/*\"",
+    "prepare": "husky",
     "prepack": "npm run build",
     "prettier": "prettier --write \"**/*\""
   },
