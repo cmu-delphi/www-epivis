@@ -27,3 +27,4 @@
 *.tgz
 *.zip
 .eslintcache
+.nvmrc
