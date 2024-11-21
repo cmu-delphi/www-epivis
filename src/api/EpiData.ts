@@ -48,7 +48,13 @@ export function fetchImpl<T>(url: URL): Promise<T> {
   const urlGetS = url.toString();
   if (urlGetS.length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return fetch(url.toString(), fetchOptions).then((d) => d.json());
+    return fetch(url.toString(), fetchOptions).then((d) => {
+      try {
+        return d.json();
+      } catch (error) {
+        throw new Error(`[${d.status}] ${d.text()}`);
+      }
+    });
   }
   const params = new URLSearchParams(url.searchParams);
   url.searchParams.forEach((d) => url.searchParams.delete(d));
@@ -57,7 +63,13 @@ export function fetchImpl<T>(url: URL): Promise<T> {
     ...fetchOptions,
     method: 'POST',
     body: params,
-  }).then((d) => d.json());
+  }).then((d) => {
+    try {
+      return d.json();
+    } catch (error) {
+      throw new Error(`[${d.status}] ${d.text()}`);
+    }
+  });
 }
 
 // generic epidata loader
@@ -155,7 +167,7 @@ export function loadDataSet(
             .alert(
               `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data.
+          <a href="${url.href}">API Link</a> returned no data, which suggests that the API has no available information for the selected location.
         </div>`,
             )
             .then(() => null);
