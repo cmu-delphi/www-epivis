@@ -4,6 +4,7 @@
   import type { LabelValue } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
+  import { apiKey } from '../../../store';
 
   export let id: string;
 
@@ -12,7 +13,7 @@
   let signal = '';
   let geo_type = '';
   let geo_value = '';
-  let form_key = '';
+  let form_key = $apiKey;
   let valid_key = true;
 
   let dataSources: (LabelValue & { signals: string[] })[] = [];
@@ -89,7 +90,7 @@
       class:uk-form-danger={!valid_key}
       name="api_key"
       required={false}
-      bind:value={form_key}
+      bind:value={$apiKey}
       on:input={debounce(() => fetchMetadata(), 500)}
     />
     {#if !valid_key}

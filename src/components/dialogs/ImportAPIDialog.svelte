@@ -183,7 +183,7 @@
       </button>
       <label
         ><input class="uk-checkbox" type="checkbox" bind:checked={$storeApiKeys} />
-        Save API keys & auth tokens</label
+        Save API key (auth token)</label
       >
     </div>
   </div>
