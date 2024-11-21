@@ -119,6 +119,7 @@ export function loadDataSet(
   fixedParams: Record<string, unknown>,
   userParams: Record<string, unknown>,
   columns: string[],
+  api_key = '',
   columnRenamings: Record<string, string> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
@@ -132,7 +133,11 @@ export function loadDataSet(
       )
       .then(() => null);
   }
-  const url = new URL(ENDPOINT + `/${endpoint}/`);
+  let url_string = ENDPOINT + `/${endpoint}/`;
+  if (api_key !== '') {
+    url_string += `?api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
   const params = cleanParams(userParams);
   Object.entries(fixedParams).forEach(([key, value]) => {
     url.searchParams.set(key, String(value));
@@ -193,10 +198,14 @@ export function loadDataSet(
     });
 }
 
-export function fetchCOVIDcastMeta(): Promise<
-  { geo_type: string; signal: string; data_source: string; time_type?: string }[]
-> {
-  const url = new URL(ENDPOINT + `/covidcast_meta/`);
+export function fetchCOVIDcastMeta(
+  api_key: string,
+): Promise<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]> {
+  let url_string = ENDPOINT + `/covidcast_meta/`;
+  if (api_key !== '') {
+    url_string += `?api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
   url.searchParams.set('format', 'json');
   return fetchImpl<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]>(url).catch(
     (error) => {
@@ -215,8 +224,9 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
     {
       epiweeks: epiRange(firstEpiWeek.cdc, currentEpiWeek),
     },
-    { auth, locations },
+    { locations },
     ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'],
+    auth,
   );
 }
 
@@ -226,12 +236,14 @@ export function importCOVIDcast({
   geo_value,
   signal,
   time_type = 'day',
+  api_key,
 }: {
   data_source: string;
   signal: string;
   time_type?: string;
   geo_type: string;
   geo_value: string;
+  api_key: string;
 }): Promise<DataGroup | null> {
   const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
   return loadDataSet(
@@ -246,6 +258,7 @@ export function importCOVIDcast({
     },
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
+    api_key,
   );
 }
 
@@ -368,7 +381,7 @@ export function importFluView({
     {
       epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
     },
-    { regions, issues, lag, auth },
+    { regions, issues, lag },
     [
       'wili',
       'ili',
@@ -382,6 +395,7 @@ export function importFluView({
       'num_age_4',
       'num_age_5',
     ],
+    auth,
     {
       wili: '%wILI',
       ili: '%ILI',
@@ -420,8 +434,9 @@ export function importGHT({
     {
       epiweeks: epiRange(firstEpiWeek.ght, currentEpiWeek),
     },
-    { auth, locations, query },
+    { locations, query },
     ['value'],
+    auth,
   );
 }
 
@@ -481,8 +496,9 @@ export function importQuidel({ auth, locations }: { auth: string; locations: str
     {
       epiweeks: epiRange(firstEpiWeek.quidel, currentEpiWeek),
     },
-    { auth, locations },
+    { locations },
     ['value'],
+    auth,
   );
 }
 export function importSensors({
@@ -503,8 +519,9 @@ export function importSensors({
     {
       epiweeks: epiRange(firstEpiWeek.sensors, currentEpiWeek),
     },
-    { auth, names, locations },
+    { names, locations },
     ['value'],
+    auth,
   );
 }
 // twtr
@@ -529,8 +546,9 @@ export function importTwitter({
       : {
           epiweeks: epiRange(firstEpiWeek.twitter, currentEpiWeek),
         },
-    { auth, locations, resolution },
+    { locations, resolution },
     ['num', 'total', 'percent'],
+    auth,
   );
 }
 export function importWiki({
