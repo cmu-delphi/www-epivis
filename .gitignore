@@ -15,3 +15,8 @@ src/**/*.generated.json
 *.log
 __diff_output__
 *.tgz
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

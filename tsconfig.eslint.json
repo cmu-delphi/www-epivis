@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*", "types.d.ts", "*.js", ".eslintrc.js"],
+  "include": ["src/**/*", "tests/**/*", "types.d.ts", "*.js", ".eslintrc.js", "playwright.config.ts"],
   "exclude": ["node_modules/*", "__sapper__/*", "public/*"]
 }

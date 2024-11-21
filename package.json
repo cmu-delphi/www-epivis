@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@playwright/test": "^1.48.1",
     "@rollup/plugin-commonjs": "^28.0.1",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-replace": "^6.0.1",
@@ -39,6 +40,7 @@
     "@tsconfig/svelte": "^5.0.4",
     "@types/d3-array": "^3.2.1",
     "@types/d3-dsv": "^3.0.7",
+    "@types/node": "^22.7.8",
     "@types/uikit": "^3.14.5",
     "@typescript-eslint/eslint-plugin": "^8.11.0",
     "@typescript-eslint/parser": "^8.11.0",
