@@ -8,11 +8,10 @@
   export let id: string;
 
   let locations = regions[0].value;
-  let auth = $apiKey;
   let names = sensorNames[0].value;
 
   export function importDataSet() {
-    return importSensors({ auth, names, locations });
+    return importSensors({ auth: $apiKey, names, locations });
   }
 </script>
 

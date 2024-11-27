@@ -8,11 +8,10 @@
   export let id: string;
 
   let locations = regions[0].value;
-  let auth = $apiKey;
   let query = '';
 
   export function importDataSet() {
-    return importGHT({ auth, locations, query });
+    return importGHT({ auth: $apiKey, locations, query });
   }
 </script>
 

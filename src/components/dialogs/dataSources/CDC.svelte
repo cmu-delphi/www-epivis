@@ -8,10 +8,9 @@
   export let id: string;
 
   let locations = regions[0].value;
-  let auth = $apiKey;
 
   export function importDataSet() {
-    return importCDC({ locations, auth });
+    return importCDC({ locations, auth: $apiKey });
   }
 </script>
 

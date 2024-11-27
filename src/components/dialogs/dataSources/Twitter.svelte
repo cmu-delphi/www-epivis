@@ -8,11 +8,10 @@
   export let id: string;
 
   let locations = regions[0].value;
-  let auth = $apiKey;
   let resolution: 'daily' | 'weekly' = 'daily';
 
   export function importDataSet() {
-    return importTwitter({ auth, locations, resolution });
+    return importTwitter({ auth: $apiKey, locations, resolution });
   }
 </script>
 

@@ -11,10 +11,9 @@
 
   let regions = fluViewRegions[0].value;
   let issue = DEFAULT_ISSUE;
-  let auth = $apiKey;
 
   export function importDataSet() {
-    return importFluView({ regions, ...issue, auth });
+    return importFluView({ regions, ...issue, auth: $apiKey });
   }
 </script>
 

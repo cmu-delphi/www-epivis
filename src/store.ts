@@ -17,55 +17,25 @@ export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
 export const navMode = writable(NavMode.autofit);
 
-export function getStoreApiKeys() {
-  if (localStorage.getItem('store-api-key')) {
-    try {
-      // if we saved it, return it (as a boolean)
-      return localStorage.getItem('store-api-key') === 'true';
-    } catch {
-      // if parsing fails, saved value is bad, so clear it out
-      localStorage.removeItem('store-api-key');
-    }
-  }
-  // if parsing fails, return default of 'false'
-  return false;
-}
-
-export function getApiKey() {
-  if (localStorage.getItem('api-key')) {
-    try {
-      return localStorage.getItem('api-key')!;
-    } catch {
-      localStorage.removeItem('api-key');
-    }
-  }
-  return '';
-}
-
-export const storeApiKeys = writable(getStoreApiKeys());
+export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
 storeApiKeys.subscribe((val) => {
-  if (!val) {
-    // reset local storage if user decides not to store API keys
-    localStorage.removeItem('api-key');
-  } else {
-    // persist API key if user decides to store API keys
-    const apiKey = sessionStorage.getItem('api-key')!;
-    if (apiKey) {
-      localStorage.setItem('api-key', apiKey);
-    }
-  }
-  // store the preference either way
   localStorage.setItem('store-api-key', val.toString());
+  if (val) {
+    // persist key from session to local storage
+    localStorage.setItem('api-key', sessionStorage.getItem('api-key') || '');
+  } else {
+    // remove key from local storage
+    localStorage.removeItem('api-key');
+  }
 });
 
-export const apiKey = writable(getApiKey());
+export const apiKey = writable(localStorage.getItem('api-key')! || '');
 apiKey.subscribe((val) => {
+  // always keep key around in session storage (resets on page refresh)
+  sessionStorage.setItem('api-key', val);
   if (localStorage.getItem('store-api-key') === 'true') {
     // store it in local storage (persistent)
-    localStorage.setItem('api-key', val.toString());
-  } else {
-    // keep it around in session storage (resets on page refresh)
-    sessionStorage.setItem('api-key', val.toString());
+    localStorage.setItem('api-key', val);
   }
 });
 

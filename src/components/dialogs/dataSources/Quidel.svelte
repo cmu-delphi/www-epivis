@@ -8,10 +8,9 @@
   export let id: string;
 
   let locations = regions[0].value;
-  let auth = $apiKey;
 
   export function importDataSet() {
-    return importQuidel({ auth, locations });
+    return importQuidel({ auth: $apiKey, locations });
   }
 </script>
 
