@@ -111,6 +111,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
   return (add: (dataset: DataSet | DataGroup) => void): Promise<DataSet[]> => {
     const resolvedDataSets: (Promise<DataSet | null | undefined> | DataSet)[] = [];
     const loadingDataSets: Map<string, Promise<DataGroup | null>> = new Map();
+    const customTitles: Map<string, string> = new Map();
 
     function loadImpl(title: string, color: string, endpoint: string, params: Record<string, unknown>) {
       const func = lookups[endpoint];
@@ -129,6 +130,30 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
     }
 
+    function resolveTitle(title: string, params: Record<string, unknown>) {
+      let customTitle = title;
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      if (params.custom_title) {
+        // Custom title present (e.g. from signal documentation) - apply directly
+        customTitle = `${params.custom_title}`;
+      } else if (params._endpoint) {
+        // Derive custom title from params
+        customTitle = `${params._endpoint}`;
+        if (params.data_source && params.signal) {
+          customTitle += ` > ${params.data_source}:${params.signal}`;
+        }
+        if (params.geo_type && params.geo_value) {
+          customTitle += ` > ${params.geo_type}:${params.geo_value}`;
+        }
+        if (params.regions) {
+          customTitle += ` > ${params.regions}`;
+        }
+        customTitle += ` > ${title}`;
+      }
+      /* eslint-enable @typescript-eslint/restrict-template-expressions */
+      customTitles.set(title, customTitle);
+    }
+
     for (const ds of datasets) {
       if (ds.params && ds.params._type === 'line') {
         const d = new DataSet(
@@ -145,6 +170,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
         continue;
       }
       if (ds.params && ds.params._endpoint) {
+        resolveTitle(ds.title, ds.params);
         loadImpl(ds.title, ds.color, ds.params._endpoint as string, ds.params);
       } else if (ds.params && Array.isArray(ds.params)) {
         // old version
@@ -156,21 +182,8 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
-        if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
-          /* eslint-disable @typescript-eslint/restrict-template-expressions */
-          const col_name = d.title;
-          d.title = `${d.params._endpoint}`;
-          if (d.params.data_source && d.params.signal) {
-            d.title += ` > ${d.params.data_source}:${d.params.signal}`;
-          }
-          if (d.params.geo_type && d.params.geo_value) {
-            d.title += ` > ${d.params.geo_type}:${d.params.geo_value}`;
-          }
-          if (d.params.regions) {
-            d.title += ` > ${d.params.regions}`;
-          }
-          d.title += ` > ${col_name}`;
-          /* eslint-enable @typescript-eslint/restrict-template-expressions */
+        if (customTitles.has(d.title)) {
+          d.title = customTitles.get(d.title)!;
         }
         add(d);
       });
