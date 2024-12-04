@@ -156,7 +156,11 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
-        if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
+        if (d.params && !Array.isArray(d.params) && d.params.custom_title) {
+          // use custom title string if provided in encoded parameters
+          d.title = d.params.custom_title;
+        } else if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
+          // otherwise, construct title from relevant parameters
           /* eslint-disable @typescript-eslint/restrict-template-expressions */
           const col_name = d.title;
           d.title = `${d.params._endpoint}`;
