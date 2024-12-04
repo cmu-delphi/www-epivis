@@ -95,6 +95,7 @@ function endpointParams(endpoint: string, params: unknown[]): Record<string, unk
 
 function patchDataSet(title: string, color: string) {
   return (dg: DataGroup | null) => {
+    console.log(dg);
     if (!dg) {
       return null;
     }
