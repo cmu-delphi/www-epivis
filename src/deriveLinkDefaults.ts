@@ -120,6 +120,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
       const key = `${endpoint}:${JSON.stringify(params)}`;
       const existing = loadingDataSets.get(key);
+      console.log(!existing, key);
       if (existing) {
         resolvedDataSets.push(existing.then(patchDataSet(title, color)));
       } else {
