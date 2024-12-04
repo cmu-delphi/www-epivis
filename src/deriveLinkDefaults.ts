@@ -156,6 +156,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
+        console.log(d)
         if (d.params && !Array.isArray(d.params) && d.params._custom_title) {
           // use custom title string if provided in encoded parameters
           d.title = d.params._custom_title;
