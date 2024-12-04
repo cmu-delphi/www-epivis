@@ -130,9 +130,9 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
     }
 
+    /* eslint-disable @typescript-eslint/restrict-template-expressions */
     function resolveTitle(title: string, params: Record<string, unknown>) {
       let customTitle = title;
-      /* eslint-disable @typescript-eslint/restrict-template-expressions */
       if (params.custom_title) {
         // Custom title present (e.g. from signal documentation) - apply directly
         customTitle = `${params.custom_title}`;
@@ -150,9 +150,9 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
         }
         customTitle += ` > ${title}`;
       }
-      /* eslint-enable @typescript-eslint/restrict-template-expressions */
       customTitles.set(title, customTitle);
     }
+    /* eslint-enable @typescript-eslint/restrict-template-expressions */
 
     for (const ds of datasets) {
       if (ds.params && ds.params._type === 'line') {
@@ -169,8 +169,8 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
         resolvedDataSets.push(d);
         continue;
       }
+      resolveTitle(ds.title, ds.params);
       if (ds.params && ds.params._endpoint) {
-        resolveTitle(ds.title, ds.params);
         loadImpl(ds.title, ds.color, ds.params._endpoint as string, ds.params);
       } else if (ds.params && Array.isArray(ds.params)) {
         // old version
