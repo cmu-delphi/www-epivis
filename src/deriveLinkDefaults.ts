@@ -93,7 +93,7 @@ function endpointParams(endpoint: string, params: unknown[]): Record<string, unk
   return r;
 }
 
-function patchDataSet(title: string, color: string) {
+function patchDataSet(title: string, color: string, customTitle: string) {
   return (dg: DataGroup | null) => {
     if (!dg) {
       return null;
@@ -102,6 +102,7 @@ function patchDataSet(title: string, color: string) {
     const d = datasets.find((di) => di.title === title);
     if (d) {
       d.color = color;
+      d.customTitle = customTitle;
     }
     return d;
   };
@@ -120,12 +121,34 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
       const key = `${endpoint}:${JSON.stringify(params)}`;
       const existing = loadingDataSets.get(key);
+
+      /* eslint-disable @typescript-eslint/restrict-template-expressions */
+      let customTitle = title;
+      if (params.custom_title) {
+        // Custom title present (e.g. from signal documentation) - apply directly
+        customTitle = `${params.custom_title}`;
+      } else if (params._endpoint) {
+        // Derive custom title from params
+        customTitle = `${params._endpoint}`;
+        if (params.data_source && params.signal) {
+          customTitle += ` > ${params.data_source}:${params.signal}`;
+        }
+        if (params.geo_type && params.geo_value) {
+          customTitle += ` > ${params.geo_type}:${params.geo_value}`;
+        }
+        if (params.regions) {
+          customTitle += ` > ${params.regions}`;
+        }
+        customTitle += ` > ${title}`;
+      }
+      /* eslint-enable @typescript-eslint/restrict-template-expressions */
+
       if (existing) {
-        resolvedDataSets.push(existing.then(patchDataSet(title, color)));
+        resolvedDataSets.push(existing.then(patchDataSet(title, color, customTitle)));
       } else {
         const loadingDataSet = func(params);
         loadingDataSets.set(key, loadingDataSet);
-        resolvedDataSets.push(loadingDataSet.then(patchDataSet(title, color)));
+        resolvedDataSets.push(loadingDataSet.then(patchDataSet(title, color, customTitle)));
       }
     }
 
@@ -156,21 +179,8 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
-        if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
-          /* eslint-disable @typescript-eslint/restrict-template-expressions */
-          const col_name = d.title;
-          d.title = `${d.params._endpoint}`;
-          if (d.params.data_source && d.params.signal) {
-            d.title += ` > ${d.params.data_source}:${d.params.signal}`;
-          }
-          if (d.params.geo_type && d.params.geo_value) {
-            d.title += ` > ${d.params.geo_type}:${d.params.geo_value}`;
-          }
-          if (d.params.regions) {
-            d.title += ` > ${d.params.regions}`;
-          }
-          d.title += ` > ${col_name}`;
-          /* eslint-enable @typescript-eslint/restrict-template-expressions */
+        if (d.customTitle) {
+          d.title = d.customTitle;
         }
         add(d);
       });
