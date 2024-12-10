@@ -95,6 +95,7 @@ function endpointParams(endpoint: string, params: unknown[]): Record<string, unk
 
 function patchDataSet(title: string, color: string) {
   return (dg: DataGroup | null) => {
+    console.log(dg);
     if (!dg) {
       return null;
     }
@@ -120,6 +121,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
       const key = `${endpoint}:${JSON.stringify(params)}`;
       const existing = loadingDataSets.get(key);
+      console.log(!existing, key);
       if (existing) {
         resolvedDataSets.push(existing.then(patchDataSet(title, color)));
       } else {
@@ -156,7 +158,13 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
-        if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
+        console.log(d)
+        console.log(JSON.stringify(d))
+        if (d.params && !Array.isArray(d.params) && d.params._custom_title) {
+          // use custom title string if provided in encoded parameters
+          d.title = d.params._custom_title;
+        } else if (d.params && !Array.isArray(d.params) && d.params._endpoint) {
+          // otherwise, construct title from relevant parameters
           /* eslint-disable @typescript-eslint/restrict-template-expressions */
           const col_name = d.title;
           d.title = `${d.params._endpoint}`;
