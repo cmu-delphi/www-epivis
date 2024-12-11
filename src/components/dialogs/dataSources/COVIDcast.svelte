@@ -8,12 +8,10 @@
 
   export let id: string;
 
-  let api_key = '';
   let data_source = '';
   let signal = '';
   let geo_type = '';
   let geo_value = '';
-  let form_key = $apiKey;
   let valid_key = true;
 
   let dataSources: (LabelValue & { signals: string[] })[] = [];
@@ -37,12 +35,11 @@
   };
 
   function fetchMetadata() {
-    fetchCOVIDcastMeta(form_key).then((res) => {
+    fetchCOVIDcastMeta($apiKey).then((res) => {
       if (res.length == 0) {
         valid_key = false;
       } else {
         valid_key = true;
-        api_key = form_key; // API key is valid -> use it to fetch data later on
         geoTypes = [...new Set(res.map((d) => d.geo_type))];
         const byDataSource = new Map<string, LabelValue & { signals: string[] }>();
         for (const row of res) {
@@ -70,10 +67,10 @@
   });
 
   export function importDataSet() {
-    return fetchCOVIDcastMeta(api_key).then((res) => {
+    return fetchCOVIDcastMeta($apiKey).then((res) => {
       const meta = res.filter((row) => row.data_source === data_source && row.signal === signal);
       const time_type = meta[0].time_type;
-      return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type, api_key });
+      return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type, api_key: $apiKey });
     });
   }
 </script>
