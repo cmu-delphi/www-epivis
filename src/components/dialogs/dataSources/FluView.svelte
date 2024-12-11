@@ -1,6 +1,7 @@
 <script lang="ts">
   import { importFluView } from '../../../api/EpiData';
   import { fluViewRegions } from '../../../data/data';
+  import { apiKey } from '../../../store';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
   import TextField from '../inputs/TextField.svelte';
@@ -10,10 +11,9 @@
 
   let regions = fluViewRegions[0].value;
   let issue = DEFAULT_ISSUE;
-  let auth: string = '';
 
   export function importDataSet() {
-    return importFluView({ regions, ...issue, auth });
+    return importFluView({ regions, ...issue, auth: $apiKey });
   }
 </script>
 
@@ -23,7 +23,7 @@
   id="{id}-auth"
   name="auth"
   label="Auth Key"
-  bind:value={auth}
+  bind:value={$apiKey}
   required={false}
   placeholder="authorization token"
 />
