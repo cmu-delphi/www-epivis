@@ -191,7 +191,7 @@ export function loadDataSet(
           .alert(
             `
         <div class="uk-alert uk-alert-error">
-          Failed to fetch API data from <a href="${url.href}">API Link</a>.
+          Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
         </div>`,
           )
           .then(() => null);
