@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import UIkit from 'uikit';
 import { appendIssueToTitle } from '../components/dialogs/utils';
 import {
@@ -47,7 +48,13 @@ export function fetchImpl<T>(url: URL): Promise<T> {
   const urlGetS = url.toString();
   if (urlGetS.length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return fetch(url.toString(), fetchOptions).then((d) => d.json());
+    return fetch(url.toString(), fetchOptions).then((d) => {
+      try {
+        return d.json();
+      } catch (error) {
+        throw new Error(`[${d.status}] ${d.text()}`);
+      }
+    });
   }
   const params = new URLSearchParams(url.searchParams);
   url.searchParams.forEach((d) => url.searchParams.delete(d));
@@ -56,7 +63,13 @@ export function fetchImpl<T>(url: URL): Promise<T> {
     ...fetchOptions,
     method: 'POST',
     body: params,
-  }).then((d) => d.json());
+  }).then((d) => {
+    try {
+      return d.json();
+    } catch (error) {
+      throw new Error(`[${d.status}] ${d.text()}`);
+    }
+  });
 }
 
 // generic epidata loader
@@ -147,18 +160,42 @@ export function loadDataSet(
   url.searchParams.set('format', 'json');
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
-      const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
-      if (data.datasets.length == 0) {
+      try {
+        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+        if (data.datasets.length == 0) {
+          return UIkit.modal
+            .alert(
+              `
+        <div class="uk-alert uk-alert-error">
+          <a href="${url.href}">API Link</a> returned no data, which suggests that the API has no available information for the selected location.
+        </div>`,
+            )
+            .then(() => null);
+        }
+        return data;
+      } catch (error) {
+        console.warn('failed loading data', error);
+        // EpiData API error - JSON with "message" property
+        if ('message' in res) {
+          return UIkit.modal
+            .alert(
+              `
+          <div class="uk-alert uk-alert-error">
+            Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${res['message']}</i>
+          </div>`,
+            )
+            .then(() => null);
+        }
+        // Fallback for generic error
         return UIkit.modal
           .alert(
             `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data.
+          Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
         </div>`,
           )
           .then(() => null);
       }
-      return data;
     })
     .catch((error) => {
       console.warn('failed fetching data', error);
