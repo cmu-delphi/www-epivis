@@ -23,11 +23,11 @@ export function getFormSelections() {
     if (sessionStorage.getItem('form')) {
       return JSON.parse(sessionStorage.getItem('form')!) as FormSelections;
     }
-    return new FormSelections();
   } catch {
+    // we are probably here because parsing failed, so remove bad JSON from sessionStorage
     sessionStorage.removeItem('form');
-    return new FormSelections();
   }
+  return new FormSelections();
 }
 
 export const formSelections = writable(getFormSelections());

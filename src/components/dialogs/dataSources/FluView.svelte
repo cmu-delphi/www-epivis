@@ -8,12 +8,10 @@
 
   export let id: string;
 
-  let regions = $formSelections.fluView.locations;
-  let issue = $formSelections.fluView.issue;
   let auth: string = '';
 
   export function importDataSet() {
-    return importFluView({ regions, ...issue, auth });
+    return importFluView({ regions: $formSelections.fluView.locations, ...$formSelections.fluView.issue, auth });
   }
 </script>
 

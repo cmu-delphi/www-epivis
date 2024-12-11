@@ -6,10 +6,8 @@
 
   export let id: string;
 
-  let locations = $formSelections.gft.locations;
-
   export function importDataSet() {
-    return importGFT({ locations });
+    return importGFT({ locations: $formSelections.gft.locations });
   }
 </script>
 

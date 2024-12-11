@@ -7,11 +7,8 @@
 
   export let id: string;
 
-  let locations = $formSelections.nidssFlu.locations;
-  let issue = $formSelections.nidssFlu.issue;
-
   export function importDataSet() {
-    return importNIDSSFlu({ regions: locations, ...issue });
+    return importNIDSSFlu({ regions: $formSelections.nidssFlu.locations, ...$formSelections.nidssFlu.issue });
   }
 </script>
 

@@ -7,12 +7,14 @@
 
   export let id: string;
 
-  let locations = $formSelections.twitter.locations;
   let auth = '';
-  let resolution = $formSelections.twitter.resolution;
 
   export function importDataSet() {
-    return importTwitter({ auth, locations, resolution });
+    return importTwitter({
+      auth,
+      locations: $formSelections.twitter.locations,
+      resolution: $formSelections.twitter.resolution,
+    });
   }
 </script>
 

@@ -16,6 +16,8 @@ import {
 } from '../../data/data';
 import { DEFAULT_ISSUE } from './utils';
 
+// The following classes define default values for the various "data source" forms, and will store modifications to those values as the user interacts with the forms.
+
 export class CdcSelections {
   locations = cdcLocations[0].value;
 }
@@ -85,6 +87,8 @@ export class WikiSelections {
   useHour = false;
   language = 'en';
 }
+
+// The FormSelections class defines the default form choice, stores changes to that choice, and holds references to the values used in each "data source" form.
 
 export default class FormSelections {
   dataSource:

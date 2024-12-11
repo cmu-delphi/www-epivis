@@ -7,12 +7,10 @@
 
   export let id: string;
 
-  let locations = $formSelections.sensors.locations;
   let auth = '';
-  let names = $formSelections.sensors.names;
 
   export function importDataSet() {
-    return importSensors({ auth, names, locations });
+    return importSensors({ auth, names: $formSelections.sensors.names, locations: $formSelections.sensors.locations });
   }
 </script>
 

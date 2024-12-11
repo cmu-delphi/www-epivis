@@ -6,10 +6,8 @@
 
   export let id: string;
 
-  let locations = $formSelections.nidssDengue.locations;
-
   export function importDataSet() {
-    return importNIDSSDengue({ locations });
+    return importNIDSSDengue({ locations: $formSelections.nidssDengue.locations });
   }
 </script>
 

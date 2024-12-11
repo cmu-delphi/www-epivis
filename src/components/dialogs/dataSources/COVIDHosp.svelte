@@ -7,11 +7,8 @@
 
   export let id: string;
 
-  let states = $formSelections.covidHosp.states;
-  let issue = $formSelections.covidHosp.issue;
-
   export function importDataSet() {
-    return importCOVIDHosp({ states, ...issue });
+    return importCOVIDHosp({ states: $formSelections.covidHosp.states, ...$formSelections.covidHosp.issue });
   }
 </script>
 

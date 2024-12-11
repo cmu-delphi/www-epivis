@@ -7,12 +7,10 @@
 
   export let id: string;
 
-  let locations = $formSelections.ght.locations;
   let auth = '';
-  let query = $formSelections.ght.query;
 
   export function importDataSet() {
-    return importGHT({ auth, locations, query });
+    return importGHT({ auth, locations: $formSelections.ght.locations, query: $formSelections.ght.query });
   }
 </script>
 

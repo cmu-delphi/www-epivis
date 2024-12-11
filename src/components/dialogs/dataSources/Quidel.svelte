@@ -7,11 +7,10 @@
 
   export let id: string;
 
-  let locations = $formSelections.quidel.locations;
   let auth = '';
 
   export function importDataSet() {
-    return importQuidel({ auth, locations });
+    return importQuidel({ auth, locations: $formSelections.quidel.locations });
   }
 </script>
 

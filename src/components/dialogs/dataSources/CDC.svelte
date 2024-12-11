@@ -7,11 +7,10 @@
 
   export let id: string;
 
-  let locations = $formSelections.cdc.locations;
   let auth = '';
 
   export function importDataSet() {
-    return importCDC({ locations, auth });
+    return importCDC({ locations: $formSelections.cdc.locations, auth });
   }
 </script>
 

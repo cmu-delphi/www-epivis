@@ -6,12 +6,6 @@
 
   export let id: string;
 
-  let articles = $formSelections.wiki.articles;
-  let resolution = $formSelections.wiki.resolution;
-  let hour = $formSelections.wiki.hour;
-  let useHour = $formSelections.wiki.useHour;
-  let language = $formSelections.wiki.language;
-
   const languages = [
     {
       value: 'en',
@@ -20,7 +14,12 @@
   ];
 
   export function importDataSet() {
-    return importWiki({ articles, resolution, hour: useHour ? hour : null, language });
+    return importWiki({
+      articles: $formSelections.wiki.articles,
+      resolution: $formSelections.wiki.resolution,
+      hour: $formSelections.wiki.useHour ? $formSelections.wiki.hour : null,
+      language: $formSelections.wiki.language,
+    });
   }
 </script>
 

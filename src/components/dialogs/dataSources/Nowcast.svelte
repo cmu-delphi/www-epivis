@@ -6,10 +6,8 @@
 
   export let id: string;
 
-  let locations = $formSelections.nowcast.locations;
-
   export function importDataSet() {
-    return importNowcast({ locations });
+    return importNowcast({ locations: $formSelections.nowcast.locations });
   }
 </script>
 

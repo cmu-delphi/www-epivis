@@ -8,11 +8,8 @@
 
   export let id: string;
 
-  let locations = $formSelections.fluSurv.locations;
-  let issue = $formSelections.fluSurv.issue;
-
   export function importDataSet() {
-    return importFluSurv({ locations, ...issue });
+    return importFluSurv({ locations: $formSelections.fluSurv.locations, ...$formSelections.fluSurv.issue });
   }
 </script>
 
