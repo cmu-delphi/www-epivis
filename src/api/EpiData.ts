@@ -44,16 +44,26 @@ const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
 
 export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
 
+function processResponse<T>(response: Response): Promise<T> {
+  try {
+    if (response.status == 429) {
+      throw new Error(
+        'Rate limit exceeded for anonymous queries. To remove this limit, register a free API key at https://api.delphi.cmu.edu/epidata/admin/registration_form</p>',
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return response.json();
+  } catch (error) {
+    throw new Error(`[${response.status}] ${response.text()}`);
+  }
+}
+
 export function fetchImpl<T>(url: URL): Promise<T> {
   const urlGetS = url.toString();
   if (urlGetS.length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return fetch(url.toString(), fetchOptions).then((d) => {
-      try {
-        return d.json();
-      } catch (error) {
-        throw new Error(`[${d.status}] ${d.text()}`);
-      }
+      return processResponse(d);
     });
   }
   const params = new URLSearchParams(url.searchParams);
@@ -64,11 +74,7 @@ export function fetchImpl<T>(url: URL): Promise<T> {
     method: 'POST',
     body: params,
   }).then((d) => {
-    try {
-      return d.json();
-    } catch (error) {
-      throw new Error(`[${d.status}] ${d.text()}`);
-    }
+    return processResponse(d);
   });
 }
 
