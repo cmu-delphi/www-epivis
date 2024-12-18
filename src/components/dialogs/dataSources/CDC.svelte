@@ -3,14 +3,12 @@
   import { cdcLocations as regions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
-  import { apiKey } from '../../../store';
+  import { apiKey, formSelections } from '../../../store';
 
   export let id: string;
 
-  let locations = regions[0].value;
-
   export function importDataSet() {
-    return importCDC({ locations, auth: $apiKey });
+    return importCDC({ locations: $formSelections.cdc.locations, auth: $apiKey });
   }
 </script>
 
@@ -21,4 +19,4 @@
   bind:value={$apiKey}
   placeholder="authorization token"
 />
-<SelectField id="{id}-r" label="Location" bind:value={locations} options={regions} />
+<SelectField id="{id}-r" label="Location" bind:value={$formSelections.cdc.locations} options={regions} />

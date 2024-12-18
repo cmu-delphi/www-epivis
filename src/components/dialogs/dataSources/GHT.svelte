@@ -1,17 +1,14 @@
 <script lang="ts">
   import { importGHT } from '../../../api/EpiData';
   import { ghtLocations as regions } from '../../../data/data';
-  import { apiKey } from '../../../store';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
+  import { apiKey, formSelections } from '../../../store';
 
   export let id: string;
 
-  let locations = regions[0].value;
-  let query = '';
-
   export function importDataSet() {
-    return importGHT({ auth: $apiKey, locations, query });
+    return importGHT({ auth: $apiKey, locations: $formSelections.ght.locations, query: $formSelections.ght.query });
   }
 </script>
 
@@ -22,5 +19,5 @@
   bind:value={$apiKey}
   placeholder="authorization token"
 />
-<SelectField id="{id}-r" label="Location" bind:value={locations} options={regions} />
-<TextField id="{id}-query" name="query" label="Search Query or Topic" bind:value={query} />
+<SelectField id="{id}-r" label="Location" bind:value={$formSelections.ght.locations} options={regions} />
+<TextField id="{id}-query" name="query" label="Search Query or Topic" bind:value={$formSelections.ght.query} />

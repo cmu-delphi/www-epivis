@@ -1,17 +1,18 @@
 <script lang="ts">
   import { importTwitter } from '../../../api/EpiData';
   import { twitterLocations as regions } from '../../../data/data';
-  import { apiKey } from '../../../store';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
+  import { apiKey, formSelections } from '../../../store';
 
   export let id: string;
 
-  let locations = regions[0].value;
-  let resolution: 'daily' | 'weekly' = 'daily';
-
   export function importDataSet() {
-    return importTwitter({ auth: $apiKey, locations, resolution });
+    return importTwitter({
+      auth: $apiKey,
+      locations: $formSelections.twitter.locations,
+      resolution: $formSelections.twitter.resolution,
+    });
   }
 </script>
 
@@ -22,13 +23,27 @@
   bind:value={$apiKey}
   placeholder="authorization token"
 />
-<SelectField id="{id}-r" label="Location" bind:value={locations} options={regions} />
+<SelectField id="{id}-r" label="Location" bind:value={$formSelections.twitter.locations} options={regions} />
 <div>
   <div class="uk-form-label">Temporal Resolution</div>
   <div class="uk-form-controls uk-form-controls-text">
-    <label><input class="uk-radio" type="radio" name="resolution" value="daily" bind:group={resolution} /> Daily</label>
     <label
-      ><input class="uk-radio" type="radio" name="resolution" value="weekly" bind:group={resolution} /> Weekly</label
+      ><input
+        class="uk-radio"
+        type="radio"
+        name="resolution"
+        value="daily"
+        bind:group={$formSelections.twitter.resolution}
+      /> Daily</label
+    >
+    <label
+      ><input
+        class="uk-radio"
+        type="radio"
+        name="resolution"
+        value="weekly"
+        bind:group={$formSelections.twitter.resolution}
+      /> Weekly</label
     >
   </div>
 </div>
