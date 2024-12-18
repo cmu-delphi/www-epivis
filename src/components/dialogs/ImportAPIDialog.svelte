@@ -19,7 +19,7 @@
   import NowCast from './dataSources/Nowcast.svelte';
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
-  import { navMode } from '../../store';
+  import { navMode, storeApiKeys } from '../../store';
   import { NavMode } from '../chartUtils';
 
   const dispatch = createEventDispatcher();
@@ -173,10 +173,26 @@
     {/if}
   </form>
 
-  <button slot="footer" class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
-    Fetch Data
-    {#if loading}
-      <div uk-spinner />
-    {/if}
-  </button>
+  <div slot="footer">
+    <div class="uk-form-controls uk-form-controls-text container">
+      <button class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
+        Fetch Data
+        {#if loading}
+          <div uk-spinner />
+        {/if}
+      </button>
+      <label
+        ><input class="uk-checkbox" type="checkbox" bind:checked={$storeApiKeys} />
+        Save API key (auth token) between visits</label
+      >
+    </div>
+  </div>
 </Dialog>
+
+<style>
+  .container {
+    display: flex;
+    align-items: center;
+    column-gap: 2em;
+  }
+</style>
