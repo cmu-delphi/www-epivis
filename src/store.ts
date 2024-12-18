@@ -35,6 +35,28 @@ formSelections.subscribe((val) => {
   sessionStorage.setItem('form', JSON.stringify(val));
 });
 
+export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
+storeApiKeys.subscribe((val) => {
+  localStorage.setItem('store-api-key', val.toString());
+  if (val) {
+    // persist key from session to local storage
+    localStorage.setItem('api-key', sessionStorage.getItem('api-key') || '');
+  } else {
+    // remove key from local storage
+    localStorage.removeItem('api-key');
+  }
+});
+
+export const apiKey = writable(localStorage.getItem('api-key')! || '');
+apiKey.subscribe((val) => {
+  // always keep key around in session storage (resets on page refresh)
+  sessionStorage.setItem('api-key', val);
+  if (localStorage.getItem('store-api-key') === 'true') {
+    // store it in local storage (persistent)
+    localStorage.setItem('api-key', val);
+  }
+});
+
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);
   root.datasets.push(dataset);

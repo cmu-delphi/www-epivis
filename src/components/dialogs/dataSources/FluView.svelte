@@ -4,14 +4,16 @@
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
   import TextField from '../inputs/TextField.svelte';
-  import { formSelections } from '../../../store';
+  import { apiKey, formSelections } from '../../../store';
 
   export let id: string;
 
-  let auth: string = '';
-
   export function importDataSet() {
-    return importFluView({ regions: $formSelections.fluView.locations, ...$formSelections.fluView.issue, auth });
+    return importFluView({
+      regions: $formSelections.fluView.locations,
+      ...$formSelections.fluView.issue,
+      auth: $apiKey,
+    });
   }
 </script>
 
@@ -21,7 +23,7 @@
   id="{id}-auth"
   name="auth"
   label="Auth Key"
-  bind:value={auth}
+  bind:value={$apiKey}
   required={false}
   placeholder="authorization token"
 />
