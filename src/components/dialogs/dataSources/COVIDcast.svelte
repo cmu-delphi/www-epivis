@@ -4,15 +4,13 @@
   import type { LabelValue } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
+  import { apiKey, formSelections } from '../../../store';
 
   export let id: string;
-
-  let api_key = '';
-  let data_source = '';
-  let signal = '';
-  let geo_type = '';
-  let geo_value = '';
-  let form_key = '';
+  let data_source = $formSelections.covidcast.dataSource;
+  let signal = $formSelections.covidcast.signal;
+  let geo_type = $formSelections.covidcast.geoType;
+  let geo_value = $formSelections.covidcast.geoValue;
   let valid_key = true;
 
   let dataSources: (LabelValue & { signals: string[] })[] = [];
@@ -21,8 +19,9 @@
   $: dataSignals = (dataSources.find((d) => d.value === data_source) || { signals: [] }).signals;
 
   $: {
-    if (data_source) {
-      signal = '';
+    if ($formSelections.covidcast.dataSource) {
+      dataSignals = (dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { signals: [] })
+        .signals;
     }
   }
 
@@ -36,12 +35,11 @@
   };
 
   function fetchMetadata() {
-    fetchCOVIDcastMeta(form_key).then((res) => {
+    fetchCOVIDcastMeta($apiKey).then((res) => {
       if (res.length == 0) {
         valid_key = false;
       } else {
         valid_key = true;
-        api_key = form_key; // API key is valid -> use it to fetch data later on
         geoTypes = [...new Set(res.map((d) => d.geo_type))];
         const byDataSource = new Map<string, LabelValue & { signals: string[] }>();
         for (const row of res) {
@@ -69,10 +67,10 @@
   });
 
   export function importDataSet() {
-    return fetchCOVIDcastMeta(api_key).then((res) => {
+    return fetchCOVIDcastMeta($apiKey).then((res) => {
       const meta = res.filter((row) => row.data_source === data_source && row.signal === signal);
       const time_type = meta[0].time_type;
-      return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type, api_key });
+      return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type, api_key: $apiKey });
     });
   }
 </script>
@@ -89,7 +87,7 @@
       class:uk-form-danger={!valid_key}
       name="api_key"
       required={false}
-      bind:value={form_key}
+      bind:value={$apiKey}
       on:input={debounce(() => fetchMetadata(), 500)}
     />
     {#if !valid_key}
@@ -97,13 +95,31 @@
     {/if}
   </div>
 </div>
-<SelectField id="{id}-r" label="Data Source" name="data_source" bind:value={data_source} options={dataSources} />
-<SelectField id="{id}-r" label="Data Signal" name="signal" bind:value={signal} options={dataSignals} />
-<SelectField id="{id}-gt" label="Geographic Type" bind:value={geo_type} name="geo_type" options={geoTypes} />
+<SelectField
+  id="{id}-r"
+  label="Data Source"
+  name="data_source"
+  bind:value={$formSelections.covidcast.dataSource}
+  options={dataSources}
+/>
+<SelectField
+  id="{id}-r"
+  label="Data Signal"
+  name="signal"
+  bind:value={$formSelections.covidcast.signal}
+  options={dataSignals}
+/>
+<SelectField
+  id="{id}-gt"
+  label="Geographic Type"
+  bind:value={$formSelections.covidcast.geoType}
+  name="geo_type"
+  options={geoTypes}
+/>
 <TextField
   id="{id}-gv"
   label="Geographic Value"
-  bind:value={geo_value}
+  bind:value={$formSelections.covidcast.geoValue}
   name="geo_values"
   placeholder="e.g., PA or 42003"
 />
