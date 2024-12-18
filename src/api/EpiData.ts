@@ -44,16 +44,22 @@ const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
 
 export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
 
+function processResponse<T>(response: Response): Promise<T> {
+  if (response.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return response.json();
+  }
+  return response.text().then((text) => {
+    throw new Error(`[${response.status}] ${text}`);
+  });
+}
+
 export function fetchImpl<T>(url: URL): Promise<T> {
   const urlGetS = url.toString();
   if (urlGetS.length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return fetch(url.toString(), fetchOptions).then((d) => {
-      try {
-        return d.json();
-      } catch (error) {
-        throw new Error(`[${d.status}] ${d.text()}`);
-      }
+      return processResponse(d);
     });
   }
   const params = new URLSearchParams(url.searchParams);
@@ -64,11 +70,7 @@ export function fetchImpl<T>(url: URL): Promise<T> {
     method: 'POST',
     body: params,
   }).then((d) => {
-    try {
-      return d.json();
-    } catch (error) {
-      throw new Error(`[${d.status}] ${d.text()}`);
-    }
+    return processResponse(d);
   });
 }
 
@@ -203,7 +205,7 @@ export function loadDataSet(
         .alert(
           `
       <div class="uk-alert uk-alert-error">
-        Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
+        Failed to fetch API data from <a href="${url.href}">API Link</a>.
       </div>`,
         )
         .then(() => null);
