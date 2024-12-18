@@ -39,7 +39,7 @@ const nextCancel = [
 tour.addStep({
   attachTo: {
     element: '[data-tour=datatour]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Welcome to EpiVis',
   text: `<p>EpiVis is an interactive tool for visualizing epidemiological time-series data. This tour will introduce its main features.</p>
@@ -95,7 +95,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=top]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Chart Menu',
   text: `The menu on top of the chart features several different options, such as changing colors or exporting the chart as an image.`,
@@ -105,7 +105,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=navmode]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Toggle between Navigation Modes',
   text: `EpiVis supports four navigation modes: Autofit (the default) ensures that all enabled datasets are fully displayed within the chart, while Pan, Crop, and Zoom can be used to manipulate the view.`,
@@ -115,7 +115,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=random]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Randomize Colors',
   text: `This action will recolor all visible datasets. Keyboard Shortcut: r`,
@@ -125,7 +125,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=points]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Toggle Point Rendering',
   text: `This action will change whether points should be rendered representing individual data points of the time series. Keyboard Shortcut: s`,
@@ -135,7 +135,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=scale]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Dataset Scaling',
   text: `The "Scale by 1/mean" action will bring all currently enabled signals within a more similar range, while "Reset Dataset Scaling" will reset them to their actual magnitudes.`,
@@ -145,7 +145,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=screenshot]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Download Screenshot',
   text: `This action will download the current view in PNG format.`,
@@ -155,7 +155,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=link]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Create Shareable Link',
   text: `This action will show a shareable link that can be used to reproduce the current view (if possible).`,
@@ -180,7 +180,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=csv]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Load CSV File',
   text: `EpiVis supports loading CSV files to explore custom datasets.`,
@@ -190,7 +190,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=api]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Load Data from EpiData API',
   text: `A more common option is to load existing time series from numerous data sources provided by the EpiData API.`,
@@ -200,7 +200,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=manually]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Draw a custom line (Advanced)',
   text: `Another more advanced option is to define a custom line that should be drawn in the chart.`,
@@ -210,7 +210,7 @@ tour.addStep({
 tour.addStep({
   attachTo: {
     element: '[data-tour=kernel]',
-    on: 'auto',
+    on: 'bottom',
   },
   title: 'Derive via a kernel function (Advanced)',
   text: `And another option is to derive one dataset by applying a kernel function to combine other datasets. For example, create a new dataset representing the average of two other datasets.`,

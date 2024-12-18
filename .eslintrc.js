@@ -1,8 +1,9 @@
 /* eslint-env node */
 module.exports = {
-  plugins: ['@typescript-eslint', 'svelte3'],
+  plugins: ['@typescript-eslint', 'svelte'],
   extends: [
     'eslint:recommended',
+    'plugin:svelte/recommended',
     // 'plugin:@typescript-eslint/recommended',
     // 'plugin:@typescript-eslint/recommended-requiring-type-checking',
   ],
@@ -22,14 +23,11 @@ module.exports = {
   },
   overrides: [
     {
-      // see https://github.com/sveltejs/eslint-plugin-svelte3/blob/master/OTHER_PLUGINS.md
       files: ['*.svelte'],
-      processor: 'svelte3/svelte3',
-      rules: {
-        'import/first': 'off',
-        'import/no-duplicates': 'off',
-        'import/no-mutable-exports': 'off',
-        'import/no-unresolved': 'off',
+      parser: 'svelte-eslint-parser',
+      // Parse the `<script>` in `.svelte` as TypeScript by adding the following configuration.
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
       },
     },
     {
@@ -42,11 +40,8 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'off',
         '@typescript-eslint/no-unnecessary-type-assertion': 'off', // generate as a bunch of false positives
+        '@typescript-eslint/no-base-to-string': 'off', // false positives in deriveLinkDefaults
       },
     },
   ],
-  settings: {
-    'svelte3/typescript': require('typescript'), // pass the TypeScript package to the Svelte plugin
-    // ...
-  },
 };
