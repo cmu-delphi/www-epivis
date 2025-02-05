@@ -7,16 +7,13 @@
   import { apiKey, formSelections } from '../../../store';
 
   export let id: string;
-  let data_source = $formSelections.covidcast.dataSource;
-  let signal = $formSelections.covidcast.signal;
-  let geo_type = $formSelections.covidcast.geoType;
-  let geo_value = $formSelections.covidcast.geoValue;
   let valid_key = true;
 
   let dataSources: (LabelValue & { signals: string[] })[] = [];
   let geoTypes: string[] = [];
 
-  $: dataSignals = (dataSources.find((d) => d.value === data_source) || { signals: [] }).signals;
+  $: dataSignals = (dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { signals: [] })
+    .signals;
 
   $: {
     if ($formSelections.covidcast.dataSource) {
@@ -68,9 +65,19 @@
 
   export function importDataSet() {
     return fetchCOVIDcastMeta($apiKey).then((res) => {
-      const meta = res.filter((row) => row.data_source === data_source && row.signal === signal);
+      const meta = res.filter(
+        (row) =>
+          row.data_source === $formSelections.covidcast.dataSource && row.signal === $formSelections.covidcast.signal,
+      );
       const time_type = meta[0].time_type;
-      return importCOVIDcast({ data_source, signal, geo_type, geo_value, time_type, api_key: $apiKey });
+      return importCOVIDcast({
+        data_source: $formSelections.covidcast.dataSource,
+        geo_type: $formSelections.covidcast.geoType,
+        geo_value: $formSelections.covidcast.geoValue,
+        signal: $formSelections.covidcast.signal,
+        time_type,
+        api_key: $apiKey,
+      });
     });
   }
 </script>
