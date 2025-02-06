@@ -19,28 +19,13 @@
   import NowCast from './dataSources/Nowcast.svelte';
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
-  import { navMode } from '../../store';
+  import { navMode, storeApiKeys } from '../../store';
   import { NavMode } from '../chartUtils';
+  import { formSelections } from '../../store';
 
   const dispatch = createEventDispatcher();
 
   const id = randomId();
-
-  let dataSource:
-    | 'fluview'
-    | 'flusurv'
-    | 'gft'
-    | 'ght'
-    | 'twitter'
-    | 'wiki'
-    | 'cdc'
-    | 'quidel'
-    | 'nidss_flu'
-    | 'nidss_dengue'
-    | 'sensors'
-    | 'nowcast'
-    | 'covidcast'
-    | 'covid_hosp' = 'fluview';
 
   let loading = false;
   let handler: unknown = null;
@@ -71,47 +56,89 @@
       <div class="uk-form-label">Data Source</div>
       <div class="uk-form-controls uk-form-controls-text">
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="fluview" />
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="fluview"
+          />
           ILINet (aka FluView) (source:
           <a target="_blank" href="https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html">cdc.gov</a>)
         </label>
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="flusurv" /> FluSurv
-          (source: <a target="_blank" href="https://gis.cdc.gov/GRASP/Fluview/FluHospRates.html">cdc.gov</a>)</label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="flusurv"
+          />
+          FluSurv (source:
+          <a target="_blank" href="https://gis.cdc.gov/GRASP/Fluview/FluHospRates.html">cdc.gov</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="gft" /> Google Flu
-          Trends (source: <a target="_blank" href="https://www.google.org/flutrends/">google.com</a>)</label
+          ><input class="uk-radio" type="radio" name="dataSource" bind:group={$formSelections.dataSource} value="gft" />
+          Google Flu Trends (source: <a target="_blank" href="https://www.google.org/flutrends/">google.com</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="ght" /> Google Health Trends
-          (source: private Google API)</label
+          ><input class="uk-radio" type="radio" name="dataSource" bind:group={$formSelections.dataSource} value="ght" />
+          Google Health Trends (source: private Google API)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="twitter" />
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="twitter"
+          />
           HealthTweets (source: <a target="_blank" href="http://www.healthtweets.org/">healthtweets.org</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="wiki" /> Wikipedia
-          Access (source:
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="wiki"
+          />
+          Wikipedia Access (source:
           <a target="_blank" href="https://dumps.wikimedia.org/other/pagecounts-raw/">dumps.wikimedia.org</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="cdc" /> CDC Page Hits (source:
-          private CDC dataset)</label
+          ><input class="uk-radio" type="radio" name="dataSource" bind:group={$formSelections.dataSource} value="cdc" />
+          CDC Page Hits (source: private CDC dataset)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="quidel" /> Quidel Data (source:
-          private Quidel dataset)</label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="quidel"
+          /> Quidel Data (source: private Quidel dataset)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="nidss_flu" /> NIDSS -
-          Influenza (source:
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="nidss_flu"
+          />
+          NIDSS - Influenza (source:
           <a target="_blank" href="http://nidss.cdc.gov.tw/en/CDCWNH01.aspx?dc=wnh">nidss.cdc.gov.tw</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="nidss_dengue" /> NIDSS
-          - Dengue (source:
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="nidss_dengue"
+          />
+          NIDSS - Dengue (source:
           <a
             target="_blank"
             href="http://nidss.cdc.gov.tw/en/SingleDisease.aspx?dc=1&amp;dt=4&amp;disease=061&amp;position=1"
@@ -119,20 +146,44 @@
           >)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="sensors" /> Delphi
-          Sensors (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="sensors"
+          />
+          Delphi Sensors (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="nowcast" /> Delphi
-          Nowcast (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="nowcast"
+          />
+          Delphi Nowcast (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="covidcast" /> Delphi
-          COVIDcast (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="covidcast"
+          />
+          Delphi COVIDcast (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
         >
         <label
-          ><input class="uk-radio" type="radio" name="dataSource" bind:group={dataSource} value="covid_hosp" /> COVID
-          Hospitalization (source:
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="covid_hosp"
+          />
+          COVID Hospitalization (source:
           <a
             target="_blank"
             href="https://healthdata.gov/dataset/covid-19-reported-patient-impact-and-hospital-capacity-state-timeseries"
@@ -142,41 +193,57 @@
       </div>
     </div>
 
-    {#if dataSource === 'fluview'}
+    {#if $formSelections.dataSource === 'fluview'}
       <FluView {id} bind:this={handler} />
-    {:else if dataSource === 'flusurv'}
+    {:else if $formSelections.dataSource === 'flusurv'}
       <FluSurv {id} bind:this={handler} />
-    {:else if dataSource === 'gft'}
+    {:else if $formSelections.dataSource === 'gft'}
       <Gft {id} bind:this={handler} />
-    {:else if dataSource === 'ght'}
+    {:else if $formSelections.dataSource === 'ght'}
       <GHT {id} bind:this={handler} />
-    {:else if dataSource === 'twitter'}
+    {:else if $formSelections.dataSource === 'twitter'}
       <Twitter {id} bind:this={handler} />
-    {:else if dataSource === 'wiki'}
+    {:else if $formSelections.dataSource === 'wiki'}
       <Wiki {id} bind:this={handler} />
-    {:else if dataSource === 'quidel'}
+    {:else if $formSelections.dataSource === 'quidel'}
       <Quidel {id} bind:this={handler} />
-    {:else if dataSource === 'nidss_dengue'}
+    {:else if $formSelections.dataSource === 'nidss_dengue'}
       <NidssDengue {id} bind:this={handler} />
-    {:else if dataSource === 'nidss_flu'}
+    {:else if $formSelections.dataSource === 'nidss_flu'}
       <NidssFlu {id} bind:this={handler} />
-    {:else if dataSource === 'cdc'}
+    {:else if $formSelections.dataSource === 'cdc'}
       <Cdc {id} bind:this={handler} />
-    {:else if dataSource === 'sensors'}
+    {:else if $formSelections.dataSource === 'sensors'}
       <Sensors {id} bind:this={handler} />
-    {:else if dataSource === 'nowcast'}
+    {:else if $formSelections.dataSource === 'nowcast'}
       <NowCast {id} bind:this={handler} />
-    {:else if dataSource === 'covid_hosp'}
+    {:else if $formSelections.dataSource === 'covid_hosp'}
       <CovidHosp {id} bind:this={handler} />
-    {:else if dataSource === 'covidcast'}
+    {:else if $formSelections.dataSource === 'covidcast'}
       <CoviDcast {id} bind:this={handler} />
     {/if}
   </form>
 
-  <button slot="footer" class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
-    Fetch Data
-    {#if loading}
-      <div uk-spinner />
-    {/if}
-  </button>
+  <div slot="footer">
+    <div class="uk-form-controls uk-form-controls-text container">
+      <button class="uk-button uk-button-primary" type="submit" form={id} disabled={loading}>
+        Fetch Data
+        {#if loading}
+          <div uk-spinner />
+        {/if}
+      </button>
+      <label
+        ><input class="uk-checkbox" type="checkbox" bind:checked={$storeApiKeys} />
+        Save API key (auth token) between visits</label
+      >
+    </div>
+  </div>
 </Dialog>
+
+<style>
+  .container {
+    display: flex;
+    align-items: center;
+    column-gap: 2em;
+  }
+</style>
