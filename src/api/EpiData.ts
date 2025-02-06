@@ -183,7 +183,7 @@ export function loadDataSet(
             .alert(
               `
           <div class="uk-alert uk-alert-error">
-            Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${res['message']}</i>
+            [f01] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${res['message']}</i>
           </div>`,
             )
             .then(() => null);
@@ -193,7 +193,7 @@ export function loadDataSet(
           .alert(
             `
         <div class="uk-alert uk-alert-error">
-          Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
+          [f02] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
         </div>`,
           )
           .then(() => null);
@@ -205,7 +205,7 @@ export function loadDataSet(
         .alert(
           `
       <div class="uk-alert uk-alert-error">
-        Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
+        [f03] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${error}</i>
       </div>`,
         )
         .then(() => null);
