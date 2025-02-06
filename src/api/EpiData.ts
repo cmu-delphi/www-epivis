@@ -55,12 +55,9 @@ function processResponse<T>(response: Response): Promise<T> {
 }
 
 export function fetchImpl<T>(url: URL): Promise<T> {
-  const urlGetS = url.toString();
-  if (urlGetS.length < 4096) {
+  if (url.toString().length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return fetch(url.toString(), fetchOptions).then((d) => {
-      return processResponse(d);
-    });
+    return fetch(url.toString(), fetchOptions).then(processResponse);
   }
   const params = new URLSearchParams(url.searchParams);
   url.searchParams.forEach((d) => url.searchParams.delete(d));
@@ -69,9 +66,7 @@ export function fetchImpl<T>(url: URL): Promise<T> {
     ...fetchOptions,
     method: 'POST',
     body: params,
-  }).then((d) => {
-    return processResponse(d);
-  });
+  }).then(processResponse);
 }
 
 // generic epidata loader
