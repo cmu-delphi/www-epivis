@@ -103,7 +103,10 @@ export default class DataSet {
 export class DataGroup {
   public parent?: DataGroup;
 
-  constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
+  constructor(
+    public readonly title: string,
+    public readonly datasets: (DataSet | DataGroup)[],
+  ) {}
 
   flat(arr: DataSet[]): void {
     for (const child of this.datasets) {

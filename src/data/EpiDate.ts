@@ -3,7 +3,11 @@ export default class EpiDate {
   private static CUMULATIVE_DAYS_PER_MONTH = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
   private static DAY_OF_WEEK_TABLE = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
 
-  constructor(private readonly year: number, private readonly month: number, private readonly day: number) {
+  constructor(
+    private readonly year: number,
+    private readonly month: number,
+    private readonly day: number,
+  ) {
     // constructor logic
     if (
       year < 1 ||
