@@ -55,8 +55,7 @@ function processResponse<T>(response: Response): Promise<T> {
 }
 
 export function fetchImpl<T>(url: URL): Promise<T> {
-  const urlGetS = url.toString();
-  if (urlGetS.length < 4096) {
+  if (url.toString().length < 4096) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return fetch(url.toString(), fetchOptions).then(processResponse);
   }
