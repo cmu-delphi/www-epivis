@@ -28,6 +28,7 @@ export default class DataSet {
     public readonly data: readonly EpiPoint[],
     public title = '',
     public readonly params: Record<string, unknown> | unknown[] | null = null,
+    public customTitle: string | null = null,
     public color = getRandomColor(),
   ) {
     this.gap = computeGap(data);
