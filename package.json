@@ -61,7 +61,7 @@
     "sass": "^1.54.5",
     "shepherd.js": "^10.0.1",
     "sirv-cli": "^2.0.2",
-    "svelte": "^3.49.0",
+    "svelte": "^4.2.19",
     "svelte-check": "^2.8.1",
     "svelte-fa": "^3.0.3",
     "svelte-preprocess": "^4.10.7",
