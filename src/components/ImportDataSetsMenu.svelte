@@ -1,7 +1,7 @@
 <script lang="ts">
   import { faCode, faDatabase, faFolderOpen, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import type { default as DataSet, DataGroup } from '../data/DataSet';
+  import { default as DataSet, DataGroup } from '../data/DataSet';
   import AddLineDialog from './dialogs/AddLineDialog.svelte';
   import AddKernelDialog from './dialogs/AddKernelDialog.svelte';
   import ImportApiDialog from './dialogs/ImportAPIDialog.svelte';
