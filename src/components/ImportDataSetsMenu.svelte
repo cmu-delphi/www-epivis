@@ -1,23 +1,17 @@
 <script lang="ts">
   import { faCode, faDatabase, faFolderOpen, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { default as DataSet, DataGroup } from '../data/DataSet';
+  import type { default as DataSet, DataGroup } from '../data/DataSet';
   import AddLineDialog from './dialogs/AddLineDialog.svelte';
   import AddKernelDialog from './dialogs/AddKernelDialog.svelte';
   import ImportApiDialog from './dialogs/ImportAPIDialog.svelte';
   import ImportCsvDialog from './dialogs/ImportCSVDialog.svelte';
-  import { activeDatasets, addDataSet } from '../store';
+  import { addDataSet } from '../store';
 
   let doDialog: null | 'csv' | 'api' | 'addLine' | 'addKernel' = null;
 
   function importedDataset(e: CustomEvent) {
     addDataSet(e.detail as DataSet | DataGroup);
-
-    // Mark COVIDcast `value` as active by default
-    if (e.detail instanceof DataGroup && e.detail.title.includes('[API] COVIDcast')) {
-      $activeDatasets = [e.detail.datasets[0], ...$activeDatasets];
-    }
-
     doDialog = null;
   }
   function closeDialog() {

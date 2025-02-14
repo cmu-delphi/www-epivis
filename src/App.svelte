@@ -31,8 +31,6 @@
         if (ds) {
           // add the dataset itself
           addDataSet(ds);
-          // reset active datasets to fluview -> wili
-          $activeDatasets = [ds.datasets[0]];
           if (chart) {
             chart.fitData(true);
           }
