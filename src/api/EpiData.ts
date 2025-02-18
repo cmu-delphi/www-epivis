@@ -80,6 +80,7 @@ function loadEpidata(
   epidata: Record<string, unknown>[],
   columns: string[],
   columnRenamings: Record<string, string>,
+  defaultEnabled: string[] = [],
   params: Record<string, unknown>,
 ): DataGroup {
   const datasets: DataSet[] = [];
@@ -114,7 +115,7 @@ function loadEpidata(
       datasets.push(new DataSet(points, title, params));
     }
   }
-  return new DataGroup(name, datasets);
+  return new DataGroup(name, datasets, defaultEnabled);
 }
 
 function cleanParams(params: Record<string, unknown>): Record<string, unknown> {
@@ -135,6 +136,7 @@ export function loadDataSet(
   columns: string[],
   api_key = '',
   columnRenamings: Record<string, string> = {},
+  defaultEnabled: string[] = [],
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -163,7 +165,10 @@ export function loadDataSet(
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
       try {
-        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+        const data = loadEpidata(title, res, columns, columnRenamings, defaultEnabled, {
+          _endpoint: endpoint,
+          ...params,
+        });
         if (data.datasets.length == 0) {
           return UIkit.modal
             .alert(
@@ -273,6 +278,8 @@ export function importCOVIDcast({
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
     api_key,
+    {},
+    ['value'],
   );
 }
 
@@ -414,6 +421,7 @@ export function importFluView({
       wili: '%wILI',
       ili: '%ILI',
     },
+    ['%wILI'],
   );
 }
 

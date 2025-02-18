@@ -2,7 +2,7 @@
   import Chart from './components/Chart.svelte';
   import LeftMenu from './components/LeftMenu.svelte';
   import TopMenu from './components/TopMenu.svelte';
-  import { activeDatasets, initialViewport, isShowingPoints, navMode } from './store';
+  import { initialViewport, isShowingPoints, navMode } from './store';
   import type { IChart } from './store';
   import { onMount } from 'svelte';
   import { tour } from './tour';
@@ -31,8 +31,6 @@
         if (ds) {
           // add the dataset itself
           addDataSet(ds);
-          // reset active datasets to fluview -> wili
-          $activeDatasets = [ds.datasets[0]];
           if (chart) {
             chart.fitData(true);
           }
