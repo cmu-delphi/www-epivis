@@ -277,6 +277,7 @@ export function importCOVIDcast({
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
     }
+    return ds;
   });
 }
 
@@ -422,6 +423,7 @@ export function importFluView({
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['%wILI'];
     }
+    return ds;
   });
 }
 
