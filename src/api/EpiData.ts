@@ -260,7 +260,7 @@ export function importCOVIDcast({
   api_key: string;
 }): Promise<DataGroup | null> {
   const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
-  const ds = loadDataSet(
+  return loadDataSet(
     title,
     'covidcast',
     {
@@ -273,9 +273,11 @@ export function importCOVIDcast({
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
     api_key,
-  );
-  ds.defaultEnabled = ['value'];
-  return ds;
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['value'];
+    }
+  };
 }
 
 export function importCOVIDHosp({
@@ -391,7 +393,7 @@ export function importFluView({
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
-  const ds = loadDataSet(
+  return loadDataSet(
     title,
     'fluview',
     {
@@ -416,9 +418,11 @@ export function importFluView({
       wili: '%wILI',
       ili: '%ILI',
     },
-  );
-  ds.defaultEnabled = ['%wILI'];
-  return ds;
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['%wILI'];
+    }
+  }
 }
 
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
