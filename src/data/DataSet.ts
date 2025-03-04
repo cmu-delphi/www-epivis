@@ -105,9 +105,7 @@ export class DataGroup {
   public defaultEnabled: string[] = [];
 
   constructor(
-    public readonly title: string,
-    public readonly datasets: (DataSet | DataGroup)[],
-  ) {}
+    public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
 
   flat(arr: DataSet[]): void {
     for (const child of this.datasets) {
