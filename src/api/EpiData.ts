@@ -277,7 +277,7 @@ export function importCOVIDcast({
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
     }
-  };
+  });
 }
 
 export function importCOVIDHosp({
@@ -422,7 +422,7 @@ export function importFluView({
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['%wILI'];
     }
-  }
+  });
 }
 
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
