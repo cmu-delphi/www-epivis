@@ -273,7 +273,14 @@ export function importCOVIDcast({
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
     api_key,
-  );
+  ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'value' data
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['value'];
+    }
+    return ds;
+  });
 }
 
 export function importCOVIDHosp({
@@ -414,7 +421,14 @@ export function importFluView({
       wili: '%wILI',
       ili: '%ILI',
     },
-  );
+  ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'percent weighted ILI' data
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['%wILI'];
+    }
+    return ds;
+  });
 }
 
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {

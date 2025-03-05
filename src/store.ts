@@ -66,6 +66,12 @@ export function addDataSet(dataset: DataSet | DataGroup): void {
   if (dataset instanceof DataGroup) {
     // auto expand
     expandedDataGroups.set([...get(expandedDataGroups), dataset]);
+    // add defaultEnabled datasets to the list of active datasets
+    for (const ds of dataset.datasets) {
+      if (ds instanceof DataSet && dataset.defaultEnabled.includes(ds.title)) {
+        activeDatasets.set([...get(activeDatasets), ds]);
+      }
+    }
   } else {
     activeDatasets.set([...get(activeDatasets), dataset]);
   }
