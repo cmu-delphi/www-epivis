@@ -37,9 +37,9 @@ formSelections.subscribe((val) => {
 
 console.log(
   "before:",
-  localStorage.getItem('store-api-key'),
-  localStorage.getItem('api-key'),
-  sessionStorage.getItem('api-key'),
+  localStorage.getItem("store-api-key"),
+  localStorage.getItem("api-key"),
+  sessionStorage.getItem("api-key"),
 );
 
 export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
@@ -70,9 +70,9 @@ apiKey.subscribe((val) => {
 
 console.log(
   "after:",
-  localStorage.getItem('store-api-key'),
-  localStorage.getItem('api-key'),
-  sessionStorage.getItem('api-key'),
+  localStorage.getItem("store-api-key"),
+  localStorage.getItem("api-key"),
+  sessionStorage.getItem("api-key"),
 );
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
