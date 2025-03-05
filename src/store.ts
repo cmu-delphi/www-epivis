@@ -35,18 +35,8 @@ formSelections.subscribe((val) => {
   sessionStorage.setItem('form', JSON.stringify(val));
 });
 
-console.log(
-  'before:',
-  JSON.stringify(localStorage.getItem('store-api-key')),
-  JSON.stringify(localStorage.getItem('api-key')),
-  JSON.stringify(sessionStorage.getItem('api-key')),
-);
-
-// ensure an appropriate value is in session storage on page load:
-sessionStorage.setItem('api-key', localStorage.getItem('api-key') || '');
-export const apiKey = writable(sessionStorage.getItem('api-key')!);
+export const apiKey = writable(localStorage.getItem('api-key')! || '');
 apiKey.subscribe((val) => {
-  console.log('apiKey:', JSON.stringify(val));
   // always keep key in session storage (resets on window close)
   sessionStorage.setItem('api-key', val);
   if (localStorage.getItem('store-api-key') === 'true') {
@@ -57,7 +47,6 @@ apiKey.subscribe((val) => {
 
 export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
 storeApiKeys.subscribe((val) => {
-  console.log('storeApiKeys:', JSON.stringify(val));
   localStorage.setItem('store-api-key', val.toString());
   if (val) {
     // persist key from session to local storage
@@ -67,13 +56,6 @@ storeApiKeys.subscribe((val) => {
     localStorage.removeItem('api-key');
   }
 });
-
-console.log(
-  'after:',
-  JSON.stringify(localStorage.getItem('store-api-key')),
-  JSON.stringify(localStorage.getItem('api-key')),
-  JSON.stringify(sessionStorage.getItem('api-key')),
-);
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);
