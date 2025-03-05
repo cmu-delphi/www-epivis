@@ -54,7 +54,7 @@ apiKey.subscribe((val) => {
   // always keep key in session storage (resets on window close)
   sessionStorage.setItem('api-key', val);
   if (localStorage.getItem('store-api-key') === 'true') {
-    // if flag set, also store it in local persistent storage
+    // if flag set, also store key in local persistent storage
     localStorage.setItem('api-key', val);
   }
 });
