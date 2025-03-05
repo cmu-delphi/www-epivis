@@ -274,6 +274,8 @@ export function importCOVIDcast({
     ['value', 'stderr', 'sample_size'],
     api_key,
   ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'value' data
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
     }
@@ -420,6 +422,8 @@ export function importFluView({
       ili: '%ILI',
     },
   ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'percent weighted ILI' data
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['%wILI'];
     }
