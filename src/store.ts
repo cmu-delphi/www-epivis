@@ -48,8 +48,8 @@ storeApiKeys.subscribe((val) => {
 });
 
 // ensure an appropriate value is in session storage on page load:
-sessionStorage.setItem('api-key', localStorage.getItem('api-key')! || '');
-export const apiKey = writable(sessionStorage.getItem('api-key'));
+sessionStorage.setItem('api-key', localStorage.getItem('api-key') || '');
+export const apiKey = writable(sessionStorage.getItem('api-key')!);
 apiKey.subscribe((val) => {
   // always keep key in session storage (resets on window close)
   sessionStorage.setItem('api-key', val);
