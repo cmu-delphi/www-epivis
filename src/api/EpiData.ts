@@ -80,7 +80,6 @@ function loadEpidata(
   epidata: Record<string, unknown>[],
   columns: string[],
   columnRenamings: Record<string, string>,
-  defaultEnabled: string[] = [],
   params: Record<string, unknown>,
 ): DataGroup {
   const datasets: DataSet[] = [];
@@ -115,7 +114,7 @@ function loadEpidata(
       datasets.push(new DataSet(points, title, params));
     }
   }
-  return new DataGroup(name, datasets, defaultEnabled);
+  return new DataGroup(name, datasets);
 }
 
 function cleanParams(params: Record<string, unknown>): Record<string, unknown> {
@@ -136,7 +135,6 @@ export function loadDataSet(
   columns: string[],
   api_key = '',
   columnRenamings: Record<string, string> = {},
-  defaultEnabled: string[] = [],
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -165,10 +163,7 @@ export function loadDataSet(
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
       try {
-        const data = loadEpidata(title, res, columns, columnRenamings, defaultEnabled, {
-          _endpoint: endpoint,
-          ...params,
-        });
+        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
         if (data.datasets.length == 0) {
           return UIkit.modal
             .alert(
@@ -278,9 +273,14 @@ export function importCOVIDcast({
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
     api_key,
-    {},
-    ['value'],
-  );
+  ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'value' data
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['value'];
+    }
+    return ds;
+  });
 }
 
 export function importCOVIDHosp({
@@ -421,8 +421,14 @@ export function importFluView({
       wili: '%wILI',
       ili: '%ILI',
     },
-    ['%wILI'],
-  );
+  ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'percent weighted ILI' data
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['%wILI'];
+    }
+    return ds;
+  });
 }
 
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
