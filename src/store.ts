@@ -42,19 +42,6 @@ console.log(
   JSON.stringify(sessionStorage.getItem('api-key')),
 );
 
-export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
-storeApiKeys.subscribe((val) => {
-  console.log('storeApiKeys:', JSON.stringify(val));
-  localStorage.setItem('store-api-key', val.toString());
-  if (val) {
-    // persist key from session to local storage
-    localStorage.setItem('api-key', sessionStorage.getItem('api-key') || '');
-  } else {
-    // remove key from local storage
-    localStorage.removeItem('api-key');
-  }
-});
-
 // ensure an appropriate value is in session storage on page load:
 sessionStorage.setItem('api-key', localStorage.getItem('api-key') || '');
 export const apiKey = writable(sessionStorage.getItem('api-key')!);
@@ -65,6 +52,19 @@ apiKey.subscribe((val) => {
   if (localStorage.getItem('store-api-key') === 'true') {
     // if flag set, also store key in local persistent storage
     localStorage.setItem('api-key', val);
+  }
+});
+
+export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
+storeApiKeys.subscribe((val) => {
+  console.log('storeApiKeys:', JSON.stringify(val));
+  localStorage.setItem('store-api-key', val.toString());
+  if (val) {
+    // persist key from session to local storage
+    localStorage.setItem('api-key', sessionStorage.getItem('api-key') || '');
+  } else {
+    // remove key from local storage
+    localStorage.removeItem('api-key');
   }
 });
 
