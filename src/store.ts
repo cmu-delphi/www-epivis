@@ -39,7 +39,7 @@ console.log(
   "before:",
   localStorage.getItem('store-api-key'),
   localStorage.getItem('api-key'),
-  sessionStorage.getItem('api-key')
+  sessionStorage.getItem('api-key'),
 );
 
 export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
@@ -72,7 +72,7 @@ console.log(
   "after:",
   localStorage.getItem('store-api-key'),
   localStorage.getItem('api-key'),
-  sessionStorage.getItem('api-key')
+  sessionStorage.getItem('api-key'),
 );
 
 export function addDataSet(dataset: DataSet | DataGroup): void {
