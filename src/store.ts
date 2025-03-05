@@ -47,7 +47,7 @@ storeApiKeys.subscribe((val) => {
   }
 });
 
-export const apiKey = writable(localStorage.getItem('api-key')! || '');
+export const apiKey = writable<string>(localStorage.getItem('api-key')! || '');
 // ensure an appropriate value is in session storage on page load:
 sessionStorage.setItem('api-key', $apiKey);
 apiKey.subscribe((val) => {
