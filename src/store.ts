@@ -35,6 +35,16 @@ formSelections.subscribe((val) => {
   sessionStorage.setItem('form', JSON.stringify(val));
 });
 
+export const apiKey = writable(localStorage.getItem('api-key')! || '');
+apiKey.subscribe((val) => {
+  // always keep key in session storage (resets on window close)
+  sessionStorage.setItem('api-key', val);
+  if (localStorage.getItem('store-api-key') === 'true') {
+    // if flag set, also store key in local persistent storage
+    localStorage.setItem('api-key', val);
+  }
+});
+
 export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
 storeApiKeys.subscribe((val) => {
   localStorage.setItem('store-api-key', val.toString());
@@ -47,16 +57,6 @@ storeApiKeys.subscribe((val) => {
   }
 });
 
-export const apiKey = writable(localStorage.getItem('api-key')! || '');
-apiKey.subscribe((val) => {
-  // always keep key around in session storage (resets on page refresh)
-  sessionStorage.setItem('api-key', val);
-  if (localStorage.getItem('store-api-key') === 'true') {
-    // store it in local storage (persistent)
-    localStorage.setItem('api-key', val);
-  }
-});
-
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);
   root.datasets.push(dataset);
@@ -66,6 +66,12 @@ export function addDataSet(dataset: DataSet | DataGroup): void {
   if (dataset instanceof DataGroup) {
     // auto expand
     expandedDataGroups.set([...get(expandedDataGroups), dataset]);
+    // add defaultEnabled datasets to the list of active datasets
+    for (const ds of dataset.datasets) {
+      if (ds instanceof DataSet && dataset.defaultEnabled.includes(ds.title)) {
+        activeDatasets.set([...get(activeDatasets), ds]);
+      }
+    }
   } else {
     activeDatasets.set([...get(activeDatasets), dataset]);
   }

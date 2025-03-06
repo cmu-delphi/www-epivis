@@ -28,6 +28,7 @@ export default class DataSet {
     public readonly data: readonly EpiPoint[],
     public title = '',
     public readonly params: Record<string, unknown> | unknown[] | null = null,
+    public customTitle: string | null = null,
     public color = getRandomColor(),
   ) {
     this.gap = computeGap(data);
@@ -102,6 +103,8 @@ export default class DataSet {
 
 export class DataGroup {
   public parent?: DataGroup;
+  // which fields of this DataGroup should be "enabled" (shown/displayed) on load:
+  public defaultEnabled: string[] = [];
 
   constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
 
