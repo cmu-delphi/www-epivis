@@ -720,7 +720,7 @@
     ctx.beginPath();
     for (let i = 0; i < data.length; i++) {
       const ptVal = dataset.getPointValue(i);
-      if (isNaN(ptVal) or ptVal == null) {
+      if (isNaN(ptVal) || ptVal == null) {
         continue;
       }
       const y = value2y(ptVal);
