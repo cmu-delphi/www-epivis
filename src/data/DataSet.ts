@@ -65,7 +65,7 @@ export default class DataSet {
 
   getPointValue(index: number): number {
     const temp = this.data[index].getValue();
-    if (Number.isNaN(temp)) {
+    if (Number.isNaN(temp) || temp == null) {
       return temp;
     }
     return this.verticalOffset + temp * this.scale;
