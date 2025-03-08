@@ -719,10 +719,11 @@
     ctx.fillStyle = color;
     ctx.beginPath();
     for (let i = 0; i < data.length; i++) {
-      const y = value2y(dataset.getPointValue(i));
-      if (isNaN(y)) {
+      const ptVal = dataset.getPointValue(i);
+      if (isNaN(ptVal) or ptVal == null) {
         continue;
       }
+      const y = value2y(ptVal);
       date1 = date2;
       date2 = data[i].getDate().getIndex();
       if (date2 - date1 !== gap) {
