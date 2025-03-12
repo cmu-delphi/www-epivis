@@ -260,11 +260,11 @@ export function importCOVIDcast({
   api_key: string;
 }): Promise<DataGroup | null> {
   const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
-  if (!api_key && $storeApiKeys) {
+  if (!api_key && storeApiKeys) {
     // if no API key was passed to this method, but we have a saved one, use it...
     // this gets around access control and rate limiting when using an epivis "shared"
     // link (an URL-encoded signal list, processed through `deriveLinkDefaults`).
-    api_key = $apiKey;
+    api_key = apiKey;
   }
   return loadDataSet(
     title,
