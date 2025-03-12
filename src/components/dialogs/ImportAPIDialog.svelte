@@ -75,7 +75,7 @@
             value="covidcast"
           />
           Delphi Indicators (aka COVIDcast) (source:
-	  <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
+          <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
         >
         <label
           ><input
