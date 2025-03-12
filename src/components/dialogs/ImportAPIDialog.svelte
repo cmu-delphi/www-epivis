@@ -72,6 +72,16 @@
             type="radio"
             name="dataSource"
             bind:group={$formSelections.dataSource}
+            value="covidcast"
+          />
+          Delphi Indicators (aka COVIDcast) (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
+        >
+        <label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
             value="flusurv"
           />
           FluSurv (source:
@@ -164,16 +174,6 @@
             value="nowcast"
           />
           Delphi Nowcast (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
-        >
-        <label
-          ><input
-            class="uk-radio"
-            type="radio"
-            name="dataSource"
-            bind:group={$formSelections.dataSource}
-            value="covidcast"
-          />
-          Delphi COVIDcast (source: <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
         >
         <label
           ><input
