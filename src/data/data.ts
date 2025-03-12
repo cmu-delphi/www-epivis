@@ -392,6 +392,6 @@ export const firstEpiWeek = {
 export const firstDate = {
   twitter: 20111201,
   wiki: 20071209,
-  covidcast: 20200101,
+  covidcast: 20170815,
   covid_hosp: 20200101,
 };
