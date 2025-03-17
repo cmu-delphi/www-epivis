@@ -24,7 +24,7 @@
     "start": "rollup -c -w",
     "server": "sirv public --no-clear --port 8080",
     "validate": "svelte-check",
-    "lint": "eslint src --ext .ts,.js,.svelte && prettier --check \"**/*\"",
+    "lint": "eslint src --ext .ts,.js,.svelte && (prettier --check \"**/*\" || (prettier --write \"**/*\" ; git diff ; false))",
     "fix": "eslint src --ext .ts,.js,.svelte --fix && prettier --write \"**/*\"",
     "prepare": "husky install",
     "prepack": "npm run build",
