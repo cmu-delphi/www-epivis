@@ -74,8 +74,8 @@
             bind:group={$formSelections.dataSource}
             value="covidcast"
           />
-          Delphi Indicators (aka COVIDcast) (source:
-          <a target="_blank" href="https://delphi.cmu.edu/">delphi.cmu.edu</a>)</label
+          Delphi Indicators (aka COVIDcast) (docs:
+          <a target="_blank" href="https://cmu-delphi.github.io/delphi-epidata/api/covidcast_signals.html#all-available-sources-and-signals">cmu-delphi.github.io</a>)</label
         >
         <label
           ><input
