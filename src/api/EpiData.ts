@@ -23,7 +23,7 @@ import DataSet, { DataGroup } from '../data/DataSet';
 import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
 import { get } from 'svelte/store';
-import { expandedDataGroups } from '../store';
+import { apiKey, expandedDataGroups, storeApiKeys } from '../store';
 
 // import DataSet from "../data/DataSet";
 // import EpiDate from "../data/EpiDate";
@@ -260,6 +260,12 @@ export function importCOVIDcast({
   api_key: string;
 }): Promise<DataGroup | null> {
   const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
+  if (!api_key && get(storeApiKeys)) {
+    // if no API key was passed to this method, but we have a saved one, use it...
+    // this gets around access control and rate limiting when using an epivis "shared"
+    // link (an URL-encoded signal list, processed through `deriveLinkDefaults`).
+    api_key = get(apiKey);
+  }
   return loadDataSet(
     title,
     'covidcast',
