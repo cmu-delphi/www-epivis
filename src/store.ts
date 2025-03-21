@@ -1,5 +1,4 @@
 import { get, writable } from 'svelte/store';
-import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
 import FormSelections from './components/dialogs/formSelections';
@@ -16,7 +15,7 @@ export const expandedDataGroups = writable([defaults.group]);
 
 export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
-export const navMode = writable(NavMode.autofit);
+export const navMode = writable(defaults.navMode);
 
 export function getFormSelections() {
   try {
@@ -97,6 +96,7 @@ export function getDirectLink(chart: IChart): { url: URL; anySkipped: boolean } 
     active: get(activeDatasets),
     showPoints: get(isShowingPoints),
     viewport: chart.getViewport(),
+    navMode: get(navMode),
   });
 }
 
