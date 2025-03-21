@@ -220,7 +220,7 @@ export function getDirectLinkImpl(state: SharedState): { url: URL; anySkipped: b
   const config: ILinkConfig = {
     chart: {
       // if in autofit mode, pass null viewport, else preserve viewport (or default to 0s)
-      viewport: (state.navMode == NavMode.autofit) ? null : (state.viewport ?? [0, 0, 0, 0]),
+      viewport: state.navMode == NavMode.autofit ? null : state.viewport ?? [0, 0, 0, 0],
       showPoints: state.showPoints,
     },
     datasets: [],
