@@ -14,6 +14,7 @@ import {
   importTwitter,
   importWiki,
 } from './api/EpiData';
+import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup, DEFAULT_GROUP, flatten, DEFAULT_VIEWPORT } from './data/DataSet';
 import EpiDate from './data/EpiDate';
 import EpiPoint from './data/EpiPoint';
@@ -35,6 +36,7 @@ export interface SharedState {
   active: DataSet[];
   viewport: null | [number, number, number, number];
   showPoints: boolean;
+  navMode: NavMode;
 }
 
 const DEFAULT_VALUES: SharedState = {
@@ -42,6 +44,7 @@ const DEFAULT_VALUES: SharedState = {
   active: [],
   viewport: DEFAULT_VIEWPORT,
   showPoints: false,
+  navMode: NavMode.pan,
 };
 
 const lookups = {
@@ -202,6 +205,8 @@ export default function deriveLinkDefaults(): SharedState & { loader?: ReturnTyp
       active: [],
       showPoints: parsed.chart?.showPoints ?? DEFAULT_VALUES.showPoints,
       viewport: parsed.chart?.viewport ?? DEFAULT_VALUES.viewport,
+      // if we were not passed viewport coords, set to autofit mode
+      navMode: parsed.chart?.viewport ? DEFAULT_VALUES.navMode : NavMode.autofit,
       loader: initialLoader(parsed.datasets),
     };
   } catch (err) {
@@ -214,7 +219,8 @@ export default function deriveLinkDefaults(): SharedState & { loader?: ReturnTyp
 export function getDirectLinkImpl(state: SharedState): { url: URL; anySkipped: boolean } {
   const config: ILinkConfig = {
     chart: {
-      viewport: state.viewport ?? [0, 0, 0, 0],
+      // if in autofit mode, pass null viewport, else preserve viewport (or default to 0s)
+      viewport: state.navMode == NavMode.autofit ? null : state.viewport ?? [0, 0, 0, 0],
       showPoints: state.showPoints,
     },
     datasets: [],
