@@ -35,6 +35,7 @@ export default class DataSet {
   }
 
   displayTitle(): string {
+    // for display to user; use custom title if available, otherwise default to title
     return this.customTitle || this.title;
   }
 
@@ -113,6 +114,7 @@ export class DataGroup {
   constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
 
   displayTitle(): string {
+    // for interface compatibility with `DataSet.displayTitle()`
     return this.title;
   }
 
