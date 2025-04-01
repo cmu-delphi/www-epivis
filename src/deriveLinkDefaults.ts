@@ -180,6 +180,11 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     }
 
     return Promise.all(resolvedDataSets).then((data) => data.filter((d): d is DataSet => d != null));
+    return Promise.all(resolvedDataSets).then((data) => {
+      const cleaned = data.filter((d): d is DataSet => d != null);
+      cleaned.forEach((d) => add(d));
+      return cleaned;
+    });
   };
 }
 
