@@ -34,6 +34,11 @@ export default class DataSet {
     this.gap = computeGap(data);
   }
 
+  displayTitle(): string {
+    // for display to user; use custom title if available, otherwise default to title
+    return this.customTitle || this.title;
+  }
+
   randomize(): void {
     this.color = getRandomColor();
   }
@@ -107,6 +112,11 @@ export class DataGroup {
   public defaultEnabled: string[] = [];
 
   constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
+
+  displayTitle(): string {
+    // for interface compatibility with `DataSet.displayTitle()`
+    return this.title;
+  }
 
   flat(arr: DataSet[]): void {
     for (const child of this.datasets) {
