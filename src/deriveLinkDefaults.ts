@@ -179,14 +179,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
     }
 
-    return Promise.all(resolvedDataSets).then((data) => {
-      const cleaned = data.filter((d): d is DataSet => d != null);
-      cleaned.forEach((d) => {
-        // TODO: is this necessary??
-        add(d);
-      });
-      return cleaned;
-    });
+    return Promise.all(resolvedDataSets).then((data) => data.filter((d): d is DataSet => d != null));
   };
 }
 
