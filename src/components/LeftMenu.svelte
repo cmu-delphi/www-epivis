@@ -13,7 +13,7 @@
 <side class="left" {style} data-tour="browser">
   <ImportDataSetsMenu />
   <div class="tree">
-    {#each $datasetTree.datasets as child (child.title)}
+    {#each $datasetTree.datasets as child (child.displayTitle())}
       {#if child instanceof DataSet}
         <TreeLeafNode {chart} node={child} />
       {:else}

@@ -182,9 +182,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     return Promise.all(resolvedDataSets).then((data) => {
       const cleaned = data.filter((d): d is DataSet => d != null);
       cleaned.forEach((d) => {
-        if (d.customTitle) {
-          d.title = d.customTitle;
-        }
+        // TODO: is this necessary??
         add(d);
       });
       return cleaned;
@@ -228,11 +226,15 @@ export function getDirectLinkImpl(state: SharedState): { url: URL; anySkipped: b
   let anySkipped = false;
   state.active.forEach((data) => {
     if (data.params) {
-      config.datasets.push({
+      let ds = {
         color: data.color,
         title: data.title,
         params: data.params as unknown as Record<string, unknown>,
-      });
+      };
+      if (data.customTitle) {
+        ds.params.custom_title = data.customTitle;
+      }
+      config.datasets.push(ds);
     } else {
       console.log('unable to get direct link to dataset:', data.title);
       anySkipped = true;
