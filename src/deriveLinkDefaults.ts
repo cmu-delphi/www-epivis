@@ -226,7 +226,7 @@ export function getDirectLinkImpl(state: SharedState): { url: URL; anySkipped: b
   let anySkipped = false;
   state.active.forEach((data) => {
     if (data.params) {
-      let ds = {
+      const ds = {
         color: data.color,
         title: data.title,
         params: data.params as unknown as Record<string, unknown>,
