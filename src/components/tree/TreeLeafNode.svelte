@@ -35,7 +35,7 @@
 >
   <Fa icon={selected ? faEye : faEyeSlash} {color} style="width: 1em; margin-right: 0.5em" />
   <span>
-    {node.title}
+    {node.displayTitle()}
   </span>
 </div>
 
