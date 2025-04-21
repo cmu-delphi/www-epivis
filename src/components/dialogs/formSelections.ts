@@ -44,6 +44,11 @@ export class FluViewSelections {
   issue = DEFAULT_ISSUE;
 }
 
+export class FluViewClinicalSelections {
+  locations = fluViewRegions[0].value;
+  issue = DEFAULT_ISSUE;
+}
+
 export class GftSelections {
   locations = gftLocations[0].value;
 }
@@ -93,6 +98,7 @@ export class WikiSelections {
 export default class FormSelections {
   dataSource:
     | 'fluview'
+    | 'fluview_clinical'
     | 'flusurv'
     | 'gft'
     | 'ght'
@@ -111,6 +117,7 @@ export default class FormSelections {
   covidHosp = new CovidHospSelections();
   fluSurv = new FluSurvSelections();
   fluView = new FluViewSelections();
+  fluViewClinical = new FluViewClinicalSelections();
   gft = new GftSelections();
   ght = new GhtSelections();
   nidssDengue = new NidssDengueSelections();

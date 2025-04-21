@@ -1,6 +1,7 @@
 <script lang="ts">
   import FluSurv from './dataSources/FluSurv.svelte';
   import FluView from './dataSources/FluView.svelte';
+  import FluViewClinical from './dataSources/FluViewClinical.svelte';
 
   import { createEventDispatcher } from 'svelte';
 
@@ -81,6 +82,17 @@
             >cmu-delphi.github.io</a
           >)</label
         >
+        <label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="fluview_clinical"
+          />
+          FluView Clinical (source:
+          <a target="_blank" href="https://gis.cdc.gov/grasp/fluview/fluportaldashboard.html">cdc.gov</a>)
+        </label>
         <label
           ><input
             class="uk-radio"
@@ -200,6 +212,8 @@
 
     {#if $formSelections.dataSource === 'fluview'}
       <FluView {id} bind:this={handler} />
+    {:else if $formSelections.dataSource === 'fluview_clinical'}
+      <FluViewClinical {id} bind:this={handler} />
     {:else if $formSelections.dataSource === 'flusurv'}
       <FluSurv {id} bind:this={handler} />
     {:else if $formSelections.dataSource === 'gft'}
