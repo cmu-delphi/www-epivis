@@ -455,14 +455,7 @@ export function importFluViewClinical({
       epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
     },
     { regions, issues, lag },
-    [
-      'total_specimens',
-      'total_a',
-      'total_b',
-      'percent_positive',
-      'percent_a',
-      'percent_b',
-    ],
+    ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'percent_positive' data

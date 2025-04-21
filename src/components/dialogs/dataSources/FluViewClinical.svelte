@@ -15,5 +15,10 @@
   }
 </script>
 
-<SelectField id="{id}-r" label="Region" bind:value={$formSelections.fluViewClinical.locations} options={fluViewRegions} />
+<SelectField
+  id="{id}-r"
+  label="Region"
+  bind:value={$formSelections.fluViewClinical.locations}
+  options={fluViewRegions}
+/>
 <SelectIssue {id} bind:value={$formSelections.fluViewClinical.issue} />
