@@ -3,7 +3,6 @@
   import { fluViewRegions } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import SelectIssue from '../inputs/SelectIssue.svelte';
-  import TextField from '../inputs/TextField.svelte';
   import { formSelections } from '../../../store';
 
   export let id: string;
