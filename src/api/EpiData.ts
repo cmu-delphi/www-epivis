@@ -437,6 +437,35 @@ export function importFluView({
   });
 }
 
+export function importFluViewClinical({
+  regions,
+  issues,
+  lag,
+}: {
+  regions: string;
+  issues?: number | null;
+  lag?: number | null;
+}): Promise<DataGroup | null> {
+  const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
+  const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag });
+  return loadDataSet(
+    title,
+    'fluview_clinical',
+    {
+      epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
+    },
+    { regions, issues, lag },
+    ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
+  ).then((ds) => {
+    // get inside the Promise and make sure its not null,
+    // then enable display of 'percent_positive' data
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['percent_positive'];
+    }
+    return ds;
+  });
+}
+
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = gftLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] GFT: ${regionLabel}`;
