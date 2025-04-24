@@ -751,7 +751,7 @@
     let labelOffset = 0;
     for (const ds of datasets) {
       ctx.fillStyle = ds.color;
-      const label = `— ${ds.title}`;
+      const label = `— ${ds.displayTitle()}`;
       drawText(ctx, label, width - 10, height - 10 - labelOffset, 0, Align.right, Align.bottom);
       labelOffset += 12;
     }

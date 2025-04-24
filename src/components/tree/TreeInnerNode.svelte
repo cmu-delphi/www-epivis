@@ -24,11 +24,11 @@
   <span on:click={toggleExpanded}>
     <Fa icon={expanded ? faChevronDown : faChevronRight} style="width: 0.9em; margin-right: 0.5em" />
     <span>
-      {node.title}
+      {node.displayTitle()}
     </span>
   </span>
   {#if expanded}
-    {#each node.datasets as child (child.title)}
+    {#each node.datasets as child (child.displayTitle())}
       {#if child instanceof DataSet}
         <TreeLeafNode {chart} node={child} />
       {:else}
