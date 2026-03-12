@@ -172,7 +172,7 @@ export function loadDataSet(
               .alert(
                 `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}: ${additionalLabels.dataSourceLabel}:${additionalLabels.signalLabel}, which suggests that the API has no available information for the selected location(${additionalLabels.geoTypeLabel}:${additionalLabels.geoValueLabel}).
+          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}(${additionalLabels.dataSourceLabel}:${additionalLabels.signalLabel}), which suggests that the API has no available information for the selected location(${additionalLabels.geoTypeLabel}:${additionalLabels.geoValueLabel}).
         </div>`,
               )
               .then(() => null);
