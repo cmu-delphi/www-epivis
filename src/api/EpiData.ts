@@ -167,43 +167,14 @@ export function loadDataSet(
       try {
         const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
         if (data.datasets.length == 0) {
-          if (endpoint === 'covidcast') {
-            return UIkit.modal
-              .alert(
-                `
+          return UIkit.modal
+            .alert(
+              `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}(${additionalLabels.dataSourceLabel}:${additionalLabels.signalLabel}), which suggests that the API has no available information for the selected location(${additionalLabels.geoTypeLabel}:${additionalLabels.geoValueLabel}).
+          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}.
         </div>`,
-              )
-              .then(() => null);
-          } else if (endpoint === 'sensors') {
-            return UIkit.modal
-              .alert(
-                `
-        <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}:${additionalLabels.namesLabel}, which suggests that the API has no available information for the selected location(${additionalLabels.regionLabel}).
-        </div>`,
-              )
-              .then(() => null);
-          } else if (endpoint === 'wiki') {
-            return UIkit.modal
-              .alert(
-                `
-        <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.articleLabel}, which suggests that the API has no available information.
-        </div>`,
-              )
-              .then(() => null);
-          } else {
-            return UIkit.modal
-              .alert(
-                `
-        <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected location(${additionalLabels.regionLabel}).
-        </div>`,
-              )
-              .then(() => null);
-          }
+            )
+            .then(() => null);
         }
         return data;
       } catch (error) {
@@ -265,7 +236,7 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
   const title = `[API] CDC Page Hits: ${regionLabel}`;
   const additionalLabels = {
     titleLabel: 'CDC Page Hist',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -304,11 +275,8 @@ export function importCOVIDcast({
     api_key = get(apiKey);
   }
   const additionalLabels = {
-    titleLabel: 'COVIDcast',
-    dataSourceLabel: data_source,
-    signalLabel: signal,
-    geoTypeLabel: geo_type,
-    geoValueLabel: geo_value,
+    titleLabel: 'COVIDcast (' + data_source + ':' + signal + ')',
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
   };
   return loadDataSet(
     title,
@@ -346,7 +314,7 @@ export function importCOVIDHosp({
   let title = `[API] COVID Hospitalization: ${regionLabel}`;
   const additionalLabels = {
     titleLabel: 'COVID Hospitalization',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   if (issues != null) {
     title += ` (issued on: ${issues})`;
@@ -433,7 +401,7 @@ export function importFluSurv({
   const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'FluSurv',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -493,7 +461,7 @@ export function importFluView({
   const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'ILINet (aka FluView)',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -544,7 +512,7 @@ export function importFluViewClinical({
   const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'FluView Clinical',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -572,7 +540,7 @@ export function importGFT({ locations }: { locations: string }): Promise<DataGro
   const title = `[API] GFT: ${regionLabel}`;
   const additionalLabels = {
     titleLabel: 'GFT',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -601,7 +569,7 @@ export function importGHT({
   const title = `[API] GHT: ${regionLabel} [${query}]`;
   const additionalLabels = {
     titleLabel: 'GHT',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -622,7 +590,7 @@ export function importNIDSSDengue({ locations }: { locations: string }): Promise
   const title = `[API] NIDSS-Dengue: ${regionLabel}`;
   const additionalLabels = {
     titleLabel: 'NIDSS-Dengue',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -650,7 +618,7 @@ export function importNIDSSFlu({
   const title = appendIssueToTitle(`[API] NIDSS-influenza: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'NIDSS-influenza',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -670,7 +638,7 @@ export function importNowcast({ locations }: { locations: string }): Promise<Dat
   const title = `[API] Delphi Nowcast: ${regionLabel}`;
   const additionalLabels = {
     titleLabel: 'Delphi Nowcast',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -690,7 +658,7 @@ export function importQuidel({ auth, locations }: { auth: string; locations: str
   const title = `[API] Quidel Data: ${regionLabel}`;
   const additionalLabels = {
     titleLabel: 'Quidel Data',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -718,9 +686,8 @@ export function importSensors({
   const namesLabel = sensorNames.find((d) => d.value === names)?.label ?? '?';
   const title = `[API] Delphi Sensor: ${namesLabel}: ${regionLabel}`;
   const additionalLabels = {
-    titleLabel: 'Delphi Sensor',
-    namesLabel: namesLabel,
-    regionLabel: regionLabel,
+    titleLabel: 'Delphi Sensor (' + namesLabel + ')',
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -749,7 +716,7 @@ export function importTwitter({
   const title = `[API] Twitter: ${regionLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
   const additionalLabels = {
     titleLabel: 'Twitter',
-    regionLabel: regionLabel,
+    selectionLabel: 'location: ' + regionLabel,
   };
   return loadDataSet(
     title,
@@ -783,7 +750,7 @@ export function importWiki({
   let title = `[API] Wiki: ${articleLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
   const additionalLabels = {
     titleLabel: 'Wiki',
-    articleLabel: articleLabel,
+    selectionLabel: 'article: ' + articleLabel,
   };
   if (hour != null) {
     title += ` (${hour})`;
