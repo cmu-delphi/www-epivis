@@ -135,6 +135,8 @@ export function loadDataSet(
   columns: string[],
   api_key = '',
   columnRenamings: Record<string, string> = {},
+  // add additional labels for the error message
+  additionalLabels: Record<string, string> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -169,7 +171,7 @@ export function loadDataSet(
             .alert(
               `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data, which suggests that the API has no available information for the selected location.
+          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}.
         </div>`,
             )
             .then(() => null);
@@ -232,6 +234,10 @@ export function fetchCOVIDcastMeta(
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
   const regionLabel = cdcLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] CDC Page Hits: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'CDC Page Hist',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'cdc',
@@ -241,6 +247,8 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
     { locations },
     ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'],
     auth,
+    {},
+    additionalLabels,
   );
 }
 
@@ -266,6 +274,10 @@ export function importCOVIDcast({
     // link (an URL-encoded signal list, processed through `deriveLinkDefaults`).
     api_key = get(apiKey);
   }
+  const additionalLabels = {
+    titleLabel: 'COVIDcast (' + data_source + ':' + signal + ')',
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+  };
   return loadDataSet(
     title,
     'covidcast',
@@ -279,6 +291,8 @@ export function importCOVIDcast({
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
     api_key,
+    {},
+    additionalLabels,
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'value' data
@@ -298,6 +312,10 @@ export function importCOVIDHosp({
 }): Promise<DataGroup | null> {
   const regionLabel = covidHospLocations.find((d) => d.value === states)?.label ?? '?';
   let title = `[API] COVID Hospitalization: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'COVID Hospitalization',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   if (issues != null) {
     title += ` (issued on: ${issues})`;
   } else {
@@ -364,6 +382,9 @@ export function importCOVIDHosp({
       'adult_icu_bed_utilization_numerator',
       'adult_icu_bed_utilization_denominator',
     ],
+    '',
+    {},
+    additionalLabels,
   );
 }
 
@@ -378,6 +399,10 @@ export function importFluSurv({
 }): Promise<DataGroup | null> {
   const regionLabel = fluSurvRegions.find((d) => d.value === locations)?.label ?? '?';
   const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'FluSurv',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'flusurv',
@@ -415,6 +440,9 @@ export function importFluSurv({
       'rate_flu_a',
       'rate_flu_b',
     ],
+    '',
+    {},
+    additionalLabels,
   );
 }
 
@@ -431,6 +459,10 @@ export function importFluView({
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'ILINet (aka FluView)',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'fluview',
@@ -456,6 +488,7 @@ export function importFluView({
       wili: '%wILI',
       ili: '%ILI',
     },
+    additionalLabels,
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'percent weighted ILI' data
@@ -477,6 +510,10 @@ export function importFluViewClinical({
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'FluView Clinical',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'fluview_clinical',
@@ -485,6 +522,9 @@ export function importFluViewClinical({
     },
     { regions, issues, lag },
     ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
+    '',
+    {},
+    additionalLabels,
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'percent_positive' data
@@ -498,6 +538,10 @@ export function importFluViewClinical({
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = gftLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] GFT: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'GFT',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'gft',
@@ -506,6 +550,9 @@ export function importGFT({ locations }: { locations: string }): Promise<DataGro
     },
     { locations },
     ['num'],
+    '',
+    {},
+    additionalLabels,
   );
 }
 
@@ -520,6 +567,10 @@ export function importGHT({
 }): Promise<DataGroup | null> {
   const regionLabel = ghtLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] GHT: ${regionLabel} [${query}]`;
+  const additionalLabels = {
+    titleLabel: 'GHT',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'ght',
@@ -529,12 +580,18 @@ export function importGHT({
     { locations, query },
     ['value'],
     auth,
+    {},
+    additionalLabels,
   );
 }
 
 export function importNIDSSDengue({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = nidssDengueLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] NIDSS-Dengue: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'NIDSS-Dengue',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'nidss_dengue',
@@ -543,6 +600,9 @@ export function importNIDSSDengue({ locations }: { locations: string }): Promise
     },
     { locations },
     ['count'],
+    '',
+    {},
+    additionalLabels,
   );
 }
 export function importNIDSSFlu({
@@ -556,6 +616,10 @@ export function importNIDSSFlu({
 }): Promise<DataGroup | null> {
   const regionLabel = nidssFluLocations.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] NIDSS-influenza: ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'NIDSS-influenza',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'nidss_flu',
@@ -564,11 +628,18 @@ export function importNIDSSFlu({
     },
     { regions, issues, lag },
     ['visits', 'ili'],
+    '',
+    {},
+    additionalLabels,
   );
 }
 export function importNowcast({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = nowcastLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] Delphi Nowcast: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'Delphi Nowcast',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'nowcast',
@@ -577,11 +648,18 @@ export function importNowcast({ locations }: { locations: string }): Promise<Dat
     },
     { locations },
     ['value', 'std'],
+    '',
+    {},
+    additionalLabels,
   );
 }
 export function importQuidel({ auth, locations }: { auth: string; locations: string }): Promise<DataGroup | null> {
   const regionLabel = quidelLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] Quidel Data: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'Quidel Data',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'quidel',
@@ -591,6 +669,8 @@ export function importQuidel({ auth, locations }: { auth: string; locations: str
     { locations },
     ['value'],
     auth,
+    {},
+    additionalLabels,
   );
 }
 export function importSensors({
@@ -605,6 +685,10 @@ export function importSensors({
   const regionLabel = sensorLocations.find((d) => d.value === locations)?.label ?? '?';
   const namesLabel = sensorNames.find((d) => d.value === names)?.label ?? '?';
   const title = `[API] Delphi Sensor: ${namesLabel}: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'Delphi Sensor (' + namesLabel + ')',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'sensors',
@@ -614,6 +698,8 @@ export function importSensors({
     { names, locations },
     ['value'],
     auth,
+    {},
+    additionalLabels,
   );
 }
 // twtr
@@ -628,6 +714,10 @@ export function importTwitter({
 }): Promise<DataGroup | null> {
   const regionLabel = twitterLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] Twitter: ${regionLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
+  const additionalLabels = {
+    titleLabel: 'Twitter',
+    selectionLabel: 'location: ' + regionLabel,
+  };
   return loadDataSet(
     title,
     'twitter',
@@ -641,6 +731,8 @@ export function importTwitter({
     { locations, resolution },
     ['num', 'total', 'percent'],
     auth,
+    {},
+    additionalLabels,
   );
 }
 export function importWiki({
@@ -656,6 +748,10 @@ export function importWiki({
 }): Promise<DataGroup | null> {
   const articleLabel = wikiArticles.find((d) => d.value === articles)?.label ?? '?';
   let title = `[API] Wiki: ${articleLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
+  const additionalLabels = {
+    titleLabel: 'Wiki',
+    selectionLabel: 'article: ' + articleLabel,
+  };
   if (hour != null) {
     title += ` (${hour})`;
   }
@@ -671,5 +767,8 @@ export function importWiki({
         },
     { articles, hour, language, resolution },
     ['count', 'total', 'value'],
+    '',
+    {},
+    additionalLabels,
   );
 }
