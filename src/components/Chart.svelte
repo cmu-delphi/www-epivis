@@ -704,6 +704,159 @@
     drawText(ctx, label, x, height - 10, 0, Align.center, Align.center);
   }
 
+  /**
+   * Binary search to find the data point in a dataset whose date is closest
+   * to the given target date index (the hovered date on the chart).
+   * Returns the point's array index, its scaled value, and its actual date index,
+   * or null if the dataset is empty or the closest point has no valid value.
+   */
+  function findClosestPoint(dataset: DataSet, targetDateIndex: number): { index: number; value: number; dateIndex: number } | null {
+    const { data } = dataset;
+    if (data.length === 0) return null;
+
+    // Binary search: find the leftmost point whose date >= targetDateIndex
+    let left = 0;
+    let right = data.length - 1;
+    while (left < right) {
+      const mid = (left + right) >> 1;
+      if (data[mid].getDate().getIndex() < targetDateIndex) left = mid + 1;
+      else right = mid;
+    }
+
+    // `left` now points at the first date >= target (or the last element).
+    // Compare it with the previous element to pick whichever is actually closer.
+    let closestIndex = left;
+    if (left > 0) {
+      const distCurrent = Math.abs(data[left].getDate().getIndex() - targetDateIndex);
+      const distPrevious = Math.abs(data[left - 1].getDate().getIndex() - targetDateIndex);
+      if (distPrevious < distCurrent) closestIndex = left - 1;
+    }
+
+    const pointValue = dataset.getPointValue(closestIndex);
+    if (pointValue == null || isNaN(pointValue)) return null;
+
+    return { index: closestIndex, value: pointValue, dateIndex: data[closestIndex].getDate().getIndex() };
+  }
+
+  function renderHoverTooltip(ctx: CanvasRenderingContext2D) {
+    if (highlightedDate == null || mousePosition == null || datasets.length === 0) {
+      return;
+    }
+    const dateIdx = highlightedDate.getIndex();
+    const hoverX = date2x(dateIdx);
+
+    type HoverEntry = { dataset: DataSet; value: number; pointDateIndex: number };
+    const entries: HoverEntry[] = [];
+
+    for (const ds of datasets) {
+      const pt = findClosestPoint(ds, dateIdx);
+      if (pt) {
+        entries.push({ dataset: ds, value: pt.value, pointDateIndex: pt.dateIndex });
+      }
+    }
+
+    if (entries.length === 0) return;
+
+    for (const entry of entries) {
+      const px = date2x(entry.pointDateIndex);
+      const py = value2y(entry.value);
+      ctx.beginPath();
+      ctx.arc(px, py, 4, 0, Math.PI * 2);
+      ctx.fillStyle = entry.dataset.color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    const padding = 8;
+    const rowHeight = 16;
+    const swatchSize = 10;
+    const swatchGap = 6;
+    const nameValueGap = 12;
+    const fontSize = 12;
+    ctx.font = `${fontSize}px Calibri`;
+
+    let maxNameWidth = 0;
+    let maxValueWidth = 0;
+    for (const entry of entries) {
+      const nameW = ctx.measureText(entry.dataset.displayTitle()).width;
+      const valStr = entry.value.toLocaleString(undefined, { maximumFractionDigits: 4 });
+      const valW = ctx.measureText(valStr).width;
+      if (nameW > maxNameWidth) maxNameWidth = nameW;
+      if (valW > maxValueWidth) maxValueWidth = valW;
+    }
+
+    const maxAllowedNameWidth = width * 0.3;
+    if (maxNameWidth > maxAllowedNameWidth) maxNameWidth = maxAllowedNameWidth;
+
+    const boxW = padding * 2 + swatchSize + swatchGap + maxNameWidth + nameValueGap + maxValueWidth;
+    const boxH = padding * 2 + entries.length * rowHeight;
+
+    const cursorOffset = 15;
+    let boxX = hoverX + cursorOffset;
+    let boxY = mousePosition.y - boxH / 2;
+
+    if (boxX + boxW > width - 5) {
+      boxX = hoverX - cursorOffset - boxW;
+    }
+    if (boxX < 5) {
+      boxX = 5;
+    }
+    if (boxY < 5) {
+      boxY = 5;
+    }
+    if (boxY + boxH > height - 5) {
+      boxY = height - 5 - boxH;
+    }
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+    ctx.strokeStyle = '#ccc';
+    ctx.lineWidth = 1;
+    const radius = 4;
+    ctx.beginPath();
+    ctx.moveTo(boxX + radius, boxY);
+    ctx.lineTo(boxX + boxW - radius, boxY);
+    ctx.arcTo(boxX + boxW, boxY, boxX + boxW, boxY + radius, radius);
+    ctx.lineTo(boxX + boxW, boxY + boxH - radius);
+    ctx.arcTo(boxX + boxW, boxY + boxH, boxX + boxW - radius, boxY + boxH, radius);
+    ctx.lineTo(boxX + radius, boxY + boxH);
+    ctx.arcTo(boxX, boxY + boxH, boxX, boxY + boxH - radius, radius);
+    ctx.lineTo(boxX, boxY + radius);
+    ctx.arcTo(boxX, boxY, boxX + radius, boxY, radius);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      const rowY = boxY + padding + i * rowHeight;
+
+      ctx.fillStyle = entry.dataset.color;
+      ctx.fillRect(boxX + padding, rowY + (rowHeight - swatchSize) / 2, swatchSize, swatchSize);
+
+      ctx.fillStyle = '#333';
+      ctx.font = `${fontSize}px Calibri`;
+      const nameX = boxX + padding + swatchSize + swatchGap;
+      const title = entry.dataset.displayTitle();
+      let displayName = title;
+      if (ctx.measureText(title).width > maxAllowedNameWidth) {
+        while (displayName.length > 3 && ctx.measureText(displayName + '...').width > maxAllowedNameWidth) {
+          displayName = displayName.slice(0, -1);
+        }
+        displayName += '...';
+      }
+      ctx.fillText(displayName, nameX, rowY + rowHeight - 3);
+
+      const valStr = entry.value.toLocaleString(undefined, { maximumFractionDigits: 4 });
+      const valX = boxX + boxW - padding;
+      ctx.fillStyle = '#000';
+      ctx.textAlign = 'right';
+      ctx.fillText(valStr, valX, rowY + rowHeight - 3);
+      ctx.textAlign = 'left';
+    }
+  }
+
   function renderData(ctx: CanvasRenderingContext2D) {
     for (const ds of datasets) {
       renderDataSet(ctx, ds);
@@ -787,6 +940,7 @@
     renderValueAxis(ctx);
     renderDateAxis(ctx);
     renderData(ctx);
+    renderHoverTooltip(ctx);
     renderDateHighlight(ctx);
     renderLegend(ctx);
     renderNavBox(ctx);
