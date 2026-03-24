@@ -710,7 +710,10 @@
    * Returns the point's array index, its scaled value, and its actual date index,
    * or null if the dataset is empty or the closest point has no valid value.
    */
-  function findClosestPoint(dataset: DataSet, targetDateIndex: number): { index: number; value: number; dateIndex: number } | null {
+  function findClosestPoint(
+    dataset: DataSet,
+    targetDateIndex: number,
+  ): { index: number; value: number; dateIndex: number } | null {
     const { data } = dataset;
     if (data.length === 0) return null;
 
