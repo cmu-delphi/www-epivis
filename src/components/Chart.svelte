@@ -82,6 +82,7 @@
   export let showPoints = false;
   export let interpolate = false;
   export let highlightedDate: EpiDate | null = null;
+  export let isHoverTooltip: boolean = true;
 
   $: datasets = $activeDatasets;
 
@@ -943,7 +944,9 @@
     renderValueAxis(ctx);
     renderDateAxis(ctx);
     renderData(ctx);
-    renderHoverTooltip(ctx);
+    if (isHoverTooltip) {
+      renderHoverTooltip(ctx);
+    }
     renderDateHighlight(ctx);
     renderLegend(ctx);
     renderNavBox(ctx);
@@ -954,6 +957,7 @@
     render({
       ctx,
       showPoints,
+      isHoverTooltip,
       interpolate,
       highlightedDate,
       navMode,

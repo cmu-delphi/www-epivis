@@ -12,9 +12,18 @@
     faQuestion,
     faSearchPlus,
     faShuffle,
+    faCrosshairs,
   } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { activeDatasets, isShowingPoints, navMode, randomizeColors, reset, scaleMean } from '../store';
+  import {
+    activeDatasets,
+    isShowingPoints,
+    navMode,
+    randomizeColors,
+    reset,
+    scaleMean,
+    isHoverTooltip,
+  } from '../store';
   import type { IChart } from '../store';
   import { NavMode } from './chartUtils';
   import { tour } from '../tour';
@@ -70,6 +79,9 @@
       case 'h':
         tour.cancel();
         tour.start();
+        break;
+      case 't':
+        $isHoverTooltip = !$isHoverTooltip;
         break;
     }
   }
@@ -138,6 +150,17 @@
       title="Show or Hide Points<br/>(Keyboard Shortcut: s)"
       data-tour="points"
       uk-tooltip><Fa icon={faEllipsisH} /></button
+    >
+    <button
+      type="button"
+      class="uk-button uk-button-small"
+      class:uk-active={$isHoverTooltip}
+      class:uk-button-secondary={$isHoverTooltip}
+      class:uk-button-default={!$isHoverTooltip}
+      on:click|preventDefault={() => ($isHoverTooltip = !$isHoverTooltip)}
+      title="Show or Hide Hover Tooltip<br/>(Keyboard Shortcut: t)"
+      data-tour="hoverTooltip"
+      uk-tooltip><Fa icon={faCrosshairs} /></button
     >
     <button
       type="button"
