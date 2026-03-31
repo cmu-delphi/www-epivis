@@ -131,6 +131,15 @@ tour.addStep({
   text: `This action will change whether points should be rendered representing individual data points of the time series. Keyboard Shortcut: s`,
   buttons: nextCancel,
 });
+tour.addStep({
+  attachTo: {
+    element: '[data-tour=hoverTooltip]',
+    on: 'auto',
+  },
+  title: 'Toggle Hover Tooltip',
+  text: `This action will change whether a tooltip should be displayed when hovering over a data point. Keyboard Shortcut: t`,
+  buttons: nextCancel,
+});
 
 tour.addStep({
   attachTo: {

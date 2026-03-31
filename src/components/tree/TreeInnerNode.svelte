@@ -1,11 +1,11 @@
 <script lang="ts">
   import DataSet from '../../data/DataSet';
   import type { DataGroup } from '../../data/DataSet';
-  import type { IChart } from '../store';
+  import type { IChart } from '../../store';
   import { expandedDataGroups } from '../../store';
   import TreeLeafNode from './TreeLeafNode.svelte';
   import Fa from 'svelte-fa';
-  import { faChevronRight, faChevronDown } from '@fortawesome/free-solid-svg-icons';
+  import { faChevronRight, faChevronDown, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 
   export let node: DataGroup;
   export let chart: IChart | null;
@@ -26,7 +26,20 @@
     <span>
       {node.displayTitle()}
     </span>
+    {#if node.dataSourceDocumentationUrl}
+      <a
+        class="info-icon"
+        href={node.dataSourceDocumentationUrl}
+        target="_blank"
+        on:click|stopPropagation
+        title={node.dataSourceDescription}
+        uk-tooltip="pos: bottom-right"
+      >
+        <Fa icon={faInfoCircle} style="width: 0.9em; margin-right: 0.5em" />
+      </a>
+    {/if}
   </span>
+
   {#if expanded}
     {#each node.datasets as child (child.displayTitle())}
       {#if child instanceof DataSet}
