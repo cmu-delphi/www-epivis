@@ -135,6 +135,8 @@ export function loadDataSet(
   columns: string[],
   api_key = '',
   columnRenamings: Record<string, string> = {},
+  // add additional labels for the error message
+  additionalLabels: Record<string, string> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -169,7 +171,7 @@ export function loadDataSet(
             .alert(
               `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data, which suggests that the API has no available information for the selected location.
+          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}.
         </div>`,
             )
             .then(() => null);
@@ -232,6 +234,13 @@ export function fetchCOVIDcastMeta(
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
   const regionLabel = cdcLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] CDC Page Hits: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'CDC Page Hist',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/cdc.html',
+    dataSourceDescription:
+      'This data source tracks public interest in influenza by counting visits to specific informational pages on the CDC website. Delphi receives server log summaries directly from the CDC, which count page hits for key topics such as ‘Flu Symptoms & Severity’, ‘How Flu Spreads’, and ‘What To Do If You Get Sick’. These counts act as a proxy for information-seeking behavior related to the flu.',
+  };
   return loadDataSet(
     title,
     'cdc',
@@ -241,7 +250,15 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
     { locations },
     ['total', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8'],
     auth,
-  );
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 
 export function importCOVIDcast({
@@ -266,6 +283,12 @@ export function importCOVIDcast({
     // link (an URL-encoded signal list, processed through `deriveLinkDefaults`).
     api_key = get(apiKey);
   }
+  const additionalLabels = {
+    titleLabel: 'COVIDcast (' + data_source + ':' + signal + ')',
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+    dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
+    dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
+  };
   return loadDataSet(
     title,
     'covidcast',
@@ -279,11 +302,15 @@ export function importCOVIDcast({
     { data_source, signal, time_type, geo_type, geo_value },
     ['value', 'stderr', 'sample_size'],
     api_key,
+    {},
+    additionalLabels,
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'value' data
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
     }
     return ds;
   });
@@ -298,6 +325,13 @@ export function importCOVIDHosp({
 }): Promise<DataGroup | null> {
   const regionLabel = covidHospLocations.find((d) => d.value === states)?.label ?? '?';
   let title = `[API] COVID Hospitalization: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'COVID Hospitalization',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/covid_hosp.html',
+    dataSourceDescription:
+      'This dataset provides daily surveys of hospital COVID-19 capacity and patient impact, as reported by US hospitals. Data is acquired from HealthData.gov. It is a mirror of the “COVID-19 Reported Patient Impact and Hospital Capacity by State Timeseries” and “COVID-19 Reported Patient Impact and Hospital Capacity by State” datasets provided by HHS via healthdata.gov. The latter provides more frequent updates, so it is combined with the former to create a single dataset which is as recent as possible.',
+  };
   if (issues != null) {
     title += ` (issued on: ${issues})`;
   } else {
@@ -364,7 +398,16 @@ export function importCOVIDHosp({
       'adult_icu_bed_utilization_numerator',
       'adult_icu_bed_utilization_denominator',
     ],
-  );
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 
 export function importFluSurv({
@@ -378,6 +421,13 @@ export function importFluSurv({
 }): Promise<DataGroup | null> {
   const regionLabel = fluSurvRegions.find((d) => d.value === locations)?.label ?? '?';
   const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'FluSurv',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/flusurv.html',
+    dataSourceDescription:
+      'This data source provides laboratory-confirmed influenza hospitalization rates from the CDC’s Influenza Hospitalization Surveillance Network (FluSurv-NET). The data includes age-stratified hospitalization rates and rates by race, sex, and flu type, when available.',
+  };
   return loadDataSet(
     title,
     'flusurv',
@@ -385,8 +435,46 @@ export function importFluSurv({
       epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
     },
     { locations, issues, lag },
-    ['rate_age_0', 'rate_age_1', 'rate_age_2', 'rate_age_3', 'rate_age_4', 'rate_overall'],
-  );
+    [
+      'rate_age_0',
+      'rate_age_1',
+      'rate_age_2',
+      'rate_age_3',
+      'rate_age_4',
+      'rate_overall',
+      'rate_age_5',
+      'rate_age_6',
+      'rate_age_7',
+      'rate_age_18t29',
+      'rate_age_30t39',
+      'rate_age_40t49',
+      'rate_age_5t11',
+      'rate_age_12t17',
+      'rate_age_lt18',
+      'rate_age_gte18',
+      'rate_age_1t4',
+      'rate_age_gte75',
+      'rate_age_0tlt1',
+      'rate_race_white',
+      'rate_race_black',
+      'rate_race_hisp',
+      'rate_race_asian',
+      'rate_race_natamer',
+      'rate_sex_male',
+      'rate_sex_female',
+      'rate_flu_a',
+      'rate_flu_b',
+    ],
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 
 export function importFluView({
@@ -402,6 +490,13 @@ export function importFluView({
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'ILINet (aka FluView)',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/fluview.html',
+    dataSourceDescription:
+      'The fluview endpoint reports influenza-like illness (ILI) data sourced from the U.S. Outpatient Influenza-like Illness Surveillance Network (ILINet) dashboard. Data is sourced from both ILINet (public health labs) and WHO_NREVSS (clinical labs).',
+  };
   return loadDataSet(
     title,
     'fluview',
@@ -427,11 +522,14 @@ export function importFluView({
       wili: '%wILI',
       ili: '%ILI',
     },
+    additionalLabels,
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'percent weighted ILI' data
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['%wILI'];
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
     }
     return ds;
   });
@@ -448,6 +546,13 @@ export function importFluViewClinical({
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'FluView Clinical',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/fluview_clinical.html',
+    dataSourceDescription:
+      'This data source provides age-stratified clinical data based on laboratory-confirmed influenza reports from the US FluView dashboard.',
+  };
   return loadDataSet(
     title,
     'fluview_clinical',
@@ -456,11 +561,16 @@ export function importFluViewClinical({
     },
     { regions, issues, lag },
     ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
+    '',
+    {},
+    additionalLabels,
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'percent_positive' data
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['percent_positive'];
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
     }
     return ds;
   });
@@ -469,6 +579,13 @@ export function importFluViewClinical({
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = gftLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] GFT: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'GFT',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/gft.html',
+    dataSourceDescription:
+      'This data source provides a historical estimate of influenza activity based on the aggregated volume of search queries related to flu symptoms, treatments, and related topics. The data is sourced from Google Flu Trends (GFT), which used these query volumes to model ILI rates.',
+  };
   return loadDataSet(
     title,
     'gft',
@@ -477,7 +594,16 @@ export function importGFT({ locations }: { locations: string }): Promise<DataGro
     },
     { locations },
     ['num'],
-  );
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 
 export function importGHT({
@@ -491,6 +617,13 @@ export function importGHT({
 }): Promise<DataGroup | null> {
   const regionLabel = ghtLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] GHT: ${regionLabel} [${query}]`;
+  const additionalLabels = {
+    titleLabel: 'GHT',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/ght.html',
+    dataSourceDescription:
+      'The ght endpoint provides access to Google Health Trends data, which tracks the aggregated volume of search queries related to specific influenza symptoms and treatments.',
+  };
   return loadDataSet(
     title,
     'ght',
@@ -500,12 +633,27 @@ export function importGHT({
     { locations, query },
     ['value'],
     auth,
-  );
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 
 export function importNIDSSDengue({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = nidssDengueLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] NIDSS-Dengue: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'NIDSS-Dengue',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/nidss_dengue.html',
+    dataSourceDescription:
+      'This endpoint reports counts of confirmed dengue cases from the Taiwan National Infectious Disease Statistics System (NIDSS) via the Taiwan CDC.',
+  };
   return loadDataSet(
     title,
     'nidss_dengue',
@@ -514,8 +662,18 @@ export function importNIDSSDengue({ locations }: { locations: string }): Promise
     },
     { locations },
     ['count'],
-  );
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
+
 export function importNIDSSFlu({
   regions,
   issues,
@@ -527,6 +685,13 @@ export function importNIDSSFlu({
 }): Promise<DataGroup | null> {
   const regionLabel = nidssFluLocations.find((d) => d.value === regions)?.label ?? '?';
   const title = appendIssueToTitle(`[API] NIDSS-influenza: ${regionLabel}`, { issues, lag });
+  const additionalLabels = {
+    titleLabel: 'NIDSS-influenza',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/nidss_flu.html',
+    dataSourceDescription:
+      'This endpoint provides weekly influenza case counts for Taiwan, as reported by the Taiwan National Infectious Disease Statistics System (NIDSS) via the Taiwan CDC.',
+  };
   return loadDataSet(
     title,
     'nidss_flu',
@@ -535,11 +700,28 @@ export function importNIDSSFlu({
     },
     { regions, issues, lag },
     ['visits', 'ili'],
-  );
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
+
 export function importNowcast({ locations }: { locations: string }): Promise<DataGroup | null> {
   const regionLabel = nowcastLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] Delphi Nowcast: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'Delphi Nowcast',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/nowcast.html',
+    dataSourceDescription:
+      'This endpoint provides Delphi’s nowcast estimates of the percentage of outpatient visits due to Influenza-Like Illness (ILI).',
+  };
   return loadDataSet(
     title,
     'nowcast',
@@ -548,11 +730,27 @@ export function importNowcast({ locations }: { locations: string }): Promise<Dat
     },
     { locations },
     ['value', 'std'],
-  );
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 export function importQuidel({ auth, locations }: { auth: string; locations: string }): Promise<DataGroup | null> {
   const regionLabel = quidelLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] Quidel Data: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'Quidel Data',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/quidel.html',
+    dataSourceDescription:
+      'This data source provides influenza testing data from Quidel Corporation, covering HHS health regions. Data is aggregated by unique device. Covers US states (excluding some like FL in older mappings).',
+  };
   return loadDataSet(
     title,
     'quidel',
@@ -562,7 +760,15 @@ export function importQuidel({ auth, locations }: { auth: string; locations: str
     { locations },
     ['value'],
     auth,
-  );
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 export function importSensors({
   auth,
@@ -576,6 +782,13 @@ export function importSensors({
   const regionLabel = sensorLocations.find((d) => d.value === locations)?.label ?? '?';
   const namesLabel = sensorNames.find((d) => d.value === names)?.label ?? '?';
   const title = `[API] Delphi Sensor: ${namesLabel}: ${regionLabel}`;
+  const additionalLabels = {
+    titleLabel: 'Delphi Sensor (' + namesLabel + ')',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/sensors.html',
+    dataSourceDescription:
+      'This endpoint provides access to Delphi’s digital surveillance sensor estimates for seasonal influenza-like illness (ILI). It aggregates signals from multiple digital sources, including Google Health Trends, Wikipedia access counts, Twitter posts, and CDC web traffic, to provide real-time indicators of flu activity before official clinical reports are finalized.',
+  };
   return loadDataSet(
     title,
     'sensors',
@@ -585,7 +798,15 @@ export function importSensors({
     { names, locations },
     ['value'],
     auth,
-  );
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 // twtr
 export function importTwitter({
@@ -599,6 +820,13 @@ export function importTwitter({
 }): Promise<DataGroup | null> {
   const regionLabel = twitterLocations.find((d) => d.value === locations)?.label ?? '?';
   const title = `[API] Twitter: ${regionLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
+  const additionalLabels = {
+    titleLabel: 'Twitter',
+    selectionLabel: 'location: ' + regionLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/twitter.html',
+    dataSourceDescription:
+      'This data source provides estimates of influenza activity derived from the content of public Twitter posts. The data was processed by HealthTweets.org using natural language processing (NLP) to classify tweets as flu-related.',
+  };
   return loadDataSet(
     title,
     'twitter',
@@ -612,7 +840,15 @@ export function importTwitter({
     { locations, resolution },
     ['num', 'total', 'percent'],
     auth,
-  );
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 export function importWiki({
   articles,
@@ -627,6 +863,13 @@ export function importWiki({
 }): Promise<DataGroup | null> {
   const articleLabel = wikiArticles.find((d) => d.value === articles)?.label ?? '?';
   let title = `[API] Wiki: ${articleLabel}, ${resolution[0].toUpperCase()}${resolution.slice(1)}`;
+  const additionalLabels = {
+    titleLabel: 'Wiki',
+    selectionLabel: 'article: ' + articleLabel,
+    dataSourceDocumentationUrl: 'https://cmu-delphi.github.io/delphi-epidata/api/wiki.html',
+    dataSourceDescription:
+      'This data source measures public interest in health topics by tracking access counts for specific influenza-related articles on English-language Wikipedia. Delphi aggregates these counts from Wikimedia’s public pageview dumps, providing a proxy for information-seeking behavior and public awareness of the flu.',
+  };
   if (hour != null) {
     title += ` (${hour})`;
   }
@@ -642,5 +885,14 @@ export function importWiki({
         },
     { articles, hour, language, resolution },
     ['count', 'total', 'value'],
-  );
+    '',
+    {},
+    additionalLabels,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }

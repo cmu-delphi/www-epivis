@@ -16,6 +16,7 @@ export const expandedDataGroups = writable([defaults.group]);
 export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
 export const navMode = writable(defaults.navMode);
+export const isHoverTooltip = writable(defaults.isHoverTooltip);
 
 export function getFormSelections() {
   try {
@@ -97,6 +98,7 @@ export function getDirectLink(chart: IChart): { url: URL; anySkipped: boolean } 
     showPoints: get(isShowingPoints),
     viewport: chart.getViewport(),
     navMode: get(navMode),
+    isHoverTooltip: get(isHoverTooltip),
   });
 }
 
