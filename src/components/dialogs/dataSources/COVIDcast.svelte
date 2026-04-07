@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { fetchCOVIDcastMeta, importCOVIDcast } from '../../../api/EpiData';
+  import { fetchCOVIDcastMeta, importCOVIDcast, deriveTimeType } from '../../../api/EpiData';
+  import type { CovidcastMetaResponse } from '../../../api/EpiData';
   import type { LabelValue } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
   import TextField from '../inputs/TextField.svelte';
@@ -9,11 +10,15 @@
   export let id: string;
   let valid_key = true;
 
-  let dataSources: (LabelValue & { signals: string[] })[] = [];
-  let geoTypes: string[] = [];
+  let cachedMeta: CovidcastMetaResponse = {};
+  let dataSources: (LabelValue & { signals: string[]; geo_types: string[] })[] = [];
 
   $: dataSignals = (dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { signals: [] })
     .signals;
+
+  $: geoTypes = (
+    dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { geo_types: [] }
+  ).geo_types;
 
   $: {
     if ($formSelections.covidcast.dataSource) {
@@ -22,7 +27,6 @@
     }
   }
 
-  // Helper function; delay invoking "fn" until "ms" milliseconds have passed
   const debounce = (fn: Function, ms = 500) => {
     let timeoutId: ReturnType<typeof setTimeout>;
     return function (this: any, ...args: any[]) {
@@ -33,28 +37,19 @@
 
   function fetchMetadata() {
     fetchCOVIDcastMeta($apiKey).then((res) => {
-      if (res.length == 0) {
+      if (Object.keys(res).length === 0) {
         valid_key = false;
       } else {
         valid_key = true;
-        geoTypes = [...new Set(res.map((d) => d.geo_type))];
-        const byDataSource = new Map<string, LabelValue & { signals: string[] }>();
-        for (const row of res) {
-          const ds = byDataSource.get(row.data_source);
-          if (!ds) {
-            byDataSource.set(row.data_source, {
-              label: row.data_source,
-              value: row.data_source,
-              signals: [row.signal],
-            });
-          } else if (!ds.signals.includes(row.signal)) {
-            ds.signals.push(row.signal);
-          }
-        }
-        byDataSource.forEach((entry) => {
-          entry.signals.sort();
-        });
-        dataSources = [...byDataSource.values()].sort((a, b) => a.value.localeCompare(b.value));
+        cachedMeta = res;
+        dataSources = Object.entries(res)
+          .map(([name, entry]) => ({
+            label: name,
+            value: name,
+            signals: [...entry.signals].sort(),
+            geo_types: [...entry.geo_types].sort(),
+          }))
+          .sort((a, b) => a.value.localeCompare(b.value));
       }
     });
   }
@@ -63,21 +58,21 @@
     fetchMetadata();
   });
 
-  export function importDataSet() {
-    return fetchCOVIDcastMeta($apiKey).then((res) => {
-      const meta = res.filter(
-        (row) =>
-          row.data_source === $formSelections.covidcast.dataSource && row.signal === $formSelections.covidcast.signal,
-      );
-      const time_type = meta[0].time_type;
-      return importCOVIDcast({
-        data_source: $formSelections.covidcast.dataSource,
-        geo_type: $formSelections.covidcast.geoType,
-        geo_value: $formSelections.covidcast.geoValue,
-        signal: $formSelections.covidcast.signal,
-        time_type,
-        api_key: $apiKey,
-      });
+  export async function importDataSet() {
+    let meta = cachedMeta;
+    if (Object.keys(meta).length === 0) {
+      meta = await fetchCOVIDcastMeta($apiKey);
+    }
+    const dataSource = $formSelections.covidcast.dataSource;
+    const sourceEntry = meta[dataSource];
+    const time_type = sourceEntry ? deriveTimeType(sourceEntry.time_value_range) : 'day';
+    return importCOVIDcast({
+      data_source: dataSource,
+      geo_type: $formSelections.covidcast.geoType,
+      geo_value: $formSelections.covidcast.geoValue,
+      signal: $formSelections.covidcast.signal,
+      time_type,
+      api_key: $apiKey,
     });
   }
 </script>

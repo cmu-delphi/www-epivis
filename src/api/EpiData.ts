@@ -41,8 +41,22 @@ export const currentDate = epidate.getYear() * 10000 + epidate.getMonth() * 100 
 
 declare const process: { env: Record<string, string> };
 const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
+const CAST_API_ENDPOINT = process.env.EPIDATA_CAST_API_ENDPOINT_URL;
 
 export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
+
+export interface CovidcastMetaSourceEntry {
+  version_range: { latest: string; first: string };
+  time_value_range: { latest: string; first: string };
+  signals: string[];
+  geo_types: string[];
+}
+
+export type CovidcastMetaResponse = Record<string, CovidcastMetaSourceEntry>;
+
+export function deriveTimeType(timeValueRange: { first: string; latest: string }): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(timeValueRange.first) ? 'day' : 'week';
+}
 
 function processResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
@@ -214,21 +228,16 @@ export function loadDataSet(
     });
 }
 
-export function fetchCOVIDcastMeta(
-  api_key: string,
-): Promise<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]> {
-  let url_string = ENDPOINT + `/covidcast_meta/`;
+export function fetchCOVIDcastMeta(api_key: string): Promise<CovidcastMetaResponse> {
+  let url_string = CAST_API_ENDPOINT + `/metadata/`;
   if (api_key !== '') {
     url_string += `?api_key=${api_key}`;
   }
   const url = new URL(url_string);
-  url.searchParams.set('format', 'json');
-  return fetchImpl<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]>(url).catch(
-    (error) => {
-      console.warn('failed fetching data', error);
-      return [];
-    },
-  );
+  return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
+    console.warn('failed fetching data', error);
+    return {} as CovidcastMetaResponse;
+  });
 }
 
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
