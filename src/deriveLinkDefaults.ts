@@ -38,6 +38,7 @@ export interface SharedState {
   viewport: null | [number, number, number, number];
   showPoints: boolean;
   navMode: NavMode;
+  isHoverTooltip: boolean;
 }
 
 const DEFAULT_VALUES: SharedState = {
@@ -46,6 +47,7 @@ const DEFAULT_VALUES: SharedState = {
   viewport: DEFAULT_VIEWPORT,
   showPoints: false,
   navMode: NavMode.pan,
+  isHoverTooltip: true,
 };
 
 const lookups = {

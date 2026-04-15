@@ -2,7 +2,7 @@
   import Chart from './components/Chart.svelte';
   import LeftMenu from './components/LeftMenu.svelte';
   import TopMenu from './components/TopMenu.svelte';
-  import { initialViewport, isShowingPoints, navMode } from './store';
+  import { initialViewport, isShowingPoints, navMode, isHoverTooltip } from './store';
   import type { IChart } from './store';
   import { onMount } from 'svelte';
   import { tour } from './tour';
@@ -48,4 +48,5 @@
   bind:showPoints={$isShowingPoints}
   bind:navMode={$navMode}
   initialViewport={$initialViewport}
+  bind:isHoverTooltip={$isHoverTooltip}
 />

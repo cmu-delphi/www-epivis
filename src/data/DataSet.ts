@@ -110,6 +110,8 @@ export class DataGroup {
   public parent?: DataGroup;
   // which fields of this DataGroup should be "enabled" (shown/displayed) on load:
   public defaultEnabled: string[] = [];
+  public dataSourceDescription: string | null = null;
+  public dataSourceDocumentationUrl: string | null = null;
 
   constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
 
