@@ -96,7 +96,7 @@
 <SelectField
   id="{id}-r"
   label="Data Source"
-  name="data_source"
+  name="source"
   bind:value={$formSelections.covidcast.dataSource}
   options={dataSources}
 />

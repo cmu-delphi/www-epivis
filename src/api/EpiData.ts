@@ -279,7 +279,7 @@ export function importCOVIDcast({
   const additionalLabels = {
     titleLabel: 'COVIDcast (' + source + ':' + signal + ')',
     selectionLabel: 'location: ' + geo_type + ':' + geo_value,
-    dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
+    dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${source}.html`,
     dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
   };
   return loadDataSet(

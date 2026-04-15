@@ -73,7 +73,7 @@ const lookups = {
 const argOrders: Record<string, string[]> = {
   cdc: ['auth', 'locations'],
   cdcp: ['auth', 'locations'],
-  covidcast: ['data_source', 'signal', 'time_type', 'geo_type', 'geo_value'],
+  covidcast: ['source', 'signal', 'geo_type', 'geo_value'],
   covid_hosp: ['states', 'issues'],
   flusurv: ['locations', 'issues', 'lag'],
   fluview: ['regions', 'issues', 'lag', 'auth'],
@@ -138,8 +138,8 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       } else if (params._endpoint) {
         // Derive custom title from params
         customTitle = `${params._endpoint}`;
-        if (params.data_source && params.signal) {
-          customTitle += ` > ${params.data_source}:${params.signal}`;
+        if (params.source && params.signal) {
+          customTitle += ` > ${params.source}:${params.signal}`;
         }
         if (params.geo_type && params.geo_value) {
           customTitle += ` > ${params.geo_type}:${params.geo_value}`;
