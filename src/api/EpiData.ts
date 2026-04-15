@@ -30,7 +30,7 @@ import { apiKey, expandedDataGroups, storeApiKeys } from '../store';
 // import EpiPoint from "../data/EpiPoint";
 
 export function epiRange(from: string | number, to: string | number): string {
-  return `${from}-${to}`;
+  return `${from}:${to}`;
 }
 
 // find the current epiweek and date
@@ -40,9 +40,22 @@ export const currentEpiWeek = epidate.getEpiYear() * 100 + epidate.getEpiWeek();
 export const currentDate = epidate.getYear() * 10000 + epidate.getMonth() * 100 + epidate.getDay();
 
 declare const process: { env: Record<string, string> };
-const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
+const CAST_API_ENDPOINT = process.env.EPIDATA_CAST_API_ENDPOINT_URL;
 
 export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
+
+export interface CovidcastMetaSourceEntry {
+  version_range: { latest: string; first: string };
+  time_value_range: { latest: string; first: string };
+  signals: string[];
+  geo_types: string[];
+}
+
+export type CovidcastMetaResponse = Record<string, CovidcastMetaSourceEntry>;
+
+export function deriveTimeType(timeValueRange: { first: string; latest: string }): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(timeValueRange.first) ? 'day' : 'week';
+}
 
 function processResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
@@ -88,26 +101,13 @@ function loadEpidata(
   for (const col of columns) {
     const points: EpiPoint[] = [];
     for (const row of epidata) {
-      if (row != null && typeof row.time_value === 'number') {
-        const timeValue = row.time_value;
-        if (timeValue.toString().length == 6) {
-          row.epiweek = timeValue;
-        } else {
-          row.date = timeValue.toString();
-        }
-      }
-      let date: EpiDate;
-      if (row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
-        date = EpiDate.parse(row.date.toString());
-      } else if (row != null && typeof row.epiweek === 'number') {
-        const year = Math.floor(row.epiweek / 100);
-        const week = row.epiweek % 100;
-        date = EpiDate.fromEpiweek(year, week);
+      if (row != null && typeof row.time_value === 'string') {
+        points.push(new EpiPoint(EpiDate.parse(row.time_value), row[col] as number));
       } else {
-        throw new Error(`missing date/week column in response`);
+        throw new Error(`missing time_value column in response`);
       }
-      points.push(new EpiPoint(date, row[col] as number));
     }
+    points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
     if (points.length > 0) {
       // overwrite default column name if there's an overwrite in columnRenamings
       const title = colRenamings.has(col) ? colRenamings.get(col) : col;
@@ -149,7 +149,7 @@ export function loadDataSet(
       )
       .then(() => null);
   }
-  let url_string = ENDPOINT + `/${endpoint}/`;
+  let url_string = CAST_API_ENDPOINT + `/${endpoint}/`;
   if (api_key !== '') {
     url_string += `?api_key=${api_key}`;
   }
@@ -214,21 +214,16 @@ export function loadDataSet(
     });
 }
 
-export function fetchCOVIDcastMeta(
-  api_key: string,
-): Promise<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]> {
-  let url_string = ENDPOINT + `/covidcast_meta/`;
+export function fetchCOVIDcastMeta(api_key: string): Promise<CovidcastMetaResponse> {
+  let url_string = CAST_API_ENDPOINT + `/metadata/`;
   if (api_key !== '') {
     url_string += `?api_key=${api_key}`;
   }
   const url = new URL(url_string);
-  url.searchParams.set('format', 'json');
-  return fetchImpl<{ geo_type: string; signal: string; data_source: string; time_type?: string }[]>(url).catch(
-    (error) => {
-      console.warn('failed fetching data', error);
-      return [];
-    },
-  );
+  return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
+    console.warn('failed fetching data', error);
+    return {} as CovidcastMetaResponse;
+  });
 }
 
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
@@ -262,21 +257,19 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
 }
 
 export function importCOVIDcast({
-  data_source,
+  source,
   geo_type,
   geo_value,
   signal,
-  time_type = 'day',
   api_key,
 }: {
-  data_source: string;
+  source: string;
   signal: string;
-  time_type?: string;
   geo_type: string;
   geo_value: string;
   api_key: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] COVIDcast: ${data_source}:${signal} (${geo_type}:${geo_value})`;
+  const title = `[API] COVIDcast: ${source}:${signal} (${geo_type}:${geo_value})`;
   if (!api_key && get(storeApiKeys)) {
     // if no API key was passed to this method, but we have a saved one, use it...
     // this gets around access control and rate limiting when using an epivis "shared"
@@ -284,23 +277,17 @@ export function importCOVIDcast({
     api_key = get(apiKey);
   }
   const additionalLabels = {
-    titleLabel: 'COVIDcast (' + data_source + ':' + signal + ')',
+    titleLabel: 'COVIDcast (' + source + ':' + signal + ')',
     selectionLabel: 'location: ' + geo_type + ':' + geo_value,
-    dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
+    dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${source}.html`,
     dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
   };
   return loadDataSet(
     title,
-    'covidcast',
-    {
-      time_type: time_type,
-      time_values:
-        time_type === 'day'
-          ? epiRange(firstDate.covidcast, currentDate)
-          : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
-    },
-    { data_source, signal, time_type, geo_type, geo_value },
-    ['value', 'stderr', 'sample_size'],
+    'viz',
+    {},
+    { source, signal, geo_type, geo_value },
+    ['value'],
     api_key,
     {},
     additionalLabels,
