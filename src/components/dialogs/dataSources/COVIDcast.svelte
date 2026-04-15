@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { fetchCOVIDcastMeta, importCOVIDcast, deriveTimeType } from '../../../api/EpiData';
+  import { fetchCOVIDcastMeta, importCOVIDcast } from '../../../api/EpiData';
   import type { CovidcastMetaResponse } from '../../../api/EpiData';
   import type { LabelValue } from '../../../data/data';
   import SelectField from '../inputs/SelectField.svelte';
@@ -16,9 +16,8 @@
   $: dataSignals = (dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { signals: [] })
     .signals;
 
-  $: geoTypes = (
-    dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { geo_types: [] }
-  ).geo_types;
+  $: geoTypes = (dataSources.find((d) => d.value === $formSelections.covidcast.dataSource) || { geo_types: [] })
+    .geo_types;
 
   $: {
     if ($formSelections.covidcast.dataSource) {
@@ -64,14 +63,11 @@
       meta = await fetchCOVIDcastMeta($apiKey);
     }
     const dataSource = $formSelections.covidcast.dataSource;
-    const sourceEntry = meta[dataSource];
-    const time_type = sourceEntry ? deriveTimeType(sourceEntry.time_value_range) : 'day';
     return importCOVIDcast({
-      data_source: dataSource,
+      source: dataSource,
       geo_type: $formSelections.covidcast.geoType,
       geo_value: $formSelections.covidcast.geoValue,
       signal: $formSelections.covidcast.signal,
-      time_type,
       api_key: $apiKey,
     });
   }
@@ -122,6 +118,7 @@
   id="{id}-gv"
   label="Geographic Value"
   bind:value={$formSelections.covidcast.geoValue}
+  required={false}
   name="geo_values"
   placeholder="e.g., PA or 42003"
 />
