@@ -21,6 +21,7 @@
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
   import PopHive from './dataSources/PopHive.svelte';
+  import Nwss from './dataSources/NWSS.svelte';
   import { navMode, storeApiKeys } from '../../store';
   import { NavMode } from '../chartUtils';
   import { formSelections } from '../../store';
@@ -92,6 +93,16 @@
             value="pophive"
           />
           PopHive</label
+        >
+        <label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="nwss"
+          />
+          NWSS (Wastewater Surveillance)</label
         >
         <label
           ><input
@@ -253,6 +264,8 @@
       <CoviDcast {id} bind:this={handler} />
     {:else if $formSelections.dataSource === 'pophive'}
       <PopHive {id} bind:this={handler} />
+    {:else if $formSelections.dataSource === 'nwss'}
+      <Nwss {id} bind:this={handler} />
     {/if}
   </form>
 

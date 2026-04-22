@@ -100,7 +100,7 @@ function loadEpidata(
   for (const col of columns) {
     const points: EpiPoint[] = [];
     for (const row of epidata) {
-      if (params.source != 'pophive') {
+      if (params.source != 'pophive' && params.source != 'nwss') {
         if (row != null && typeof row.time_value === 'number') {
           const timeValue = row.time_value;
           if (timeValue.toString().length == 6) {
@@ -307,6 +307,73 @@ export function importPopHive({
     'viz',
     {},
     { source: 'pophive', signal, geo_type, geo_value, extra_keys: `age_group:${age_group}` },
+    ['value'],
+    api_key,
+    {},
+    additionalLabels,
+    CAST_API_V5_ENDPOINT,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['value'];
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
+}
+
+export function fetchNwssMeta(api_key: string): Promise<CovidcastMetaResponse> {
+  let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=nwss`;
+  if (api_key !== '') {
+    url_string += `&api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
+  return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
+    console.warn('failed fetching data', error);
+    return {} as CovidcastMetaResponse;
+  });
+}
+
+export function importNwss({
+  signal,
+  geo_type,
+  geo_value,
+  pcr_target,
+  nwss_source,
+  fill_method,
+  api_key,
+}: {
+  signal: string;
+  geo_type: string;
+  geo_value: string;
+  pcr_target: string;
+  nwss_source: string;
+  fill_method: string;
+  api_key: string;
+}): Promise<DataGroup | null> {
+  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geo_value})`;
+  if (!api_key && get(storeApiKeys)) {
+    api_key = get(apiKey);
+  }
+  const additionalLabels = {
+    titleLabel: 'NWSS (nwss:' + signal + ')',
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+    dataSourceDocumentationUrl: '',
+    dataSourceDescription: '',
+  };
+  return loadDataSet(
+    title,
+    'viz',
+    {},
+    {
+      source: 'nwss',
+      signal,
+      geo_type,
+      geo_value,
+      pcr_target,
+      fill_method,
+      extra_keys: `nwss_source:${nwss_source}`,
+    },
     ['value'],
     api_key,
     {},
