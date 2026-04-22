@@ -11,7 +11,17 @@
   let dataSignals: string[] = [];
   let geoTypes: string[] = [];
 
-  const pcrTargets = ['fluav', 'fluav a h5', 'hmpxv', 'hmpxv clade i', 'hmpxv clade ii', 'mev_wt', 'nvo', 'rsv', 'sars-cov-2'];
+  const pcrTargets = [
+    'fluav',
+    'fluav a h5',
+    'hmpxv',
+    'hmpxv clade i',
+    'hmpxv clade ii',
+    'mev_wt',
+    'nvo',
+    'rsv',
+    'sars-cov-2',
+  ];
   const nwssSources = ['CDC_Biobot', 'CDC_Verily', 'State_Territory', 'WastewaterSCAN'];
   const fillMethods = ['source'];
 
