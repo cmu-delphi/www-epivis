@@ -53,6 +53,9 @@ export default [
           'process.env.EPIDATA_ENDPOINT_URL': JSON.stringify(
             process.env.EPIDATA_ENDPOINT_URL || 'https://api.delphi.cmu.edu/epidata',
           ),
+          'process.env.EPIDATA_CAST_API_V5_ENDPOINT_URL': JSON.stringify(
+            process.env.EPIDATA_CAST_API_V5_ENDPOINT_URL || 'https://delphi.cmu.edu/epidata/v5',
+          ),
         },
         preventAssignment: true,
       }),

@@ -41,8 +41,20 @@ export const currentDate = epidate.getYear() * 10000 + epidate.getMonth() * 100 
 
 declare const process: { env: Record<string, string> };
 const ENDPOINT = process.env.EPIDATA_ENDPOINT_URL;
+const CAST_API_V5_ENDPOINT = process.env.EPIDATA_CAST_API_V5_ENDPOINT_URL;
 
 export const fetchOptions: RequestInit = process.env.NODE_ENV === 'development' ? { cache: 'force-cache' } : {};
+
+export interface CovidcastMetaSourceEntry {
+  version_range: { latest: string; first: string };
+  time_value_range: { latest: string; first: string };
+  signals: string[];
+  geo_types: string[];
+}
+
+export type CovidcastMetaResponse = Record<string, CovidcastMetaSourceEntry>;
+
+export type PopHiveExtraKeyValues = Record<string, string[]>;
 
 function processResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
@@ -88,26 +100,35 @@ function loadEpidata(
   for (const col of columns) {
     const points: EpiPoint[] = [];
     for (const row of epidata) {
-      if (row != null && typeof row.time_value === 'number') {
-        const timeValue = row.time_value;
-        if (timeValue.toString().length == 6) {
-          row.epiweek = timeValue;
+      if (params.source != 'pophive' && params.source != 'nwss') {
+        if (row != null && typeof row.time_value === 'number') {
+          const timeValue = row.time_value;
+          if (timeValue.toString().length == 6) {
+            row.epiweek = timeValue;
+          } else {
+            row.date = timeValue.toString();
+          }
+        }
+        let date: EpiDate;
+        if (row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
+          date = EpiDate.parse(row.date.toString());
+        } else if (row != null && typeof row.epiweek === 'number') {
+          const year = Math.floor(row.epiweek / 100);
+          const week = row.epiweek % 100;
+          date = EpiDate.fromEpiweek(year, week);
         } else {
-          row.date = timeValue.toString();
+          throw new Error(`missing date/week column in response`);
+        }
+        points.push(new EpiPoint(date, row[col] as number));
+      } else {
+        if (row != null && typeof row.time_value === 'string') {
+          points.push(new EpiPoint(EpiDate.parse(row.time_value), row[col] as number));
+        } else {
+          throw new Error(`missing time_value column in response`);
         }
       }
-      let date: EpiDate;
-      if (row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
-        date = EpiDate.parse(row.date.toString());
-      } else if (row != null && typeof row.epiweek === 'number') {
-        const year = Math.floor(row.epiweek / 100);
-        const week = row.epiweek % 100;
-        date = EpiDate.fromEpiweek(year, week);
-      } else {
-        throw new Error(`missing date/week column in response`);
-      }
-      points.push(new EpiPoint(date, row[col] as number));
     }
+    points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
     if (points.length > 0) {
       // overwrite default column name if there's an overwrite in columnRenamings
       const title = colRenamings.has(col) ? colRenamings.get(col) : col;
@@ -137,6 +158,7 @@ export function loadDataSet(
   columnRenamings: Record<string, string> = {},
   // add additional labels for the error message
   additionalLabels: Record<string, string> = {},
+  baseUrl: string = ENDPOINT,
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -149,7 +171,7 @@ export function loadDataSet(
       )
       .then(() => null);
   }
-  let url_string = ENDPOINT + `/${endpoint}/`;
+  let url_string = baseUrl + `/${endpoint}/`;
   if (api_key !== '') {
     url_string += `?api_key=${api_key}`;
   }
@@ -229,6 +251,142 @@ export function fetchCOVIDcastMeta(
       return [];
     },
   );
+}
+
+export function fetchPopHiveMeta(api_key: string): Promise<CovidcastMetaResponse> {
+  let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=pophive`;
+  if (api_key !== '') {
+    url_string += `&api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
+  return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
+    console.warn('failed fetching data', error);
+    return {} as CovidcastMetaResponse;
+  });
+}
+
+export function fetchPopHiveExtraKeyValues(api_key: string): Promise<PopHiveExtraKeyValues> {
+  let url_string = CAST_API_V5_ENDPOINT + `/metadata/extra_key_values/?source=pophive`;
+  if (api_key !== '') {
+    url_string += `&api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
+  return fetchImpl<{ extra_key_values: PopHiveExtraKeyValues }>(url)
+    .then((res) => res.extra_key_values ?? {})
+    .catch((error) => {
+      console.warn('failed fetching extra key values', error);
+      return {} as PopHiveExtraKeyValues;
+    });
+}
+
+export function importPopHive({
+  signal,
+  geo_type,
+  geo_value,
+  age_group,
+  api_key,
+}: {
+  signal: string;
+  geo_type: string;
+  geo_value: string;
+  age_group: string;
+  api_key: string;
+}): Promise<DataGroup | null> {
+  const title = `[API] PopHive: pophive:${signal} (${geo_type}:${geo_value}, age:${age_group})`;
+  if (!api_key && get(storeApiKeys)) {
+    api_key = get(apiKey);
+  }
+  const additionalLabels = {
+    titleLabel: 'PopHive (pophive:' + signal + ')',
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+    dataSourceDocumentationUrl: '',
+    dataSourceDescription: '',
+  };
+  return loadDataSet(
+    title,
+    'viz',
+    {},
+    { source: 'pophive', signal, geo_type, geo_value, extra_keys: `age_group:${age_group}` },
+    ['value'],
+    api_key,
+    {},
+    additionalLabels,
+    CAST_API_V5_ENDPOINT,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['value'];
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
+}
+
+export function fetchNwssMeta(api_key: string): Promise<CovidcastMetaResponse> {
+  let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=nwss`;
+  if (api_key !== '') {
+    url_string += `&api_key=${api_key}`;
+  }
+  const url = new URL(url_string);
+  return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
+    console.warn('failed fetching data', error);
+    return {} as CovidcastMetaResponse;
+  });
+}
+
+export function importNwss({
+  signal,
+  geo_type,
+  geo_value,
+  pcr_target,
+  nwss_source,
+  fill_method,
+  api_key,
+}: {
+  signal: string;
+  geo_type: string;
+  geo_value: string;
+  pcr_target: string;
+  nwss_source: string;
+  fill_method: string;
+  api_key: string;
+}): Promise<DataGroup | null> {
+  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geo_value})`;
+  if (!api_key && get(storeApiKeys)) {
+    api_key = get(apiKey);
+  }
+  const additionalLabels = {
+    titleLabel: 'NWSS (nwss:' + signal + ')',
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+    dataSourceDocumentationUrl: '',
+    dataSourceDescription: '',
+  };
+  return loadDataSet(
+    title,
+    'viz',
+    {},
+    {
+      source: 'nwss',
+      signal,
+      geo_type,
+      geo_value,
+      pcr_target,
+      fill_method,
+      extra_keys: `nwss_source:${nwss_source}`,
+    },
+    ['value'],
+    api_key,
+    {},
+    additionalLabels,
+    CAST_API_V5_ENDPOINT,
+  ).then((ds) => {
+    if (ds instanceof DataGroup) {
+      ds.defaultEnabled = ['value'];
+      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+    }
+    return ds;
+  });
 }
 
 export function importCDC({ locations, auth }: { locations: string; auth?: string }): Promise<DataGroup | null> {
