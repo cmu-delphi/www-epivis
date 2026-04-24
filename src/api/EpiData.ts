@@ -304,7 +304,7 @@ export function importPopHive({
   };
   return loadDataSet(
     title,
-    'viz',
+    'pophive',
     {},
     { source: 'pophive', signal, geo_type, geo_value, extra_keys },
     ['value'],
@@ -363,7 +363,7 @@ export function importNwss({
   };
   return loadDataSet(
     title,
-    'viz',
+    'nwss',
     {},
     {
       source: 'nwss',
