@@ -53,12 +53,13 @@
   });
 
   export function importDataSet() {
+    console.log($formSelections.nwss.extraKeys);
     return importNwss({
       signal: $formSelections.nwss.signal,
       geo_type: $formSelections.nwss.geoType,
       geo_value: $formSelections.nwss.geoValue,
       pcr_target: $formSelections.nwss.pcrTarget,
-      nwss_source: $formSelections.nwss.nwssSource,
+      extra_keys: `nwss_source:${$formSelections.nwss.extraKeys || ''}`,
       fill_method: $formSelections.nwss.fillMethod,
       api_key: $apiKey,
     });
@@ -109,8 +110,8 @@
 <SelectField
   id="{id}-ns"
   label="NWSS Source"
-  bind:value={$formSelections.nwss.nwssSource}
-  name="nwss_source"
+  bind:value={$formSelections.nwss.extraKeys}
+  name="extra_keys"
   options={nwssSources}
 />
 <SelectField

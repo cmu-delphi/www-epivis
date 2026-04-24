@@ -339,7 +339,7 @@ export function importNwss({
   geo_type,
   geo_value,
   pcr_target,
-  nwss_source,
+  extra_keys,
   fill_method,
   api_key,
 }: {
@@ -347,7 +347,7 @@ export function importNwss({
   geo_type: string;
   geo_value: string;
   pcr_target: string;
-  nwss_source: string;
+  extra_keys: string;
   fill_method: string;
   api_key: string;
 }): Promise<DataGroup | null> {
@@ -361,6 +361,7 @@ export function importNwss({
     dataSourceDocumentationUrl: '',
     dataSourceDescription: '',
   };
+  console.log(extra_keys);
   return loadDataSet(
     title,
     'viz',
@@ -372,7 +373,7 @@ export function importNwss({
       geo_value,
       pcr_target,
       fill_method,
-      extra_keys: `nwss_source:${nwss_source}`,
+      extra_keys,
     },
     ['value'],
     api_key,

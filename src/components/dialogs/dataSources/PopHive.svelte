@@ -49,7 +49,7 @@
       signal: $formSelections.pophive.signal,
       geo_type: $formSelections.pophive.geoType,
       geo_value: $formSelections.pophive.geoValue,
-      age_group: $formSelections.pophive.ageGroup,
+      extra_keys: `age_group:${$formSelections.pophive.extraKeys}`,
       api_key: $apiKey,
     });
   }
@@ -85,8 +85,8 @@
 <SelectField
   id="{id}-ag"
   label="Age Group"
-  bind:value={$formSelections.pophive.ageGroup}
-  name="age_group"
+  bind:value={$formSelections.pophive.extraKeys}
+  name="extraKeys"
   options={ageGroups}
 />
 <SelectField
