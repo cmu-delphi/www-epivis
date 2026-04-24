@@ -33,7 +33,7 @@ export class PopHiveSelections {
   signal = '';
   geoType = '';
   geoValue = '';
-  ageGroup = '';
+  extraKeys = '';
 }
 
 export class NwssSelections {
@@ -41,7 +41,7 @@ export class NwssSelections {
   geoType = '';
   geoValue = '';
   pcrTarget = '';
-  nwssSource = '';
+  extraKeys = '';
   fillMethod = 'source';
 }
 
