@@ -92,7 +92,7 @@
             bind:group={$formSelections.dataSource}
             value="pophive"
           />
-          PopHive</label
+          Cosmos by Pophive</label
         >
         <label
           ><input

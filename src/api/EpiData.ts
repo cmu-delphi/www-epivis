@@ -159,6 +159,7 @@ export function loadDataSet(
   // add additional labels for the error message
   additionalLabels: Record<string, string> = {},
   baseUrl: string = ENDPOINT,
+  apiPath: string = endpoint,
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -171,7 +172,7 @@ export function loadDataSet(
       )
       .then(() => null);
   }
-  let url_string = baseUrl + `/${endpoint}/`;
+  let url_string = baseUrl + `/${apiPath}/`;
   if (api_key !== '') {
     url_string += `?api_key=${api_key}`;
   }
@@ -312,6 +313,7 @@ export function importPopHive({
     {},
     additionalLabels,
     CAST_API_V5_ENDPOINT,
+    'viz',
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
@@ -379,6 +381,7 @@ export function importNwss({
     {},
     additionalLabels,
     CAST_API_V5_ENDPOINT,
+    'viz',
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
