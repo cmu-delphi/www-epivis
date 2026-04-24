@@ -283,16 +283,16 @@ export function importPopHive({
   signal,
   geo_type,
   geo_value,
-  age_group,
+  extra_keys,
   api_key,
 }: {
   signal: string;
   geo_type: string;
   geo_value: string;
-  age_group: string;
+  extra_keys: string;
   api_key: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] PopHive: pophive:${signal} (${geo_type}:${geo_value}, age:${age_group})`;
+  const title = `[API] PopHive: pophive:${signal} (${geo_type}:${geo_value}, ${extra_keys})`;
   if (!api_key && get(storeApiKeys)) {
     api_key = get(apiKey);
   }
@@ -306,7 +306,7 @@ export function importPopHive({
     title,
     'viz',
     {},
-    { source: 'pophive', signal, geo_type, geo_value, extra_keys: `age_group:${age_group}` },
+    { source: 'pophive', signal, geo_type, geo_value, extra_keys },
     ['value'],
     api_key,
     {},
@@ -339,7 +339,7 @@ export function importNwss({
   geo_type,
   geo_value,
   pcr_target,
-  nwss_source,
+  extra_keys,
   fill_method,
   api_key,
 }: {
@@ -347,7 +347,7 @@ export function importNwss({
   geo_type: string;
   geo_value: string;
   pcr_target: string;
-  nwss_source: string;
+  extra_keys: string;
   fill_method: string;
   api_key: string;
 }): Promise<DataGroup | null> {
@@ -372,7 +372,7 @@ export function importNwss({
       geo_value,
       pcr_target,
       fill_method,
-      extra_keys: `nwss_source:${nwss_source}`,
+      extra_keys,
     },
     ['value'],
     api_key,

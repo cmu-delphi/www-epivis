@@ -14,6 +14,8 @@ import {
   importSensors,
   importTwitter,
   importWiki,
+  importPopHive,
+  importNwss,
 } from './api/EpiData';
 import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup, DEFAULT_GROUP, flatten, DEFAULT_VIEWPORT } from './data/DataSet';
@@ -68,6 +70,8 @@ const lookups = {
   twtr: importTwitter,
   twitter: importTwitter,
   wiki: importWiki,
+  pophive: importPopHive,
+  nwss: importNwss,
 } as unknown as Record<string, (args: Record<string, unknown>) => Promise<DataGroup | null>>;
 
 const argOrders: Record<string, string[]> = {
