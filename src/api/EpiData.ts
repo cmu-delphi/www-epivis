@@ -361,7 +361,6 @@ export function importNwss({
     dataSourceDocumentationUrl: '',
     dataSourceDescription: '',
   };
-  console.log(extra_keys);
   return loadDataSet(
     title,
     'viz',

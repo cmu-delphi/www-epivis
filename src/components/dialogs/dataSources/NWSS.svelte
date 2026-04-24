@@ -53,7 +53,6 @@
   });
 
   export function importDataSet() {
-    console.log($formSelections.nwss.extraKeys);
     return importNwss({
       signal: $formSelections.nwss.signal,
       geo_type: $formSelections.nwss.geoType,
