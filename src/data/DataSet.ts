@@ -23,6 +23,7 @@ export default class DataSet {
   public verticalOffset = 0;
   public horizontalOffset = 0;
   public readonly gap: number;
+  public readonly maxGap: number;
 
   constructor(
     public readonly data: readonly EpiPoint[],
@@ -32,6 +33,7 @@ export default class DataSet {
     public color = getRandomColor(),
   ) {
     this.gap = computeGap(data);
+    this.maxGap = this.gap * 3;
   }
 
   displayTitle(): string {

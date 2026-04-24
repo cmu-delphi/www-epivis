@@ -20,6 +20,8 @@
   import NowCast from './dataSources/Nowcast.svelte';
   import CovidHosp from './dataSources/COVIDHosp.svelte';
   import CoviDcast from './dataSources/COVIDcast.svelte';
+  import PopHive from './dataSources/PopHive.svelte';
+  import Nwss from './dataSources/NWSS.svelte';
   import { navMode, storeApiKeys } from '../../store';
   import { NavMode } from '../chartUtils';
   import { formSelections } from '../../store';
@@ -81,6 +83,26 @@
             href="https://cmu-delphi.github.io/delphi-epidata/api/covidcast_signals.html#all-available-sources-and-signals"
             >cmu-delphi.github.io</a
           >)</label
+        >
+        <label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="pophive"
+          />
+          PopHive</label
+        >
+        <label
+          ><input
+            class="uk-radio"
+            type="radio"
+            name="dataSource"
+            bind:group={$formSelections.dataSource}
+            value="nwss"
+          />
+          NWSS (Wastewater Surveillance)</label
         >
         <label
           ><input
@@ -240,6 +262,10 @@
       <CovidHosp {id} bind:this={handler} />
     {:else if $formSelections.dataSource === 'covidcast'}
       <CoviDcast {id} bind:this={handler} />
+    {:else if $formSelections.dataSource === 'pophive'}
+      <PopHive {id} bind:this={handler} />
+    {:else if $formSelections.dataSource === 'nwss'}
+      <Nwss {id} bind:this={handler} />
     {/if}
   </form>
 
