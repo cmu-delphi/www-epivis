@@ -121,10 +121,10 @@ function loadEpidata(
         }
         points.push(new EpiPoint(date, row[col] as number));
       } else {
-        if (row != null && typeof row.time_value === 'string') {
-          points.push(new EpiPoint(EpiDate.parse(row.time_value), row[col] as number));
+        if (row != null && typeof row.reference_time === 'string') {
+          points.push(new EpiPoint(EpiDate.parse(row.reference_time), row[col] as number));
         } else {
-          throw new Error(`missing time_value column in response`);
+          throw new Error(`missing reference_time column in response`);
         }
       }
     }
@@ -204,11 +204,12 @@ export function loadDataSet(
         console.warn('failed loading data', error);
         // EpiData API error - JSON with "message" property
         if ('message' in res) {
+          const message = res['message' as keyof typeof res];
           return UIkit.modal
             .alert(
               `
           <div class="uk-alert uk-alert-error">
-            [f01] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${res['message']}</i>
+            [f01] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${message}</i>
           </div>`,
             )
             .then(() => null);

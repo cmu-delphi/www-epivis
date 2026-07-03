@@ -1,6 +1,6 @@
 import { mean } from 'd3-array';
-import EpiDate from './EpiDate';
-import EpiPoint from './EpiPoint';
+import EpiDate from './EpiDate.js';
+import type EpiPoint from './EpiPoint.js';
 
 function getRandomColor() {
   function channel() {

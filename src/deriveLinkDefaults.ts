@@ -24,7 +24,7 @@ import EpiPoint from './data/EpiPoint';
 
 export interface ILinkConfig {
   chart: {
-    viewport: [number, number, number, number];
+    viewport: [number, number, number, number] | null;
     showPoints: boolean;
   };
   datasets: {
