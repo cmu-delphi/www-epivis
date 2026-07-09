@@ -59,7 +59,7 @@ export type PopHiveExtraKeyValues = Record<string, string[]>;
 export type NWSSGeoValue = {
   county: string;
   sewersheds: string[];
-}
+};
 
 function processResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
@@ -1062,7 +1062,9 @@ export function importWiki({
 }
 
 export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
-  const url = new URL("https://development.delphi.cmu.edu/epidata/v5" + `/geomap/nwss_sewershed_crosswalk/?other_geo_type=county`);
+  const url = new URL(
+    'https://development.delphi.cmu.edu/epidata/v5' + `/geomap/nwss_sewershed_crosswalk/?other_geo_type=county`,
+  );
   return fetch(url.toString())
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -1077,7 +1079,7 @@ export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
       const toIdx = header.indexOf('to_val');
       const toNameIdx = header.indexOf('to_name');
 
-      const byCounty = new Map<string, { name: string, sewersheds: string[] }>();
+      const byCounty = new Map<string, { name: string; sewersheds: string[] }>();
       for (let i = 1; i < rows.length; i++) {
         const cols = rows[i].split(',');
         const sewershedId = cols[fromIdx]?.trim();
@@ -1089,7 +1091,7 @@ export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
         byCounty.set(countyFips, entry);
       }
 
-      return [...byCounty.values()].map((e) => ({county: e.name, sewersheds: e.sewersheds}));
+      return [...byCounty.values()].map((e) => ({ county: e.name, sewersheds: e.sewersheds }));
     })
     .catch((error) => {
       console.error('Error fetching NWSS geo values:', error);
