@@ -56,6 +56,11 @@ export type CovidcastMetaResponse = Record<string, CovidcastMetaSourceEntry>;
 
 export type PopHiveExtraKeyValues = Record<string, string[]>;
 
+export type NWSSGeoValue = {
+  county: string;
+  sewersheds: string[];
+}
+
 function processResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -341,7 +346,6 @@ export function importNwss({
   signal,
   geo_type,
   geo_value,
-  pcr_target,
   extra_keys,
   fill_method,
   api_key,
@@ -349,7 +353,6 @@ export function importNwss({
   signal: string;
   geo_type: string;
   geo_value: string;
-  pcr_target: string;
   extra_keys: string;
   fill_method: string;
   api_key: string;
@@ -373,7 +376,6 @@ export function importNwss({
       signal,
       geo_type,
       geo_value,
-      pcr_target,
       fill_method,
       extra_keys,
     },
@@ -1057,4 +1059,40 @@ export function importWiki({
     }
     return ds;
   });
+}
+
+export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
+  const url = new URL("https://development.delphi.cmu.edu/epidata/v5" + `/geomap/nwss_sewershed_crosswalk/?other_geo_type=county`);
+  return fetch(url.toString())
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
+    })
+    .then((text) => {
+      const rows = text.trim().split(/\r?\n/);
+      if (rows.length < 2) return [];
+
+      const header = rows[0].split(',').map((h) => h.trim());
+      const fromIdx = header.indexOf('from_val');
+      const toIdx = header.indexOf('to_val');
+      const toNameIdx = header.indexOf('to_name');
+
+      const byCounty = new Map<string, { name: string, sewersheds: string[] }>();
+      for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i].split(',');
+        const sewershedId = cols[fromIdx]?.trim();
+        const countyFips = cols[toIdx]?.trim();
+        const countyName = cols[toNameIdx]?.trim();
+        if (!sewershedId || !countyFips || !countyName) continue;
+        const entry = byCounty.get(countyFips) ?? { name: countyName || countyFips, sewersheds: [] };
+        entry.sewersheds.push(sewershedId);
+        byCounty.set(countyFips, entry);
+      }
+
+      return [...byCounty.values()].map((e) => ({county: e.name, sewersheds: e.sewersheds}));
+    })
+    .catch((error) => {
+      console.error('Error fetching NWSS geo values:', error);
+      return [];
+    });
 }

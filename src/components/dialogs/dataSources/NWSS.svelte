@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { fetchNwssMeta, importNwss } from '../../../api/EpiData';
+  import { fetchNwssMeta, importNwss, fetchNWSSGeoValues } from '../../../api/EpiData';
   import SelectField from '../inputs/SelectField.svelte';
-  import TextField from '../inputs/TextField.svelte';
   import { apiKey, formSelections } from '../../../store';
+  import type { LabelValue } from '../../../data/data';
 
   export let id: string;
   let valid_key = true;
@@ -11,17 +11,7 @@
   let dataSignals: string[] = [];
   let geoTypes: string[] = [];
 
-  const pcrTargets = [
-    'fluav',
-    'fluav a h5',
-    'hmpxv',
-    'hmpxv clade i',
-    'hmpxv clade ii',
-    'mev_wt',
-    'nvo',
-    'rsv',
-    'sars-cov-2',
-  ];
+  let geoValues: LabelValue[] = [];
   const nwssSources = ['CDC_Biobot', 'CDC_Verily', 'State_Territory', 'WastewaterSCAN'];
   const fillMethods = ['source'];
 
@@ -48,8 +38,23 @@
     });
   }
 
+  function fetchGeoValues() {
+    fetchNWSSGeoValues($apiKey).then((rows) => {
+      const byCounty = new Map<string, string[]>();
+      for (const row of rows) {
+        const ids = byCounty.get(row.county) ?? [];
+        ids.push(...row.sewersheds);
+        byCounty.set(row.county, ids);
+      }
+      geoValues = [...byCounty.entries()]
+        .map(([county, ids]) => ({ label: county, value: ids.join(',') }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+    });
+  }
+
   onMount(() => {
     fetchMetadata();
+    fetchGeoValues();
   });
 
   export function importDataSet() {
@@ -57,7 +62,6 @@
       signal: $formSelections.nwss.signal,
       geo_type: $formSelections.nwss.geoType,
       geo_value: $formSelections.nwss.geoValue,
-      pcr_target: $formSelections.nwss.pcrTarget,
       extra_keys: `nwss_source:${$formSelections.nwss.extraKeys || ''}`,
       fill_method: $formSelections.nwss.fillMethod,
       api_key: $apiKey,
@@ -78,7 +82,10 @@
       name="api_key"
       required={false}
       bind:value={$apiKey}
-      on:input={debounce(() => fetchMetadata(), 500)}
+      on:input={debounce(() => {
+        fetchMetadata();
+        fetchGeoValues();
+      }, 500)}
     />
     {#if !valid_key}
       <div class="invalid">API key is invalid - ignoring</div>
@@ -100,13 +107,6 @@
   options={geoTypes}
 />
 <SelectField
-  id="{id}-pt"
-  label="PCR Target"
-  bind:value={$formSelections.nwss.pcrTarget}
-  name="pcr_target"
-  options={pcrTargets}
-/>
-<SelectField
   id="{id}-ns"
   label="NWSS Source"
   bind:value={$formSelections.nwss.extraKeys}
@@ -120,12 +120,12 @@
   name="fill_method"
   options={fillMethods}
 />
-<TextField
+<SelectField
   id="{id}-gv"
   label="Geographic Value"
   bind:value={$formSelections.nwss.geoValue}
   name="geo_values"
-  placeholder="e.g., PA or 42003"
+  options={geoValues}
 />
 
 <style>
