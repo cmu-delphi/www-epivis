@@ -98,13 +98,15 @@ function loadEpidata(
   columns: string[],
   columnRenamings: Record<string, string>,
   params: Record<string, unknown>,
+  seriesKey?: string,
 ): DataGroup {
   const datasets: DataSet[] = [];
   const colRenamings = new Map(Object.entries(columnRenamings));
 
   for (const col of columns) {
-    const points: EpiPoint[] = [];
+    const seriesPoints = new Map<string, EpiPoint[]>();
     for (const row of epidata) {
+      let date: EpiDate;
       if (params.source != 'pophive' && params.source != 'nwss') {
         if (row != null && typeof row.time_value === 'number') {
           const timeValue = row.time_value;
@@ -114,7 +116,7 @@ function loadEpidata(
             row.date = timeValue.toString();
           }
         }
-        let date: EpiDate;
+
         if (row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
           date = EpiDate.parse(row.date.toString());
         } else if (row != null && typeof row.epiweek === 'number') {
@@ -124,20 +126,25 @@ function loadEpidata(
         } else {
           throw new Error(`missing date/week column in response`);
         }
-        points.push(new EpiPoint(date, row[col] as number));
       } else {
         if (row != null && typeof row.reference_time === 'string') {
-          points.push(new EpiPoint(EpiDate.parse(row.reference_time), row[col] as number));
+          date = EpiDate.parse(row.reference_time);
         } else {
           throw new Error(`missing reference_time column in response`);
         }
       }
+      const key = seriesKey && row?.[seriesKey] != null ? String(row[seriesKey]) : '';
+      const bucket = seriesPoints.get(key) ?? [];
+      bucket.push(new EpiPoint(date, row[col] as number));
+      seriesPoints.set(key, bucket);
     }
-    points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
-    if (points.length > 0) {
-      // overwrite default column name if there's an overwrite in columnRenamings
-      const title = colRenamings.has(col) ? colRenamings.get(col) : col;
-      datasets.push(new DataSet(points, title, params));
+
+    for (const [key, points] of seriesPoints) {
+      points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
+      if (points.length > 0) {
+        const base = colRenamings.has(col) ? colRenamings.get(col)! : col;
+        datasets.push(new DataSet(points, key ? `${base} ${key}` : base, params));
+      }
     }
   }
   return new DataGroup(name, datasets);
@@ -165,6 +172,7 @@ export function loadDataSet(
   additionalLabels: Record<string, string> = {},
   baseUrl: string = ENDPOINT,
   apiPath: string = endpoint,
+  seriesKey?: string,
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -193,7 +201,7 @@ export function loadDataSet(
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
       try {
-        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params }, seriesKey);
         if (data.datasets.length == 0) {
           return UIkit.modal
             .alert(
@@ -371,23 +379,17 @@ export function importNwss({
     title,
     'nwss',
     {},
-    {
-      source: 'nwss',
-      signal,
-      geo_type,
-      geo_value,
-      fill_method,
-      extra_keys,
-    },
+    { source: 'nwss', signal, geo_type, geo_value, fill_method, extra_keys },
     ['value'],
     api_key,
-    {},
+    { value: 'Sewershed:' },
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
+    'geo_value', // <-- one DataSet per sewershed
   ).then((ds) => {
     if (ds instanceof DataGroup) {
-      ds.defaultEnabled = ['value'];
+      ds.defaultEnabled = ds.datasets.filter((d): d is DataSet => d instanceof DataSet).map((d) => d.title);
       ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
       ds.dataSourceDescription = additionalLabels.dataSourceDescription;
     }
