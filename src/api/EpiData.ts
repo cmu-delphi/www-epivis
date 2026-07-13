@@ -382,7 +382,7 @@ export function importNwss({
     { source: 'nwss', signal, geo_type, geo_value, fill_method, extra_keys },
     ['value'],
     api_key,
-    { value: 'Sewershed:' },
+    { value: `${signal}, sewershed: ` },
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
@@ -1064,9 +1064,7 @@ export function importWiki({
 }
 
 export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
-  const url = new URL(
-    'https://development.delphi.cmu.edu/epidata/v5' + `/geomap/nwss_sewershed_crosswalk/?other_geo_type=county`,
-  );
+  const url = new URL(CAST_API_V5_ENDPOINT + '/geomap/nwss_sewershed_crosswalk/?other_geo_type=county');
   return fetch(url.toString())
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);

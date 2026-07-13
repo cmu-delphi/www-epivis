@@ -111,7 +111,9 @@ function patchDataSet(title: string, color: string, customTitle: string) {
       return null;
     }
     const datasets = flatten(dg);
-    const d = datasets.find((di) => di.title === title);
+    // Exact title match; if none (e.g. NWSS names datasets "Sewershed: <geo_value>" while
+    // externally generated links may say "value"), fall back to a single unambiguous dataset.
+    const d = datasets.find((di) => di.title === title) ?? (datasets.length === 1 ? datasets[0] : undefined);
     if (d) {
       d.color = color;
       d.customTitle = customTitle;
