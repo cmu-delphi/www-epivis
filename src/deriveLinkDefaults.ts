@@ -127,6 +127,20 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
     const resolvedDataSets: (Promise<DataSet | null | undefined> | DataSet)[] = [];
     const loadingDataSets: Map<string, Promise<DataGroup | null>> = new Map();
 
+    // Add each dataset to the chart as soon as its own request resolves, so a single
+    // dataset that errors, returns no data, or shows a blocking modal can't prevent the
+    // others from being plotted.
+    function track(p: Promise<DataSet | null | undefined>): Promise<DataSet | null | undefined> {
+      const added = p.then((d) => {
+        if (d) {
+          add(d);
+        }
+        return d;
+      });
+      resolvedDataSets.push(added);
+      return added;
+    }
+
     function loadImpl(title: string, color: string, endpoint: string, params: Record<string, unknown>) {
       const func = lookups[endpoint];
       if (!func) {
@@ -158,11 +172,11 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       /* eslint-enable @typescript-eslint/restrict-template-expressions */
 
       if (existing) {
-        resolvedDataSets.push(existing.then(patchDataSet(title, color, customTitle)));
+        track(existing.then(patchDataSet(title, color, customTitle)));
       } else {
         const loadingDataSet = func(params);
         loadingDataSets.set(key, loadingDataSet);
-        resolvedDataSets.push(loadingDataSet.then(patchDataSet(title, color, customTitle)));
+        track(loadingDataSet.then(patchDataSet(title, color, customTitle)));
       }
     }
 
@@ -178,6 +192,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
           ds.color,
         );
         add(d);
+        // already added above; push the value directly so it is included in the result
         resolvedDataSets.push(d);
         continue;
       }
@@ -190,11 +205,15 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
     }
 
-    return Promise.all(resolvedDataSets).then((data) => {
-      const cleaned = data.filter((d): d is DataSet => d != null);
-      cleaned.forEach((d) => add(d));
-      return cleaned;
-    });
+    // Datasets are already added incrementally via `track`; here we just wait for all of
+    // them to settle and return the ones that produced data. `allSettled` ensures a single
+    // rejected request doesn't discard the datasets that loaded successfully.
+    return Promise.allSettled(resolvedDataSets).then((results) =>
+      results
+        .filter((r): r is PromiseFulfilledResult<DataSet | null | undefined> => r.status === 'fulfilled')
+        .map((r) => r.value)
+        .filter((d): d is DataSet => d != null),
+    );
   };
 }
 

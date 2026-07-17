@@ -365,13 +365,16 @@ export function importNwss({
   fill_method: string;
   api_key: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geo_value})`;
+  // extra_keys looks like "nwss_source:CDC_Biobot"; extract the source name so
+  // datasets differing only by source get distinct titles
+  const nwssSource = extra_keys ? extra_keys.split(':').pop() ?? '' : '';
+  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geo_value}${nwssSource ? `, ${nwssSource}` : ''})`;
   if (!api_key && get(storeApiKeys)) {
     api_key = get(apiKey);
   }
   const additionalLabels = {
     titleLabel: 'NWSS (nwss:' + signal + ')',
-    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+    selectionLabel: 'location: ' + geo_type + ':' + geo_value + (nwssSource ? ', source: ' + nwssSource : ''),
     dataSourceDocumentationUrl: '',
     dataSourceDescription: '',
   };
@@ -382,7 +385,7 @@ export function importNwss({
     { source: 'nwss', signal, geo_type, geo_value, fill_method, extra_keys },
     ['value'],
     api_key,
-    { value: `${signal}, sewershed: ` },
+    { value: `${signal}${nwssSource ? ` (${nwssSource})` : ''}, sewershed:` },
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
