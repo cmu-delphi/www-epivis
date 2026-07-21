@@ -172,11 +172,11 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       /* eslint-enable @typescript-eslint/restrict-template-expressions */
 
       if (existing) {
-        track(existing.then(patchDataSet(title, color, customTitle)));
+        void track(existing.then(patchDataSet(title, color, customTitle)));
       } else {
         const loadingDataSet = func(params);
         loadingDataSets.set(key, loadingDataSet);
-        track(loadingDataSet.then(patchDataSet(title, color, customTitle)));
+        void track(loadingDataSet.then(patchDataSet(title, color, customTitle)));
       }
     }
 
