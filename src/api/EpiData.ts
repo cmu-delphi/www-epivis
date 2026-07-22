@@ -271,7 +271,7 @@ export function fetchCOVIDcastMeta(
 export function fetchPopHiveMeta(api_key: string): Promise<CovidcastMetaResponse> {
   let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=pophive`;
   if (api_key !== '') {
-    url_string += `&api_key=${api_key}`;
+    url_string += `&token=${api_key}`;
   }
   const url = new URL(url_string);
   return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
@@ -283,7 +283,7 @@ export function fetchPopHiveMeta(api_key: string): Promise<CovidcastMetaResponse
 export function fetchPopHiveExtraKeyValues(api_key: string): Promise<PopHiveExtraKeyValues> {
   let url_string = CAST_API_V5_ENDPOINT + `/metadata/extra_key_values/?source=pophive`;
   if (api_key !== '') {
-    url_string += `&api_key=${api_key}`;
+    url_string += `&token=${api_key}`;
   }
   const url = new URL(url_string);
   return fetchImpl<{ extra_key_values: PopHiveExtraKeyValues }>(url)
@@ -341,7 +341,7 @@ export function importPopHive({
 export function fetchNwssMeta(api_key: string): Promise<CovidcastMetaResponse> {
   let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=nwss`;
   if (api_key !== '') {
-    url_string += `&api_key=${api_key}`;
+    url_string += `&token=${api_key}`;
   }
   const url = new URL(url_string);
   return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
@@ -1066,8 +1066,11 @@ export function importWiki({
   });
 }
 
-export function fetchNWSSGeoValues(): Promise<NWSSGeoValue[]> {
+export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
   const url = new URL(CAST_API_V5_ENDPOINT + '/geomap/nwss_sewershed_crosswalk/?other_geo_type=county');
+  if (api_key !== '') {
+    url.searchParams.set('token', api_key);
+  }
   return fetch(url.toString())
     .then((response) => {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
