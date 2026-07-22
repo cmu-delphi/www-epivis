@@ -1066,7 +1066,7 @@ export function importWiki({
   });
 }
 
-export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
+export function fetchNWSSGeoValues(): Promise<NWSSGeoValue[]> {
   const url = new URL(CAST_API_V5_ENDPOINT + '/geomap/nwss_sewershed_crosswalk/?other_geo_type=county');
   return fetch(url.toString())
     .then((response) => {
