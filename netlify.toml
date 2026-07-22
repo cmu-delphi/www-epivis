@@ -1,6 +1,6 @@
 [context.production.environment]
   EPIDATA_ENDPOINT_URL = "https://api.delphi.cmu.edu/epidata"
-  EPIDATA_CAST_API_V5_ENDPOINT_URL = "https://development.  elphi.cmu.edu/epidata/v5"
+  EPIDATA_CAST_API_V5_ENDPOINT_URL = "https://development.delphi.cmu.edu/epidata/v5"
 
 [context.branch-deploy.environment]
   EPIDATA_ENDPOINT_URL = "https://api.delphi.cmu.edu/epidata"
