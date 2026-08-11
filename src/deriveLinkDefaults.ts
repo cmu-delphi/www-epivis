@@ -14,6 +14,8 @@ import {
   importSensors,
   importTwitter,
   importWiki,
+  importPopHive,
+  importNwss,
 } from './api/EpiData';
 import { NavMode } from './components/chartUtils';
 import DataSet, { DataGroup, DEFAULT_GROUP, flatten, DEFAULT_VIEWPORT } from './data/DataSet';
@@ -22,7 +24,7 @@ import EpiPoint from './data/EpiPoint';
 
 export interface ILinkConfig {
   chart: {
-    viewport: [number, number, number, number];
+    viewport: [number, number, number, number] | null;
     showPoints: boolean;
   };
   datasets: {
@@ -68,6 +70,8 @@ const lookups = {
   twtr: importTwitter,
   twitter: importTwitter,
   wiki: importWiki,
+  pophive: importPopHive,
+  nwss: importNwss,
 } as unknown as Record<string, (args: Record<string, unknown>) => Promise<DataGroup | null>>;
 
 const argOrders: Record<string, string[]> = {
@@ -107,7 +111,9 @@ function patchDataSet(title: string, color: string, customTitle: string) {
       return null;
     }
     const datasets = flatten(dg);
-    const d = datasets.find((di) => di.title === title);
+    // Exact title match; if none (e.g. NWSS names datasets "Sewershed: <geo_value>" while
+    // externally generated links may say "value"), fall back to a single unambiguous dataset.
+    const d = datasets.find((di) => di.title === title) ?? (datasets.length === 1 ? datasets[0] : undefined);
     if (d) {
       d.color = color;
       d.customTitle = customTitle;
@@ -120,6 +126,20 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
   return (add: (dataset: DataSet | DataGroup) => void): Promise<DataSet[]> => {
     const resolvedDataSets: (Promise<DataSet | null | undefined> | DataSet)[] = [];
     const loadingDataSets: Map<string, Promise<DataGroup | null>> = new Map();
+
+    // Add each dataset to the chart as soon as its own request resolves, so a single
+    // dataset that errors, returns no data, or shows a blocking modal can't prevent the
+    // others from being plotted.
+    function track(p: Promise<DataSet | null | undefined>): Promise<DataSet | null | undefined> {
+      const added = p.then((d) => {
+        if (d) {
+          add(d);
+        }
+        return d;
+      });
+      resolvedDataSets.push(added);
+      return added;
+    }
 
     function loadImpl(title: string, color: string, endpoint: string, params: Record<string, unknown>) {
       const func = lookups[endpoint];
@@ -152,11 +172,11 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       /* eslint-enable @typescript-eslint/restrict-template-expressions */
 
       if (existing) {
-        resolvedDataSets.push(existing.then(patchDataSet(title, color, customTitle)));
+        void track(existing.then(patchDataSet(title, color, customTitle)));
       } else {
         const loadingDataSet = func(params);
         loadingDataSets.set(key, loadingDataSet);
-        resolvedDataSets.push(loadingDataSet.then(patchDataSet(title, color, customTitle)));
+        void track(loadingDataSet.then(patchDataSet(title, color, customTitle)));
       }
     }
 
@@ -172,6 +192,7 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
           ds.color,
         );
         add(d);
+        // already added above; push the value directly so it is included in the result
         resolvedDataSets.push(d);
         continue;
       }
@@ -184,11 +205,15 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
       }
     }
 
-    return Promise.all(resolvedDataSets).then((data) => {
-      const cleaned = data.filter((d): d is DataSet => d != null);
-      cleaned.forEach((d) => add(d));
-      return cleaned;
-    });
+    // Datasets are already added incrementally via `track`; here we just wait for all of
+    // them to settle and return the ones that produced data. `allSettled` ensures a single
+    // rejected request doesn't discard the datasets that loaded successfully.
+    return Promise.allSettled(resolvedDataSets).then((results) =>
+      results
+        .filter((r): r is PromiseFulfilledResult<DataSet | null | undefined> => r.status === 'fulfilled')
+        .map((r) => r.value)
+        .filter((d): d is DataSet => d != null),
+    );
   };
 }
 

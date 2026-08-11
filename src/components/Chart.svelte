@@ -869,7 +869,7 @@
   }
 
   function renderDataSet(ctx: CanvasRenderingContext2D, dataset: DataSet) {
-    const { data, color, gap, lineWidth } = dataset;
+    const { data, color, maxGap, lineWidth } = dataset;
     let first = true;
     let date1 = 0;
     let date2 = 0;
@@ -883,7 +883,7 @@
       const y = value2y(ptVal);
       date1 = date2;
       date2 = data[i].getDate().getIndex();
-      if (date2 - date1 !== gap) {
+      if (date2 - date1 > maxGap) {
         first = !interpolate;
       }
       const x = date2x(date2);
@@ -909,7 +909,7 @@
     for (const ds of datasets) {
       ctx.fillStyle = ds.color;
       const label = `— ${ds.displayTitle()}`;
-      drawText(ctx, label, width - 10, height - 10 - labelOffset, 0, Align.right, Align.bottom);
+      drawText(ctx, label, width - 10, height - 40 - labelOffset, 0, Align.right, Align.bottom);
       labelOffset += 12;
     }
   }

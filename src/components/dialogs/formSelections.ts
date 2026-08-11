@@ -29,6 +29,21 @@ export class CovidcastSelections {
   geoValue = '';
 }
 
+export class PopHiveSelections {
+  signal = '';
+  geoType = '';
+  geoValue = '';
+  extraKeys = '';
+}
+
+export class NwssSelections {
+  signal = '';
+  geoType = '';
+  geoValue = '';
+  extraKeys = '';
+  fillMethod = 'source';
+}
+
 export class CovidHospSelections {
   states = covidHospLocations[0].value;
   issue = DEFAULT_ISSUE;
@@ -111,10 +126,14 @@ export default class FormSelections {
     | 'sensors'
     | 'nowcast'
     | 'covidcast'
+    | 'pophive'
+    | 'nwss'
     | 'covid_hosp' = 'fluview';
   cdc = new CdcSelections();
   covidcast = new CovidcastSelections();
   covidHosp = new CovidHospSelections();
+  pophive = new PopHiveSelections();
+  nwss = new NwssSelections();
   fluSurv = new FluSurvSelections();
   fluView = new FluViewSelections();
   fluViewClinical = new FluViewClinicalSelections();
