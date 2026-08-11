@@ -5,7 +5,7 @@
   import { expandedDataGroups } from '../../store';
   import TreeLeafNode from './TreeLeafNode.svelte';
   import Fa from 'svelte-fa';
-  import { faChevronRight, faChevronDown, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+  import { faChevronRight, faChevronDown, faInfoCircle, faBan } from '@fortawesome/free-solid-svg-icons';
 
   export let node: DataGroup;
   export let chart: IChart | null;
@@ -48,6 +48,14 @@
         <svelte:self node={child} />
       {/if}
     {/each}
+    {#each node.missingSeriesKeyValues as label (label)}
+      <div class="tv_node_missing" title="No data available" uk-tooltip="pos: right">
+        <Fa icon={faBan} style="width: 1em; margin-right: 0.5em" />
+        <span>
+          {label}
+        </span>
+      </div>
+    {/each}
   {/if}
 </div>
 
@@ -59,5 +67,11 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+  }
+  div.tv_node_missing {
+    padding-left: 1em;
+    display: flex;
+    align-items: center;
+    opacity: 0.5;
   }
 </style>

@@ -173,6 +173,7 @@ export function loadDataSet(
   baseUrl: string = ENDPOINT,
   apiPath: string = endpoint,
   seriesKey?: string,
+  expectedSeriesKeyValues?: string[],
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -202,16 +203,27 @@ export function loadDataSet(
     .then((res) => {
       try {
         const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params }, seriesKey);
+        let missingKeys: string[] = [];
+        if (seriesKey && expectedSeriesKeyValues && expectedSeriesKeyValues.length > 0) {
+          const actualKeys = new Set(
+            res
+              .map((row) => row[seriesKey])
+              .filter((value) => value != null)
+              .map((value) => String(value)),
+          );
+          missingKeys = expectedSeriesKeyValues.filter((key) => !actualKeys.has(key));
+        }
         if (data.datasets.length == 0) {
           return UIkit.modal
             .alert(
               `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}.
+          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}${missingKeys.length > 0 ? ` (requested: ${missingKeys.join(', ')})` : ''}.
         </div>`,
             )
             .then(() => null);
         }
+        data.missingSeriesKeyValues = missingKeys;
         return data;
       } catch (error) {
         console.warn('failed loading data', error);
@@ -378,6 +390,11 @@ export function importNwss({
     dataSourceDocumentationUrl: '',
     dataSourceDescription: '',
   };
+  const seriesLabel = `${signal}${nwssSource ? ` (${nwssSource})` : ''}, sewershed:`;
+  const expectedSewersheds = geo_value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   return loadDataSet(
     title,
     'nwss',
@@ -385,16 +402,27 @@ export function importNwss({
     { source: 'nwss', signal, geo_type, geo_value, fill_method, extra_keys },
     ['value'],
     api_key,
-    { value: `${signal}${nwssSource ? ` (${nwssSource})` : ''}, sewershed:` },
+    { value: seriesLabel },
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
     'geo_value', // <-- one DataSet per sewershed
+    expectedSewersheds,
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ds.datasets.filter((d): d is DataSet => d instanceof DataSet).map((d) => d.title);
       ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
       ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      if (ds.missingSeriesKeyValues.length > 0) {
+        const missingIds = ds.missingSeriesKeyValues;
+        ds.missingSeriesKeyValues = missingIds.map((id) => `${seriesLabel} ${id} (no data)`);
+        void UIkit.modal.alert(
+          `
+        <div class="uk-alert uk-alert-warning">
+          No data was returned for ${missingIds.length > 1 ? 'sewersheds' : 'sewershed'} <b>${missingIds.join(', ')}</b> (${additionalLabels.titleLabel}, ${additionalLabels.selectionLabel}). The chart includes data for the remaining sewersheds only.
+        </div>`,
+        );
+      }
     }
     return ds;
   });
