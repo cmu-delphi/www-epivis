@@ -121,6 +121,7 @@
   bind:value={$formSelections.nwss.fillMethod}
   name="fill_method"
   options={fillMethods}
+  additionalInfo="The rule used to estimate missing geographic data during aggregation. Zero Fill assumes missing values are 0 (best for counts). Average Fill replaces missing values with the group average (or ignores missing regions when averaging)."
 />
 <SelectField
   id="{id}-gv"
