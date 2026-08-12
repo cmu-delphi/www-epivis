@@ -1,5 +1,5 @@
 import { get, writable } from 'svelte/store';
-import DataSet, { DataGroup } from './data/DataSet';
+import DataSet, { DataGroup, flatten } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
 import FormSelections from './components/dialogs/formSelections';
 
@@ -57,6 +57,8 @@ storeApiKeys.subscribe((val) => {
   }
 });
 
+const MAX_DEFAULT_ENABLED_DATASETS = 10;
+
 export function addDataSet(dataset: DataSet | DataGroup): void {
   const root = get(datasetTree);
   root.datasets.push(dataset);
@@ -66,15 +68,48 @@ export function addDataSet(dataset: DataSet | DataGroup): void {
   if (dataset instanceof DataGroup) {
     // auto expand
     expandedDataGroups.set([...get(expandedDataGroups), dataset]);
-    // add defaultEnabled datasets to the list of active datasets
+    // add defaultEnabled datasets to the list of active datasets, capped so a
+    // group with many datasets (e.g. NWSS with many sewersheds) doesn't enable
+    // everything at once; the rest stay togglable via the eye icon
+    const toActivate: DataSet[] = [];
     for (const ds of dataset.datasets) {
+      if (toActivate.length >= MAX_DEFAULT_ENABLED_DATASETS) {
+        break;
+      }
       if (ds instanceof DataSet && dataset.defaultEnabled.includes(ds.title)) {
-        activeDatasets.set([...get(activeDatasets), ds]);
+        toActivate.push(ds);
       }
     }
+    activeDatasets.set([...get(activeDatasets), ...toActivate]);
   } else {
     activeDatasets.set([...get(activeDatasets), dataset]);
   }
+}
+
+function collectGroups(node: DataSet | DataGroup, out: DataGroup[]): void {
+  if (node instanceof DataGroup) {
+    out.push(node);
+    node.datasets.forEach((child) => collectGroups(child, out));
+  }
+}
+
+export function removeDataSet(item: DataSet | DataGroup): void {
+  const root = get(datasetTree);
+  const index = root.datasets.indexOf(item);
+  if (index === -1) {
+    return;
+  }
+  root.datasets.splice(index, 1);
+  datasetTree.set(root);
+
+  const groupsToRemove: DataGroup[] = [];
+  collectGroups(item, groupsToRemove);
+  if (groupsToRemove.length > 0) {
+    expandedDataGroups.set(get(expandedDataGroups).filter((g) => !groupsToRemove.includes(g)));
+  }
+
+  const leavesToRemove = flatten(item);
+  activeDatasets.set(get(activeDatasets).filter((d) => !leavesToRemove.includes(d)));
 }
 
 if (defaults.loader) {

@@ -174,6 +174,9 @@ export function loadDataSet(
   apiPath: string = endpoint,
   seriesKey?: string,
   expectedSeriesKeyValues?: string[],
+  // extra fields stored on the resulting DataSets for display/title purposes only
+  // (e.g. a human-readable label) - never sent as part of the API request
+  displayParams: Record<string, unknown> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -202,7 +205,14 @@ export function loadDataSet(
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
       try {
-        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params }, seriesKey);
+        const data = loadEpidata(
+          title,
+          res,
+          columns,
+          columnRenamings,
+          { _endpoint: endpoint, ...displayParams, ...params },
+          seriesKey,
+        );
         let missingKeys: string[] = [];
         if (seriesKey && expectedSeriesKeyValues && expectedSeriesKeyValues.length > 0) {
           const actualKeys = new Set(
@@ -366,6 +376,7 @@ export function importNwss({
   signal,
   geo_type,
   geo_value,
+  geo_label,
   extra_keys,
   fill_method,
   api_key,
@@ -373,6 +384,7 @@ export function importNwss({
   signal: string;
   geo_type: string;
   geo_value: string;
+  geo_label?: string;
   extra_keys: string;
   fill_method: string;
   api_key: string;
@@ -380,13 +392,16 @@ export function importNwss({
   // extra_keys looks like "nwss_source:CDC_Biobot"; extract the source name so
   // datasets differing only by source get distinct titles
   const nwssSource = extra_keys ? extra_keys.split(':').pop() ?? '' : '';
-  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geo_value}${nwssSource ? `, ${nwssSource}` : ''})`;
+  // prefer the county name (geo_label) over the raw, potentially long comma-separated
+  // list of sewershed ids in geo_value for the group title/selection label
+  const geoDisplay = geo_label || geo_value;
+  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geoDisplay}${nwssSource ? `, ${nwssSource}` : ''})`;
   if (!api_key && get(storeApiKeys)) {
     api_key = get(apiKey);
   }
   const additionalLabels = {
     titleLabel: 'NWSS (nwss:' + signal + ')',
-    selectionLabel: 'location: ' + geo_type + ':' + geo_value + (nwssSource ? ', source: ' + nwssSource : ''),
+    selectionLabel: 'location: ' + geo_type + ':' + geoDisplay + (nwssSource ? ', source: ' + nwssSource : ''),
     dataSourceDocumentationUrl: '',
     dataSourceDescription: '',
   };
@@ -408,6 +423,7 @@ export function importNwss({
     'viz',
     'geo_value', // <-- one DataSet per sewershed
     expectedSewersheds,
+    geo_label ? { geo_label } : {},
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ds.datasets.filter((d): d is DataSet => d instanceof DataSet).map((d) => d.title);

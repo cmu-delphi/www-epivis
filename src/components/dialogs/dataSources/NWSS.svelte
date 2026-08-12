@@ -58,10 +58,12 @@
   });
 
   export function importDataSet() {
+    const geoLabel = geoValues.find((gv) => gv.value === $formSelections.nwss.geoValue)?.label;
     return importNwss({
       signal: $formSelections.nwss.signal,
       geo_type: $formSelections.nwss.geoType,
       geo_value: $formSelections.nwss.geoValue,
+      geo_label: geoLabel,
       extra_keys: `nwss_source:${$formSelections.nwss.extraKeys || ''}`,
       fill_method: $formSelections.nwss.fillMethod,
       api_key: $apiKey,

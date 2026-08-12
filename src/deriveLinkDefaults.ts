@@ -162,7 +162,9 @@ export function initialLoader(datasets: ILinkConfig['datasets']) {
           customTitle += ` > ${params.data_source}:${params.signal}`;
         }
         if (params.geo_type && params.geo_value) {
-          customTitle += ` > ${params.geo_type}:${params.geo_value}`;
+          // prefer a human-readable label (e.g. NWSS county name) over the raw,
+          // potentially very long comma-separated geo_value (e.g. sewershed ids)
+          customTitle += ` > ${params.geo_type}:${params.geo_label || params.geo_value}`;
         }
         if (params.regions) {
           customTitle += ` > ${params.regions}`;
