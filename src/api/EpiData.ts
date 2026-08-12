@@ -341,7 +341,7 @@ export function importPopHive({
     titleLabel: 'PopHive (pophive:' + signal + ')',
     selectionLabel: 'location: ' + geo_type + ':' + geo_value,
     dataSourceDocumentationUrl: '',
-    dataSourceDescription: '',
+    dataSourceDescription: 'BETA Cosmos by Pophive provides COVID-19, Influenza, and respiratory syncytial virus (RSV) cases in the emergency Department (ED). This data originates from the Epic Cosmos system.',
   };
   return loadDataSet(
     title,
@@ -407,7 +407,7 @@ export function importNwss({
     titleLabel: 'NWSS (nwss:' + signal + ')',
     selectionLabel: 'location: ' + geo_type + ':' + geoDisplay + (nwssSource ? ', source: ' + nwssSource : ''),
     dataSourceDocumentationUrl: '',
-    dataSourceDescription: '',
+    dataSourceDescription: 'BETA The National Wastewater Surveillance System Program (NWSS) is an effort to track infectious deieases through wastewater across the country. This dataset in particular tracks wastewater sample data for COVID-19, mealses, influenza, mpox, rsv, and avian influenza',
   };
   const seriesLabel = `${signal}${nwssSource ? ` (${nwssSource})` : ''}, sewershed:`;
   const expectedSewersheds = geo_value
