@@ -228,7 +228,11 @@ export function loadDataSet(
             .alert(
               `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}${missingKeys.length > 0 ? ` (requested: ${missingKeys.join(', ')})` : ''}.
+          <a href="${url.href}">API Link</a> returned no data for ${
+                additionalLabels.titleLabel
+              }, which suggests that the API has no available information for the selected ${
+                additionalLabels.selectionLabel
+              }${missingKeys.length > 0 ? ` (requested: ${missingKeys.join(', ')})` : ''}.
         </div>`,
             )
             .then(() => null);
@@ -435,7 +439,11 @@ export function importNwss({
         void UIkit.modal.alert(
           `
         <div class="uk-alert uk-alert-warning">
-          No data was returned for ${missingIds.length > 1 ? 'sewersheds' : 'sewershed'} <b>${missingIds.join(', ')}</b> (${additionalLabels.titleLabel}, ${additionalLabels.selectionLabel}). The chart includes data for the remaining sewersheds only.
+          No data was returned for ${missingIds.length > 1 ? 'sewersheds' : 'sewershed'} <b>${missingIds.join(
+            ', ',
+          )}</b> (${additionalLabels.titleLabel}, ${
+            additionalLabels.selectionLabel
+          }). The chart includes data for the remaining sewersheds only.
         </div>`,
         );
       }
