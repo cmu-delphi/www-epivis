@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataSet from '../data/DataSet';
   import type { IChart } from '../store';
-  import { datasetTree, version } from '../store';
+  import { datasetTree, removeDataSet, version } from '../store';
   import ImportDataSetsMenu from './ImportDataSetsMenu.svelte';
   import TreeInnerNode from './tree/TreeInnerNode.svelte';
   import TreeLeafNode from './tree/TreeLeafNode.svelte';
@@ -15,9 +15,9 @@
   <div class="tree">
     {#each $datasetTree.datasets as child (child.displayTitle())}
       {#if child instanceof DataSet}
-        <TreeLeafNode {chart} node={child} />
+        <TreeLeafNode {chart} node={child} onRemove={() => removeDataSet(child)} />
       {:else}
-        <TreeInnerNode {chart} node={child} />
+        <TreeInnerNode {chart} node={child} onRemove={() => removeDataSet(child)} />
       {/if}
     {/each}
   </div>

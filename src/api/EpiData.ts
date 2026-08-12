@@ -56,6 +56,11 @@ export type CovidcastMetaResponse = Record<string, CovidcastMetaSourceEntry>;
 
 export type PopHiveExtraKeyValues = Record<string, string[]>;
 
+export type NWSSGeoValue = {
+  county: string;
+  sewersheds: string[];
+};
+
 function processResponse<T>(response: Response): Promise<T> {
   if (response.ok) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -93,13 +98,15 @@ function loadEpidata(
   columns: string[],
   columnRenamings: Record<string, string>,
   params: Record<string, unknown>,
+  seriesKey?: string,
 ): DataGroup {
   const datasets: DataSet[] = [];
   const colRenamings = new Map(Object.entries(columnRenamings));
 
   for (const col of columns) {
-    const points: EpiPoint[] = [];
+    const seriesPoints = new Map<string, EpiPoint[]>();
     for (const row of epidata) {
+      let date: EpiDate;
       if (params.source != 'pophive' && params.source != 'nwss') {
         if (row != null && typeof row.time_value === 'number') {
           const timeValue = row.time_value;
@@ -109,7 +116,7 @@ function loadEpidata(
             row.date = timeValue.toString();
           }
         }
-        let date: EpiDate;
+
         if (row != null && (typeof row.date === 'string' || typeof row.date === 'number')) {
           date = EpiDate.parse(row.date.toString());
         } else if (row != null && typeof row.epiweek === 'number') {
@@ -119,20 +126,25 @@ function loadEpidata(
         } else {
           throw new Error(`missing date/week column in response`);
         }
-        points.push(new EpiPoint(date, row[col] as number));
       } else {
-        if (row != null && typeof row.time_value === 'string') {
-          points.push(new EpiPoint(EpiDate.parse(row.time_value), row[col] as number));
+        if (row != null && typeof row.reference_time === 'string') {
+          date = EpiDate.parse(row.reference_time);
         } else {
-          throw new Error(`missing time_value column in response`);
+          throw new Error(`missing reference_time column in response`);
         }
       }
+      const key = seriesKey && row?.[seriesKey] != null ? String(row[seriesKey]) : '';
+      const bucket = seriesPoints.get(key) ?? [];
+      bucket.push(new EpiPoint(date, row[col] as number));
+      seriesPoints.set(key, bucket);
     }
-    points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
-    if (points.length > 0) {
-      // overwrite default column name if there's an overwrite in columnRenamings
-      const title = colRenamings.has(col) ? colRenamings.get(col) : col;
-      datasets.push(new DataSet(points, title, params));
+
+    for (const [key, points] of seriesPoints) {
+      points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
+      if (points.length > 0) {
+        const base = colRenamings.has(col) ? colRenamings.get(col)! : col;
+        datasets.push(new DataSet(points, key ? `${base} ${key}` : base, params));
+      }
     }
   }
   return new DataGroup(name, datasets);
@@ -160,6 +172,11 @@ export function loadDataSet(
   additionalLabels: Record<string, string> = {},
   baseUrl: string = ENDPOINT,
   apiPath: string = endpoint,
+  seriesKey?: string,
+  expectedSeriesKeyValues?: string[],
+  // extra fields stored on the resulting DataSets for display/title purposes only
+  // (e.g. a human-readable label) - never sent as part of the API request
+  displayParams: Record<string, unknown> = {},
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -188,27 +205,50 @@ export function loadDataSet(
   return fetchImpl<Record<string, unknown>[]>(url)
     .then((res) => {
       try {
-        const data = loadEpidata(title, res, columns, columnRenamings, { _endpoint: endpoint, ...params });
+        const data = loadEpidata(
+          title,
+          res,
+          columns,
+          columnRenamings,
+          { _endpoint: endpoint, ...displayParams, ...params },
+          seriesKey,
+        );
+        let missingKeys: string[] = [];
+        if (seriesKey && expectedSeriesKeyValues && expectedSeriesKeyValues.length > 0) {
+          const actualKeys = new Set(
+            res
+              .map((row) => row[seriesKey])
+              .filter((value) => value != null)
+              .map((value) => String(value)),
+          );
+          missingKeys = expectedSeriesKeyValues.filter((key) => !actualKeys.has(key));
+        }
         if (data.datasets.length == 0) {
           return UIkit.modal
             .alert(
               `
         <div class="uk-alert uk-alert-error">
-          <a href="${url.href}">API Link</a> returned no data for ${additionalLabels.titleLabel}, which suggests that the API has no available information for the selected ${additionalLabels.selectionLabel}.
+          <a href="${url.href}">API Link</a> returned no data for ${
+                additionalLabels.titleLabel
+              }, which suggests that the API has no available information for the selected ${
+                additionalLabels.selectionLabel
+              }${missingKeys.length > 0 ? ` (requested: ${missingKeys.join(', ')})` : ''}.
         </div>`,
             )
             .then(() => null);
         }
+        data.missingSeriesKeyValues = missingKeys;
         return data;
       } catch (error) {
         console.warn('failed loading data', error);
         // EpiData API error - JSON with "message" property
         if ('message' in res) {
+          const message = res['message' as keyof typeof res];
           return UIkit.modal
             .alert(
               `
           <div class="uk-alert uk-alert-error">
-            [f01] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${res['message']}</i>
+            [f01] Failed to fetch API data from <a href="${url.href}">API Link</a>:<br/><i>${message}</i>
           </div>`,
             )
             .then(() => null);
@@ -257,7 +297,7 @@ export function fetchCOVIDcastMeta(
 export function fetchPopHiveMeta(api_key: string): Promise<CovidcastMetaResponse> {
   let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=pophive`;
   if (api_key !== '') {
-    url_string += `&api_key=${api_key}`;
+    url_string += `&token=${api_key}`;
   }
   const url = new URL(url_string);
   return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
@@ -269,7 +309,7 @@ export function fetchPopHiveMeta(api_key: string): Promise<CovidcastMetaResponse
 export function fetchPopHiveExtraKeyValues(api_key: string): Promise<PopHiveExtraKeyValues> {
   let url_string = CAST_API_V5_ENDPOINT + `/metadata/extra_key_values/?source=pophive`;
   if (api_key !== '') {
-    url_string += `&api_key=${api_key}`;
+    url_string += `&token=${api_key}`;
   }
   const url = new URL(url_string);
   return fetchImpl<{ extra_key_values: PopHiveExtraKeyValues }>(url)
@@ -327,7 +367,7 @@ export function importPopHive({
 export function fetchNwssMeta(api_key: string): Promise<CovidcastMetaResponse> {
   let url_string = CAST_API_V5_ENDPOINT + `/metadata/?source=nwss`;
   if (api_key !== '') {
-    url_string += `&api_key=${api_key}`;
+    url_string += `&token=${api_key}`;
   }
   const url = new URL(url_string);
   return fetchImpl<CovidcastMetaResponse>(url).catch((error) => {
@@ -340,7 +380,7 @@ export function importNwss({
   signal,
   geo_type,
   geo_value,
-  pcr_target,
+  geo_label,
   extra_keys,
   fill_method,
   api_key,
@@ -348,45 +388,65 @@ export function importNwss({
   signal: string;
   geo_type: string;
   geo_value: string;
-  pcr_target: string;
+  geo_label?: string;
   extra_keys: string;
   fill_method: string;
   api_key: string;
 }): Promise<DataGroup | null> {
-  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geo_value})`;
+  // extra_keys looks like "nwss_source:CDC_Biobot"; extract the source name so
+  // datasets differing only by source get distinct titles
+  const nwssSource = extra_keys ? extra_keys.split(':').pop() ?? '' : '';
+  // prefer the county name (geo_label) over the raw, potentially long comma-separated
+  // list of sewershed ids in geo_value for the group title/selection label
+  const geoDisplay = geo_label || geo_value;
+  const title = `[API] NWSS: nwss:${signal} (${geo_type}:${geoDisplay}${nwssSource ? `, ${nwssSource}` : ''})`;
   if (!api_key && get(storeApiKeys)) {
     api_key = get(apiKey);
   }
   const additionalLabels = {
     titleLabel: 'NWSS (nwss:' + signal + ')',
-    selectionLabel: 'location: ' + geo_type + ':' + geo_value,
+    selectionLabel: 'location: ' + geo_type + ':' + geoDisplay + (nwssSource ? ', source: ' + nwssSource : ''),
     dataSourceDocumentationUrl: '',
     dataSourceDescription: '',
   };
+  const seriesLabel = `${signal}${nwssSource ? ` (${nwssSource})` : ''}, sewershed:`;
+  const expectedSewersheds = geo_value
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   return loadDataSet(
     title,
     'nwss',
     {},
-    {
-      source: 'nwss',
-      signal,
-      geo_type,
-      geo_value,
-      pcr_target,
-      fill_method,
-      extra_keys,
-    },
+    { source: 'nwss', signal, geo_type, geo_value, fill_method, extra_keys },
     ['value'],
     api_key,
-    {},
+    { value: seriesLabel },
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
+    'geo_value', // <-- one DataSet per sewershed
+    expectedSewersheds,
+    geo_label ? { geo_label } : {},
   ).then((ds) => {
     if (ds instanceof DataGroup) {
-      ds.defaultEnabled = ['value'];
+      ds.defaultEnabled = ds.datasets.filter((d): d is DataSet => d instanceof DataSet).map((d) => d.title);
       ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
       ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      if (ds.missingSeriesKeyValues.length > 0) {
+        const missingIds = ds.missingSeriesKeyValues;
+        ds.missingSeriesKeyValues = missingIds.map((id) => `${seriesLabel} ${id} (no data)`);
+        void UIkit.modal.alert(
+          `
+        <div class="uk-alert uk-alert-warning">
+          No data was returned for ${missingIds.length > 1 ? 'sewersheds' : 'sewershed'} <b>${missingIds.join(
+            ', ',
+          )}</b> (${additionalLabels.titleLabel}, ${
+            additionalLabels.selectionLabel
+          }). The chart includes data for the remaining sewersheds only.
+        </div>`,
+        );
+      }
     }
     return ds;
   });
@@ -1056,4 +1116,43 @@ export function importWiki({
     }
     return ds;
   });
+}
+
+export function fetchNWSSGeoValues(api_key: string): Promise<NWSSGeoValue[]> {
+  const url = new URL(CAST_API_V5_ENDPOINT + '/geomap/nwss_sewershed_crosswalk/?other_geo_type=county');
+  if (api_key !== '') {
+    url.searchParams.set('token', api_key);
+  }
+  return fetch(url.toString())
+    .then((response) => {
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return response.text();
+    })
+    .then((text) => {
+      const rows = text.trim().split(/\r?\n/);
+      if (rows.length < 2) return [];
+
+      const header = rows[0].split(',').map((h) => h.trim());
+      const fromIdx = header.indexOf('from_val');
+      const toIdx = header.indexOf('to_val');
+      const toNameIdx = header.indexOf('to_name');
+
+      const byCounty = new Map<string, { name: string; sewersheds: string[] }>();
+      for (let i = 1; i < rows.length; i++) {
+        const cols = rows[i].split(',');
+        const sewershedId = cols[fromIdx]?.trim();
+        const countyFips = cols[toIdx]?.trim();
+        const countyName = cols[toNameIdx]?.trim();
+        if (!sewershedId || !countyFips || !countyName) continue;
+        const entry = byCounty.get(countyFips) ?? { name: countyName || countyFips, sewersheds: [] };
+        entry.sewersheds.push(sewershedId);
+        byCounty.set(countyFips, entry);
+      }
+
+      return [...byCounty.values()].map((e) => ({ county: e.name, sewersheds: e.sewersheds }));
+    })
+    .catch((error) => {
+      console.error('Error fetching NWSS geo values:', error);
+      return [];
+    });
 }

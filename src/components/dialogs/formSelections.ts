@@ -40,7 +40,6 @@ export class NwssSelections {
   signal = '';
   geoType = '';
   geoValue = '';
-  pcrTarget = '';
   extraKeys = '';
   fillMethod = 'source';
 }
