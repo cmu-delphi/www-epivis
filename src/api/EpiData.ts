@@ -24,6 +24,7 @@ import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
 import { get } from 'svelte/store';
 import { apiKey, expandedDataGroups, storeApiKeys } from '../store';
+import { isAvailableInV5 } from './v5Availability';
 
 // import DataSet from "../data/DataSet";
 // import EpiDate from "../data/EpiDate";
@@ -280,6 +281,54 @@ export function loadDataSet(
         )
         .then(() => null);
     });
+}
+
+export interface FallbackRequestVariant {
+  endpoint: string;
+  fixedParams: Record<string, unknown>;
+  userParams: Record<string, unknown>;
+  columns: string[];
+  columnRenamings?: Record<string, string>;
+  baseUrl: string;
+  apiPath?: string;
+  seriesKey?: string;
+  expectedSeriesKeyValues?: string[];
+  displayParams?: Record<string, unknown>;
+}
+
+// Checks v5 metadata for (source, signal) and dispatches to loadDataSet with
+// whichever of `v4`/`v5` request shapes matches. The routing decision is
+// made once, up front, from cached metadata - never retried based on
+// whether the chosen request itself succeeds (see spec's Non-goals).
+export function loadDataSetWithFallback(
+  title: string,
+  source: string,
+  signal: string,
+  api_key: string,
+  additionalLabels: Record<string, string>,
+  v4: FallbackRequestVariant,
+  v5: FallbackRequestVariant,
+): Promise<DataGroup | null> {
+  return isAvailableInV5(source, signal).then((useV5) => {
+    const variant = useV5 ? v5 : v4;
+    const responseSchema: ResponseSchema = useV5 ? 'v5' : 'v4';
+    return loadDataSet(
+      title,
+      variant.endpoint,
+      variant.fixedParams,
+      variant.userParams,
+      variant.columns,
+      api_key,
+      variant.columnRenamings ?? {},
+      additionalLabels,
+      variant.baseUrl,
+      variant.apiPath ?? variant.endpoint,
+      variant.seriesKey,
+      variant.expectedSeriesKeyValues,
+      variant.displayParams ?? {},
+      responseSchema,
+    );
+  });
 }
 
 export function fetchCOVIDcastMeta(
