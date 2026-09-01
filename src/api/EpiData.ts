@@ -92,13 +92,16 @@ export function fetchImpl<T>(url: URL): Promise<T> {
 }
 
 // generic epidata loader
+type ResponseSchema = 'v4' | 'v5';
+
 function loadEpidata(
   name: string,
   epidata: Record<string, unknown>[],
   columns: string[],
   columnRenamings: Record<string, string>,
   params: Record<string, unknown>,
-  seriesKey?: string,
+  seriesKey: string | undefined,
+  responseSchema: ResponseSchema,
 ): DataGroup {
   const datasets: DataSet[] = [];
   const colRenamings = new Map(Object.entries(columnRenamings));
@@ -107,7 +110,7 @@ function loadEpidata(
     const seriesPoints = new Map<string, EpiPoint[]>();
     for (const row of epidata) {
       let date: EpiDate;
-      if (params.source != 'pophive' && params.source != 'nwss') {
+      if (responseSchema === 'v4') {
         if (row != null && typeof row.time_value === 'number') {
           const timeValue = row.time_value;
           if (timeValue.toString().length == 6) {
@@ -177,6 +180,7 @@ export function loadDataSet(
   // extra fields stored on the resulting DataSets for display/title purposes only
   // (e.g. a human-readable label) - never sent as part of the API request
   displayParams: Record<string, unknown> = {},
+  responseSchema: ResponseSchema = 'v4',
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -212,6 +216,7 @@ export function loadDataSet(
           columnRenamings,
           { _endpoint: endpoint, ...displayParams, ...params },
           seriesKey,
+          responseSchema,
         );
         let missingKeys: string[] = [];
         if (seriesKey && expectedSeriesKeyValues && expectedSeriesKeyValues.length > 0) {
@@ -354,6 +359,10 @@ export function importPopHive({
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
+    undefined,
+    undefined,
+    {},
+    'v5',
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
@@ -428,6 +437,7 @@ export function importNwss({
     'geo_value', // <-- one DataSet per sewershed
     expectedSewersheds,
     geo_label ? { geo_label } : {},
+    'v5',
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ds.datasets.filter((d): d is DataSet => d instanceof DataSet).map((d) => d.title);
