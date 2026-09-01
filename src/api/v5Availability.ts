@@ -29,9 +29,12 @@ export function getV5Metadata(): Promise<V5MetadataResponse> {
 
 // Existence check only: does v5 know about this exact (source, signal) pair?
 // No geo_type/geo_value/date-range logic here by design (see spec).
+// Array.isArray guards a malformed/unexpected entry (e.g. a source key present
+// with no `signals` array) so this never throws - the spec's degrade-to-v4
+// guarantee must hold even if the response shape isn't what's expected.
 export function isAvailableInV5(source: string, signal: string): Promise<boolean> {
   return getV5Metadata().then((metadata) => {
     const entry = metadata[source];
-    return entry != null && entry.signals.includes(signal);
+    return entry != null && Array.isArray(entry.signals) && entry.signals.includes(signal);
   });
 }

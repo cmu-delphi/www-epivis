@@ -284,12 +284,18 @@ export function loadDataSet(
 }
 
 export interface FallbackRequestVariant {
+  // Logical endpoint key, persisted on the resulting DataSet as `params._endpoint`.
+  // Must match a key in `deriveLinkDefaults`'s `lookups` table so shared links can
+  // re-import this dataset - it is NOT necessarily the URL path segment (see apiPath).
   endpoint: string;
   fixedParams: Record<string, unknown>;
   userParams: Record<string, unknown>;
   columns: string[];
   columnRenamings?: Record<string, string>;
   baseUrl: string;
+  // Actual URL path segment; defaults to `endpoint` when omitted. Set this
+  // explicitly whenever the URL path differs from the persisted `endpoint` key
+  // (e.g. a v5 variant using the `viz` path under a `covidcast`-keyed endpoint).
   apiPath?: string;
   seriesKey?: string;
   expectedSeriesKeyValues?: string[];
@@ -589,9 +595,19 @@ export function importCOVIDcast({
       baseUrl: ENDPOINT,
     },
     {
-      endpoint: 'viz',
+      // `endpoint` must stay 'covidcast' (not 'viz'): it's the key persisted as
+      // `params._endpoint` on the resulting DataSet, and `deriveLinkDefaults`'s
+      // `lookups` table resolves shared-link re-imports by that key, not by
+      // `apiPath`. Using 'viz' here would silently drop this dataset from any
+      // shared link, since `lookups.viz` doesn't exist.
+      endpoint: 'covidcast',
+      apiPath: 'viz',
       fixedParams: {},
       userParams: { source: data_source, signal, geo_type, geo_value },
+      // Persisted alongside the URL params (but never sent as part of the
+      // request) so a reloaded shared link has `data_source`/`time_type`
+      // available when `importCOVIDcast` re-destructures its arguments.
+      displayParams: { data_source, time_type },
       columns: ['value'],
       baseUrl: CAST_API_V5_ENDPOINT,
     },
