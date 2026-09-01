@@ -569,21 +569,32 @@ export function importCOVIDcast({
     dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
     dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
   };
-  return loadDataSet(
+  return loadDataSetWithFallback(
     title,
-    'covidcast',
-    {
-      time_type: time_type,
-      time_values:
-        time_type === 'day'
-          ? epiRange(firstDate.covidcast, currentDate)
-          : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
-    },
-    { data_source, signal, time_type, geo_type, geo_value },
-    ['value', 'stderr', 'sample_size'],
+    data_source,
+    signal,
     api_key,
-    {},
     additionalLabels,
+    {
+      endpoint: 'covidcast',
+      fixedParams: {
+        time_type: time_type,
+        time_values:
+          time_type === 'day'
+            ? epiRange(firstDate.covidcast, currentDate)
+            : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
+      },
+      userParams: { data_source, signal, time_type, geo_type, geo_value },
+      columns: ['value', 'stderr', 'sample_size'],
+      baseUrl: ENDPOINT,
+    },
+    {
+      endpoint: 'viz',
+      fixedParams: {},
+      userParams: { source: data_source, signal, geo_type, geo_value },
+      columns: ['value'],
+      baseUrl: CAST_API_V5_ENDPOINT,
+    },
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'value' data
