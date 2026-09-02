@@ -24,6 +24,7 @@ import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
 import { get } from 'svelte/store';
 import { apiKey, expandedDataGroups, storeApiKeys } from '../store';
+import { isAvailableInV5 } from './v5Availability';
 
 // import DataSet from "../data/DataSet";
 // import EpiDate from "../data/EpiDate";
@@ -92,13 +93,16 @@ export function fetchImpl<T>(url: URL): Promise<T> {
 }
 
 // generic epidata loader
+type ResponseSchema = 'v4' | 'v5';
+
 function loadEpidata(
   name: string,
   epidata: Record<string, unknown>[],
   columns: string[],
   columnRenamings: Record<string, string>,
   params: Record<string, unknown>,
-  seriesKey?: string,
+  seriesKey: string | undefined,
+  responseSchema: ResponseSchema,
 ): DataGroup {
   const datasets: DataSet[] = [];
   const colRenamings = new Map(Object.entries(columnRenamings));
@@ -107,7 +111,7 @@ function loadEpidata(
     const seriesPoints = new Map<string, EpiPoint[]>();
     for (const row of epidata) {
       let date: EpiDate;
-      if (params.source != 'pophive' && params.source != 'nwss') {
+      if (responseSchema === 'v4') {
         if (row != null && typeof row.time_value === 'number') {
           const timeValue = row.time_value;
           if (timeValue.toString().length == 6) {
@@ -177,6 +181,7 @@ export function loadDataSet(
   // extra fields stored on the resulting DataSets for display/title purposes only
   // (e.g. a human-readable label) - never sent as part of the API request
   displayParams: Record<string, unknown> = {},
+  responseSchema: ResponseSchema = 'v4',
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -212,6 +217,7 @@ export function loadDataSet(
           columnRenamings,
           { _endpoint: endpoint, ...displayParams, ...params },
           seriesKey,
+          responseSchema,
         );
         let missingKeys: string[] = [];
         if (seriesKey && expectedSeriesKeyValues && expectedSeriesKeyValues.length > 0) {
@@ -275,6 +281,60 @@ export function loadDataSet(
         )
         .then(() => null);
     });
+}
+
+export interface FallbackRequestVariant {
+  // Logical endpoint key, persisted on the resulting DataSet as `params._endpoint`.
+  // Must match a key in `deriveLinkDefaults`'s `lookups` table so shared links can
+  // re-import this dataset - it is NOT necessarily the URL path segment (see apiPath).
+  endpoint: string;
+  fixedParams: Record<string, unknown>;
+  userParams: Record<string, unknown>;
+  columns: string[];
+  columnRenamings?: Record<string, string>;
+  baseUrl: string;
+  // Actual URL path segment; defaults to `endpoint` when omitted. Set this
+  // explicitly whenever the URL path differs from the persisted `endpoint` key
+  // (e.g. a v5 variant using the `viz` path under a `covidcast`-keyed endpoint).
+  apiPath?: string;
+  seriesKey?: string;
+  expectedSeriesKeyValues?: string[];
+  displayParams?: Record<string, unknown>;
+}
+
+// Checks v5 metadata for (source, signal) and dispatches to loadDataSet with
+// whichever of `v4`/`v5` request shapes matches. The routing decision is
+// made once, up front, from cached metadata - never retried based on
+// whether the chosen request itself succeeds (see spec's Non-goals).
+export function loadDataSetWithFallback(
+  title: string,
+  source: string,
+  signal: string,
+  api_key: string,
+  additionalLabels: Record<string, string>,
+  v4: FallbackRequestVariant,
+  v5: FallbackRequestVariant,
+): Promise<DataGroup | null> {
+  return isAvailableInV5(source, signal).then((useV5) => {
+    const variant = useV5 ? v5 : v4;
+    const responseSchema: ResponseSchema = useV5 ? 'v5' : 'v4';
+    return loadDataSet(
+      title,
+      variant.endpoint,
+      variant.fixedParams,
+      variant.userParams,
+      variant.columns,
+      api_key,
+      variant.columnRenamings ?? {},
+      additionalLabels,
+      variant.baseUrl,
+      variant.apiPath ?? variant.endpoint,
+      variant.seriesKey,
+      variant.expectedSeriesKeyValues,
+      variant.displayParams ?? {},
+      responseSchema,
+    );
+  });
 }
 
 export function fetchCOVIDcastMeta(
@@ -355,6 +415,10 @@ export function importPopHive({
     additionalLabels,
     CAST_API_V5_ENDPOINT,
     'viz',
+    undefined,
+    undefined,
+    {},
+    'v5',
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ['value'];
@@ -430,6 +494,7 @@ export function importNwss({
     'geo_value', // <-- one DataSet per sewershed
     expectedSewersheds,
     geo_label ? { geo_label } : {},
+    'v5',
   ).then((ds) => {
     if (ds instanceof DataGroup) {
       ds.defaultEnabled = ds.datasets.filter((d): d is DataSet => d instanceof DataSet).map((d) => d.title);
@@ -512,21 +577,42 @@ export function importCOVIDcast({
     dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
     dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
   };
-  return loadDataSet(
+  return loadDataSetWithFallback(
     title,
-    'covidcast',
-    {
-      time_type: time_type,
-      time_values:
-        time_type === 'day'
-          ? epiRange(firstDate.covidcast, currentDate)
-          : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
-    },
-    { data_source, signal, time_type, geo_type, geo_value },
-    ['value', 'stderr', 'sample_size'],
+    data_source,
+    signal,
     api_key,
-    {},
     additionalLabels,
+    {
+      endpoint: 'covidcast',
+      fixedParams: {
+        time_type: time_type,
+        time_values:
+          time_type === 'day'
+            ? epiRange(firstDate.covidcast, currentDate)
+            : epiRange(firstEpiWeek.covidcast, currentEpiWeek),
+      },
+      userParams: { data_source, signal, time_type, geo_type, geo_value },
+      columns: ['value', 'stderr', 'sample_size'],
+      baseUrl: ENDPOINT,
+    },
+    {
+      // `endpoint` must stay 'covidcast' (not 'viz'): it's the key persisted as
+      // `params._endpoint` on the resulting DataSet, and `deriveLinkDefaults`'s
+      // `lookups` table resolves shared-link re-imports by that key, not by
+      // `apiPath`. Using 'viz' here would silently drop this dataset from any
+      // shared link, since `lookups.viz` doesn't exist.
+      endpoint: 'covidcast',
+      apiPath: 'viz',
+      fixedParams: {},
+      userParams: { source: data_source, signal, geo_type, geo_value },
+      // Persisted alongside the URL params (but never sent as part of the
+      // request) so a reloaded shared link has `data_source`/`time_type`
+      // available when `importCOVIDcast` re-destructures its arguments.
+      displayParams: { data_source, time_type },
+      columns: ['value'],
+      baseUrl: CAST_API_V5_ENDPOINT,
+    },
   ).then((ds) => {
     // get inside the Promise and make sure its not null,
     // then enable display of 'value' data
