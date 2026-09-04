@@ -35,9 +35,14 @@
         on:click|stopPropagation
         title={node.dataSourceDescription}
         uk-tooltip="pos: bottom-right"
+        aria-disabled="true"
       >
         <Fa icon={faInfoCircle} style="width: 0.9em; margin-right: 0.5em" />
       </a>
+    {:else if node.dataSourceDescription}
+      <span class="info-icon" title={node.dataSourceDescription} uk-tooltip="pos: bottom-right" aria-disabled="true">
+        <Fa icon={faInfoCircle} style="width: 0.9em; margin-right: 0.5em" />
+      </span>
     {/if}
     {#if onRemove}
       <span
