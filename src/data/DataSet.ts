@@ -1,6 +1,6 @@
 import { mean } from 'd3-array';
-import EpiDate from './EpiDate';
-import EpiPoint from './EpiPoint';
+import EpiDate from './EpiDate.js';
+import type EpiPoint from './EpiPoint.js';
 
 function getRandomColor() {
   function channel() {
@@ -114,6 +114,8 @@ export class DataGroup {
   public defaultEnabled: string[] = [];
   public dataSourceDescription: string | null = null;
   public dataSourceDocumentationUrl: string | null = null;
+  // labels for series that were expected (via `expectedSeriesKeyValues` in loadDataSet) but returned no data
+  public missingSeriesKeyValues: string[] = [];
 
   constructor(public readonly title: string, public readonly datasets: (DataSet | DataGroup)[]) {}
 
