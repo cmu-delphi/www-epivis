@@ -12,6 +12,15 @@
   let lag = value?.lag ?? 0;
   let asOf = value?.issues != null ? String(value.issues) : hasIssueDay ? '20201116' : '202105';
 
+  // The lag option can be withdrawn while this component is mounted - a persisted
+  // selection restored from sessionStorage, or a data source that only offers lag
+  // for some of its selections. Fall back to the default mode so the hidden radio
+  // cannot strand `recent` on a choice the user can no longer see or change; the
+  // block below then clears the lag from `value` on its own.
+  $: if (!hasLag && recent === 'lag') {
+    recent = 'recent';
+  }
+
   $: {
     value = {
       lag: recent === 'lag' ? lag : null,

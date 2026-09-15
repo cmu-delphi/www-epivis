@@ -15,12 +15,6 @@
   let hasLag = true;
   void isAvailableInV5('flusurv', FLUSURV_SENTINEL_SIGNAL).then((useV5) => {
     hasLag = !useV5;
-    if (useV5 && $formSelections.fluSurv.issue.lag != null) {
-      // Form selections persist in sessionStorage, so a lag chosen before v5 picked up
-      // this source would otherwise survive into a session where the control is hidden
-      // - leaving SelectIssue stuck on a mode the user can no longer see or change.
-      $formSelections.fluSurv.issue = { ...$formSelections.fluSurv.issue, lag: null };
-    }
   });
 
   export function importDataSet() {
