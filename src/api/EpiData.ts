@@ -147,7 +147,11 @@ function loadEpidata(
       points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
       if (points.length > 0) {
         const base = colRenamings.has(col) ? colRenamings.get(col)! : col;
-        datasets.push(new DataSet(points, key ? `${base} ${key}` : base, params));
+        // An empty renaming means "the series key alone is the name" - used by v5
+        // variants whose single `value` column is split into series by `seriesKey`,
+        // so their titles match the equivalent v4 column names exactly.
+        const seriesTitle = key ? (base ? `${base} ${key}` : key) : base;
+        datasets.push(new DataSet(points, seriesTitle, params));
       }
     }
   }
@@ -717,6 +721,64 @@ export function importCOVIDHosp({
   });
 }
 
+// The FluSurv rate columns. In v4 these are value columns on a single `flusurv`
+// row; in v5 they are individual signals under the `flusurv` source, split back
+// apart via `seriesKey: 'signal'`. The two lists are identical by design, so both
+// routes produce the same series names.
+const FLUSURV_RATE_SIGNALS = [
+  'rate_age_0',
+  'rate_age_0tlt1',
+  'rate_age_1',
+  'rate_age_12t17',
+  'rate_age_18t29',
+  'rate_age_1t4',
+  'rate_age_2',
+  'rate_age_3',
+  'rate_age_30t39',
+  'rate_age_4',
+  'rate_age_40t49',
+  'rate_age_5',
+  'rate_age_5t11',
+  'rate_age_6',
+  'rate_age_7',
+  'rate_age_gte18',
+  'rate_age_gte75',
+  'rate_age_lt18',
+  'rate_flu_a',
+  'rate_flu_b',
+  'rate_overall',
+  'rate_race_asian',
+  'rate_race_black',
+  'rate_race_hisp',
+  'rate_race_natamer',
+  'rate_race_white',
+  'rate_sex_female',
+  'rate_sex_male',
+];
+
+// Signal used to probe v5 availability on behalf of all of FLUSURV_RATE_SIGNALS.
+export const FLUSURV_SENTINEL_SIGNAL = 'rate_overall';
+
+// v4 takes a single `locations` value; v5 splits the same set across two geo types.
+// The three `network_*` aggregates and the two New York sites are `flusurv_site`;
+// everything else is a two-letter state code. v5 spells all of them lowercase.
+function fluSurvV5Geo(locations: string): { geo_type: string; geo_value: string } {
+  const isSite = locations.startsWith('network_') || locations.startsWith('NY_');
+  return { geo_type: isSite ? 'flusurv_site' : 'state', geo_value: locations.toLowerCase() };
+}
+
+function isoDate(date: EpiDate): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getYear()}-${pad(date.getMonth())}-${pad(date.getDay())}`;
+}
+
+// v4 expresses "as of" as an epiweek; v5 wants a calendar date. `fromEpiweek`
+// returns the Wednesday of the week, so +3 days lands on the Saturday - the end of
+// the epiweek, and therefore the cutoff that includes everything published in it.
+function issueToSnapshotDate(issues: number): string {
+  return isoDate(EpiDate.fromEpiweek(Math.floor(issues / 100), issues % 100).addDays(3));
+}
+
 export function importFluSurv({
   locations,
   issues,
@@ -727,7 +789,6 @@ export function importFluSurv({
   lag?: number | null;
 }): Promise<DataGroup | null> {
   const regionLabel = fluSurvRegions.find((d) => d.value === locations)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'FluSurv',
     selectionLabel: 'location: ' + regionLabel,
@@ -735,53 +796,71 @@ export function importFluSurv({
     dataSourceDescription:
       'This data source provides laboratory-confirmed influenza hospitalization rates from the CDC’s Influenza Hospitalization Surveillance Network (FluSurv-NET). The data includes age-stratified hospitalization rates and rates by race, sex, and flu type, when available.',
   };
-  return loadDataSet(
-    title,
-    'flusurv',
-    {
-      epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
-    },
-    { locations, issues, lag },
-    [
-      'rate_age_0',
-      'rate_age_1',
-      'rate_age_2',
-      'rate_age_3',
-      'rate_age_4',
-      'rate_overall',
-      'rate_age_5',
-      'rate_age_6',
-      'rate_age_7',
-      'rate_age_18t29',
-      'rate_age_30t39',
-      'rate_age_40t49',
-      'rate_age_5t11',
-      'rate_age_12t17',
-      'rate_age_lt18',
-      'rate_age_gte18',
-      'rate_age_1t4',
-      'rate_age_gte75',
-      'rate_age_0tlt1',
-      'rate_race_white',
-      'rate_race_black',
-      'rate_race_hisp',
-      'rate_race_asian',
-      'rate_race_natamer',
-      'rate_sex_male',
-      'rate_sex_female',
-      'rate_flu_a',
-      'rate_flu_b',
-    ],
-    '',
-    {},
-    additionalLabels,
-  ).then((ds) => {
-    if (ds instanceof DataGroup) {
-      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
-      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
-    }
-    return ds;
-  });
+  // Resolved here as well as inside loadDataSetWithFallback so the title can reflect
+  // the route taken. Both calls share getV5Metadata's cached promise, so this costs
+  // no extra request and the two decisions cannot disagree.
+  return isAvailableInV5('flusurv', FLUSURV_SENTINEL_SIGNAL)
+    .then((useV5) => {
+      // v5 has no publication-lag concept. Rather than serve a lagged request from
+      // v4 - which is frozen, so its series would be quietly incomparable to live v5
+      // ones on the same chart - lag is dropped whenever v5 is serving this source.
+      // FluSurv.svelte hides the lag control in that case; this covers shared links
+      // created before it was hidden.
+      const effectiveLag = useV5 ? null : lag;
+      const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag: effectiveLag });
+      return loadDataSetWithFallback(
+        title,
+        'flusurv',
+        FLUSURV_SENTINEL_SIGNAL,
+        '',
+        additionalLabels,
+        {
+          endpoint: 'flusurv',
+          fixedParams: {
+            epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
+          },
+          userParams: { locations, issues, lag },
+          columns: FLUSURV_RATE_SIGNALS,
+          baseUrl: ENDPOINT,
+        },
+        {
+          // `endpoint` stays 'flusurv': it is the key persisted as `params._endpoint`
+          // and the one `deriveLinkDefaults`'s `lookups` table resolves shared-link
+          // re-imports by. The URL path is 'viz' (see apiPath).
+          endpoint: 'flusurv',
+          apiPath: 'viz',
+          fixedParams: {},
+          userParams: {
+            source: 'flusurv',
+            signal: FLUSURV_RATE_SIGNALS.join(','),
+            ...fluSurvV5Geo(locations),
+            // cleanParams drops this when no issue is selected.
+            snapshot_date: issues != null ? issueToSnapshotDate(issues) : null,
+          },
+          // v5 returns one `value` column tagged by `signal`; the empty renaming makes
+          // each series take its signal name alone, matching the v4 column names.
+          columns: ['value'],
+          columnRenamings: { value: '' },
+          seriesKey: 'signal',
+          // Deliberately no expectedSeriesKeyValues: most locations carry only a
+          // subset of the 28 signals, and listing the rest as "(no data)" in the tree
+          // would be noise. v4 simply omits empty columns; this matches.
+          // Persisted alongside the URL params (but never sent) so a reloaded shared
+          // link still has `locations` and `issues` when importFluSurv re-destructures
+          // its arguments - neither appears in the v5 request itself. `lag` is
+          // intentionally absent; it no longer applies on this route.
+          displayParams: { locations, issues },
+          baseUrl: CAST_API_V5_ENDPOINT,
+        },
+      );
+    })
+    .then((ds) => {
+      if (ds instanceof DataGroup) {
+        ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+        ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      }
+      return ds;
+    });
 }
 
 export function importFluView({
