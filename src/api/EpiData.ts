@@ -558,6 +558,21 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
   });
 }
 
+// COVIDcast and v5 disagree about the spelling of a few source names, so the
+// `data_source` the dialog works with is not always the `source` v5 knows. Without
+// a translation the availability check simply never matches and the source stays on
+// v4 forever - a silent non-migration rather than a visible failure, which is why
+// this is an explicit table: a new mismatch should be added here deliberately
+// rather than papered over with a global hyphen/underscore substitution, which
+// would also rewrite the many COVIDcast sources v5 does not carry at all.
+const COVIDCAST_V5_SOURCE_ALIASES: Record<string, string> = {
+  'nchs-mortality': 'nchs_mortality',
+};
+
+function covidcastV5Source(data_source: string): string {
+  return COVIDCAST_V5_SOURCE_ALIASES[data_source] ?? data_source;
+}
+
 export function importCOVIDcast({
   data_source,
   geo_type,
@@ -586,9 +601,12 @@ export function importCOVIDcast({
     dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
     dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
   };
+  // Used both to probe v5 availability and as the v5 request's `source`; the two
+  // must agree or the check passes and the request then 404s.
+  const v5Source = covidcastV5Source(data_source);
   return loadDataSetWithFallback(
     title,
-    data_source,
+    v5Source,
     signal,
     api_key,
     additionalLabels,
@@ -614,10 +632,12 @@ export function importCOVIDcast({
       endpoint: 'covidcast',
       apiPath: 'viz',
       fixedParams: {},
-      userParams: { source: data_source, signal, geo_type, geo_value },
+      userParams: { source: v5Source, signal, geo_type, geo_value },
       // Persisted alongside the URL params (but never sent as part of the
       // request) so a reloaded shared link has `data_source`/`time_type`
-      // available when `importCOVIDcast` re-destructures its arguments.
+      // available when `importCOVIDcast` re-destructures its arguments. This keeps
+      // COVIDcast's spelling, not the aliased v5 one, since that is what the
+      // re-import and the dialog's own source list expect.
       displayParams: { data_source, time_type },
       columns: ['value'],
       baseUrl: CAST_API_V5_ENDPOINT,
