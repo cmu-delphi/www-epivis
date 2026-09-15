@@ -44,14 +44,30 @@
     <div>
       <label class="uk-form-label" for="{id}-asof">What day should the data come from? (format: YYYYMMDD)</label>
       <div class="uk-form-controls">
-        <input type="text" class="uk-input" name="asof" required id="{id}-asof" bind:value={asOf} pattern="[0-9]{8}" />
+        <input
+          type="text"
+          class="uk-input"
+          name="asof"
+          required
+          id="{id}-asof"
+          bind:value={asOf}
+          pattern={'[0-9]{8}'}
+        />
       </div>
     </div>
   {:else}
     <div>
       <label class="uk-form-label" for="{id}-asof">What MMWR week should the data come from? (format: YYYYWW)</label>
       <div class="uk-form-controls">
-        <input type="text" class="uk-input" name="asof" required id="{id}-asof" bind:value={asOf} pattern="[0-9]{6}" />
+        <input
+          type="text"
+          class="uk-input"
+          name="asof"
+          required
+          id="{id}-asof"
+          bind:value={asOf}
+          pattern={'[0-9]{6}'}
+        />
       </div>
     </div>
   {/if}
