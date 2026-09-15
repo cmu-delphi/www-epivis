@@ -1015,6 +1015,24 @@ export function importFluView({
     });
 }
 
+// v5 signal names for the clinical-labs series, paired with the v4 column name each
+// one carries. The correspondence was confirmed against live data rather than
+// inferred from the names: for nat/201740-201742 every v4 column equals its v5
+// signal exactly (e.g. total_a 230 == positive_a 230). Renaming them back to the v4
+// spellings keeps both routes producing the same series names, which is what lets
+// `defaultEnabled` and shared-link title matching survive a v4/v5 switch.
+const FLUVIEW_CLINICAL_V5_TO_V4 = {
+  total_specimens: 'total_specimens',
+  positive_a: 'total_a',
+  positive_b: 'total_b',
+  pct_positive: 'percent_positive',
+  pct_positive_a: 'percent_a',
+  pct_positive_b: 'percent_b',
+};
+
+// Signal used to probe v5 availability on behalf of all of the clinical signals.
+export const FLUVIEW_CLINICAL_SENTINEL_SIGNAL = 'pct_positive';
+
 export function importFluViewClinical({
   regions,
   issues,
@@ -1025,7 +1043,6 @@ export function importFluViewClinical({
   lag?: number | null;
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'FluView Clinical',
     selectionLabel: 'location: ' + regionLabel,
@@ -1033,27 +1050,68 @@ export function importFluViewClinical({
     dataSourceDescription:
       'This data source provides age-stratified clinical data based on laboratory-confirmed influenza reports from the US FluView dashboard.',
   };
-  return loadDataSet(
-    title,
-    'fluview_clinical',
-    {
-      epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
-    },
-    { regions, issues, lag },
-    ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
-    '',
-    {},
-    additionalLabels,
-  ).then((ds) => {
-    // get inside the Promise and make sure its not null,
-    // then enable display of 'percent_positive' data
-    if (ds instanceof DataGroup) {
-      ds.defaultEnabled = ['percent_positive'];
-      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
-      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
-    }
-    return ds;
-  });
+  // Same region namespace as ILINet, so the same geo mapping and the same v4-only
+  // regions apply (see fluViewV5Geo).
+  const v5Geo = fluViewV5Geo(regions);
+  return (
+    v5Geo == null
+      ? Promise.resolve(false)
+      : isAvailableInV5('fluview_resp_lab_clinical', FLUVIEW_CLINICAL_SENTINEL_SIGNAL)
+  )
+    .then((useV5) => {
+      // v5 has no publication-lag concept - see importFluSurv.
+      const effectiveLag = useV5 ? null : lag;
+      const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag: effectiveLag });
+      return loadDataSetWithFallback(
+        title,
+        'fluview_resp_lab_clinical',
+        FLUVIEW_CLINICAL_SENTINEL_SIGNAL,
+        '',
+        additionalLabels,
+        {
+          endpoint: 'fluview_clinical',
+          fixedParams: {
+            epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
+          },
+          userParams: { regions, issues, lag },
+          columns: ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
+          baseUrl: ENDPOINT,
+        },
+        v5Geo == null
+          ? null
+          : {
+              // `endpoint` stays 'fluview_clinical': it is the key persisted as
+              // `params._endpoint` and the one `deriveLinkDefaults`'s `lookups` table
+              // resolves shared-link re-imports by. The URL path is 'viz'.
+              endpoint: 'fluview_clinical',
+              apiPath: 'viz',
+              fixedParams: {},
+              userParams: {
+                source: 'fluview_resp_lab_clinical',
+                signal: Object.keys(FLUVIEW_CLINICAL_V5_TO_V4).join(','),
+                ...v5Geo,
+                snapshot_date: issues != null ? issueToSnapshotDate(issues) : null,
+              },
+              columns: ['value'],
+              // Empty renaming for the column, so each series is named by its signal,
+              // then each signal is relabelled to its v4 equivalent.
+              columnRenamings: { value: '', ...FLUVIEW_CLINICAL_V5_TO_V4 },
+              seriesKey: 'signal',
+              displayParams: { regions, issues },
+              baseUrl: CAST_API_V5_ENDPOINT,
+            },
+      );
+    })
+    .then((ds) => {
+      // get inside the Promise and make sure its not null,
+      // then enable display of 'percent_positive' data
+      if (ds instanceof DataGroup) {
+        ds.defaultEnabled = ['percent_positive'];
+        ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+        ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      }
+      return ds;
+    });
 }
 
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
