@@ -23,7 +23,7 @@ import DataSet, { DataGroup } from '../data/DataSet';
 import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
 import { get } from 'svelte/store';
-import { apiKey, expandedDataGroups, storeApiKeys } from '../store';
+import { apiKey, expandedDataGroups, storeApiKeys } from '../apiState';
 import { isAvailableInV5 } from './v5Availability';
 
 // import DataSet from "../data/DataSet";

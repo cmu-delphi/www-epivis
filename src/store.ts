@@ -2,6 +2,11 @@ import { get, writable } from 'svelte/store';
 import DataSet, { DataGroup, flatten } from './data/DataSet';
 import deriveLinkDefaults, { getDirectLinkImpl } from './deriveLinkDefaults';
 import FormSelections from './components/dialogs/formSelections';
+import { apiKey, expandedDataGroups, storeApiKeys } from './apiState';
+
+// Re-exported so consumers can keep importing them from the store, even though they
+// are declared in a leaf module to keep the module graph acyclic (see apiState.ts).
+export { apiKey, expandedDataGroups, storeApiKeys };
 
 declare const __VERSION__: string;
 
@@ -11,7 +16,9 @@ const defaults = deriveLinkDefaults();
 
 export const datasetTree = writable<DataGroup>(defaults.group);
 export const activeDatasets = writable(defaults.active);
-export const expandedDataGroups = writable([defaults.group]);
+// Must stay above the `defaults.loader` call at the bottom of this module: that
+// call reaches EpiData importers which read this store synchronously.
+expandedDataGroups.set([defaults.group]);
 
 export const isShowingPoints = writable(defaults.showPoints);
 export const initialViewport = writable(defaults.viewport);
@@ -33,28 +40,6 @@ export function getFormSelections() {
 export const formSelections = writable(getFormSelections());
 formSelections.subscribe((val) => {
   sessionStorage.setItem('form', JSON.stringify(val));
-});
-
-export const apiKey = writable(localStorage.getItem('api-key')! || '');
-apiKey.subscribe((val) => {
-  // always keep key in session storage (resets on window close)
-  sessionStorage.setItem('api-key', val);
-  if (localStorage.getItem('store-api-key') === 'true') {
-    // if flag set, also store key in local persistent storage
-    localStorage.setItem('api-key', val);
-  }
-});
-
-export const storeApiKeys = writable(localStorage.getItem('store-api-key') === 'true');
-storeApiKeys.subscribe((val) => {
-  localStorage.setItem('store-api-key', val.toString());
-  if (val) {
-    // persist key from session to local storage
-    localStorage.setItem('api-key', sessionStorage.getItem('api-key') || '');
-  } else {
-    // remove key from local storage
-    localStorage.removeItem('api-key');
-  }
 });
 
 const MAX_DEFAULT_ENABLED_DATASETS = 10;
