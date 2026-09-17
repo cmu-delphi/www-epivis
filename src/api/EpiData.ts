@@ -23,7 +23,7 @@ import DataSet, { DataGroup } from '../data/DataSet';
 import EpiDate from '../data/EpiDate';
 import EpiPoint from '../data/EpiPoint';
 import { get } from 'svelte/store';
-import { apiKey, expandedDataGroups, storeApiKeys } from '../store';
+import { apiKey, expandedDataGroups, storeApiKeys } from '../apiState';
 import { isAvailableInV5 } from './v5Availability';
 
 // import DataSet from "../data/DataSet";
@@ -147,7 +147,13 @@ function loadEpidata(
       points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
       if (points.length > 0) {
         const base = colRenamings.has(col) ? colRenamings.get(col)! : col;
-        datasets.push(new DataSet(points, key ? `${base} ${key}` : base, params));
+        // An empty renaming means "the series key alone is the name" - used by v5
+        // variants whose single `value` column is split into series by `seriesKey`,
+        // so their titles match the equivalent v4 column names exactly. In that case
+        // the renaming map is consulted a second time, by key, so a v5 variant can
+        // also relabel individual signals (e.g. wili -> %wILI).
+        const seriesTitle = key ? (base ? `${base} ${key}` : colRenamings.get(key) ?? key) : base;
+        datasets.push(new DataSet(points, seriesTitle, params));
       }
     }
   }
@@ -306,6 +312,11 @@ export interface FallbackRequestVariant {
 // whichever of `v4`/`v5` request shapes matches. The routing decision is
 // made once, up front, from cached metadata - never retried based on
 // whether the chosen request itself succeeds (see spec's Non-goals).
+//
+// A null `v5` variant pins the request to v4 regardless of what the metadata
+// says. Callers use this for selections v5 cannot express at all - e.g. a
+// FluView region with no v5 geo_type equivalent - where source-level
+// availability is not enough to decide.
 export function loadDataSetWithFallback(
   title: string,
   source: string,
@@ -313,10 +324,10 @@ export function loadDataSetWithFallback(
   api_key: string,
   additionalLabels: Record<string, string>,
   v4: FallbackRequestVariant,
-  v5: FallbackRequestVariant,
+  v5: FallbackRequestVariant | null,
 ): Promise<DataGroup | null> {
-  return isAvailableInV5(source, signal).then((useV5) => {
-    const variant = useV5 ? v5 : v4;
+  return (v5 == null ? Promise.resolve(false) : isAvailableInV5(source, signal)).then((useV5) => {
+    const variant = useV5 && v5 != null ? v5 : v4;
     const responseSchema: ResponseSchema = useV5 ? 'v5' : 'v4';
     return loadDataSet(
       title,
@@ -549,6 +560,21 @@ export function importCDC({ locations, auth }: { locations: string; auth?: strin
   });
 }
 
+// COVIDcast and v5 disagree about the spelling of a few source names, so the
+// `data_source` the dialog works with is not always the `source` v5 knows. Without
+// a translation the availability check simply never matches and the source stays on
+// v4 forever - a silent non-migration rather than a visible failure, which is why
+// this is an explicit table: a new mismatch should be added here deliberately
+// rather than papered over with a global hyphen/underscore substitution, which
+// would also rewrite the many COVIDcast sources v5 does not carry at all.
+const COVIDCAST_V5_SOURCE_ALIASES: Record<string, string> = {
+  'nchs-mortality': 'nchs_mortality',
+};
+
+function covidcastV5Source(data_source: string): string {
+  return COVIDCAST_V5_SOURCE_ALIASES[data_source] ?? data_source;
+}
+
 export function importCOVIDcast({
   data_source,
   geo_type,
@@ -577,9 +603,12 @@ export function importCOVIDcast({
     dataSourceDocumentationUrl: `https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/${data_source}.html`,
     dataSourceDescription: `This dataset provides daily COVID-19 case and hospitalization data sourced from the COVIDcast API. The data is aggregated from multiple sources, including public health labs (ILINet) and clinical labs (WHO_NREVSS), to provide a comprehensive view of COVID-19 activity in the United States.`,
   };
+  // Used both to probe v5 availability and as the v5 request's `source`; the two
+  // must agree or the check passes and the request then 404s.
+  const v5Source = covidcastV5Source(data_source);
   return loadDataSetWithFallback(
     title,
-    data_source,
+    v5Source,
     signal,
     api_key,
     additionalLabels,
@@ -605,10 +634,12 @@ export function importCOVIDcast({
       endpoint: 'covidcast',
       apiPath: 'viz',
       fixedParams: {},
-      userParams: { source: data_source, signal, geo_type, geo_value },
+      userParams: { source: v5Source, signal, geo_type, geo_value },
       // Persisted alongside the URL params (but never sent as part of the
       // request) so a reloaded shared link has `data_source`/`time_type`
-      // available when `importCOVIDcast` re-destructures its arguments.
+      // available when `importCOVIDcast` re-destructures its arguments. This keeps
+      // COVIDcast's spelling, not the aliased v5 one, since that is what the
+      // re-import and the dialog's own source list expect.
       displayParams: { data_source, time_type },
       columns: ['value'],
       baseUrl: CAST_API_V5_ENDPOINT,
@@ -719,6 +750,64 @@ export function importCOVIDHosp({
   });
 }
 
+// The FluSurv rate columns. In v4 these are value columns on a single `flusurv`
+// row; in v5 they are individual signals under the `flusurv` source, split back
+// apart via `seriesKey: 'signal'`. The two lists are identical by design, so both
+// routes produce the same series names.
+const FLUSURV_RATE_SIGNALS = [
+  'rate_age_0',
+  'rate_age_0tlt1',
+  'rate_age_1',
+  'rate_age_12t17',
+  'rate_age_18t29',
+  'rate_age_1t4',
+  'rate_age_2',
+  'rate_age_3',
+  'rate_age_30t39',
+  'rate_age_4',
+  'rate_age_40t49',
+  'rate_age_5',
+  'rate_age_5t11',
+  'rate_age_6',
+  'rate_age_7',
+  'rate_age_gte18',
+  'rate_age_gte75',
+  'rate_age_lt18',
+  'rate_flu_a',
+  'rate_flu_b',
+  'rate_overall',
+  'rate_race_asian',
+  'rate_race_black',
+  'rate_race_hisp',
+  'rate_race_natamer',
+  'rate_race_white',
+  'rate_sex_female',
+  'rate_sex_male',
+];
+
+// Signal used to probe v5 availability on behalf of all of FLUSURV_RATE_SIGNALS.
+export const FLUSURV_SENTINEL_SIGNAL = 'rate_overall';
+
+// v4 takes a single `locations` value; v5 splits the same set across two geo types.
+// The three `network_*` aggregates and the two New York sites are `flusurv_site`;
+// everything else is a two-letter state code. v5 spells all of them lowercase.
+function fluSurvV5Geo(locations: string): { geo_type: string; geo_value: string } {
+  const isSite = locations.startsWith('network_') || locations.startsWith('NY_');
+  return { geo_type: isSite ? 'flusurv_site' : 'state', geo_value: locations.toLowerCase() };
+}
+
+function isoDate(date: EpiDate): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${date.getYear()}-${pad(date.getMonth())}-${pad(date.getDay())}`;
+}
+
+// v4 expresses "as of" as an epiweek; v5 wants a calendar date. `fromEpiweek`
+// returns the Wednesday of the week, so +3 days lands on the Saturday - the end of
+// the epiweek, and therefore the cutoff that includes everything published in it.
+function issueToSnapshotDate(issues: number): string {
+  return isoDate(EpiDate.fromEpiweek(Math.floor(issues / 100), issues % 100).addDays(3));
+}
+
 export function importFluSurv({
   locations,
   issues,
@@ -729,7 +818,6 @@ export function importFluSurv({
   lag?: number | null;
 }): Promise<DataGroup | null> {
   const regionLabel = fluSurvRegions.find((d) => d.value === locations)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'FluSurv',
     selectionLabel: 'location: ' + regionLabel,
@@ -737,53 +825,117 @@ export function importFluSurv({
     dataSourceDescription:
       'This data source provides laboratory-confirmed influenza hospitalization rates from the CDC’s Influenza Hospitalization Surveillance Network (FluSurv-NET). The data includes age-stratified hospitalization rates and rates by race, sex, and flu type, when available.',
   };
-  return loadDataSet(
-    title,
-    'flusurv',
-    {
-      epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
-    },
-    { locations, issues, lag },
-    [
-      'rate_age_0',
-      'rate_age_1',
-      'rate_age_2',
-      'rate_age_3',
-      'rate_age_4',
-      'rate_overall',
-      'rate_age_5',
-      'rate_age_6',
-      'rate_age_7',
-      'rate_age_18t29',
-      'rate_age_30t39',
-      'rate_age_40t49',
-      'rate_age_5t11',
-      'rate_age_12t17',
-      'rate_age_lt18',
-      'rate_age_gte18',
-      'rate_age_1t4',
-      'rate_age_gte75',
-      'rate_age_0tlt1',
-      'rate_race_white',
-      'rate_race_black',
-      'rate_race_hisp',
-      'rate_race_asian',
-      'rate_race_natamer',
-      'rate_sex_male',
-      'rate_sex_female',
-      'rate_flu_a',
-      'rate_flu_b',
-    ],
-    '',
-    {},
-    additionalLabels,
-  ).then((ds) => {
-    if (ds instanceof DataGroup) {
-      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
-      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
-    }
-    return ds;
-  });
+  // Resolved here as well as inside loadDataSetWithFallback so the title can reflect
+  // the route taken. Both calls share getV5Metadata's cached promise, so this costs
+  // no extra request and the two decisions cannot disagree.
+  return isAvailableInV5('flusurv', FLUSURV_SENTINEL_SIGNAL)
+    .then((useV5) => {
+      // v5 has no publication-lag concept. Rather than serve a lagged request from
+      // v4 - which is frozen, so its series would be quietly incomparable to live v5
+      // ones on the same chart - lag is dropped whenever v5 is serving this source.
+      // FluSurv.svelte hides the lag control in that case; this covers shared links
+      // created before it was hidden.
+      const effectiveLag = useV5 ? null : lag;
+      const title = appendIssueToTitle(`[API] FluSurv: ${regionLabel}`, { issues, lag: effectiveLag });
+      return loadDataSetWithFallback(
+        title,
+        'flusurv',
+        FLUSURV_SENTINEL_SIGNAL,
+        '',
+        additionalLabels,
+        {
+          endpoint: 'flusurv',
+          fixedParams: {
+            epiweeks: epiRange(firstEpiWeek.flusurv, currentEpiWeek),
+          },
+          userParams: { locations, issues, lag },
+          columns: FLUSURV_RATE_SIGNALS,
+          baseUrl: ENDPOINT,
+        },
+        {
+          // `endpoint` stays 'flusurv': it is the key persisted as `params._endpoint`
+          // and the one `deriveLinkDefaults`'s `lookups` table resolves shared-link
+          // re-imports by. The URL path is 'viz' (see apiPath).
+          endpoint: 'flusurv',
+          apiPath: 'viz',
+          fixedParams: {},
+          userParams: {
+            source: 'flusurv',
+            signal: FLUSURV_RATE_SIGNALS.join(','),
+            ...fluSurvV5Geo(locations),
+            // cleanParams drops this when no issue is selected.
+            snapshot_date: issues != null ? issueToSnapshotDate(issues) : null,
+          },
+          // v5 returns one `value` column tagged by `signal`; the empty renaming makes
+          // each series take its signal name alone, matching the v4 column names.
+          columns: ['value'],
+          columnRenamings: { value: '' },
+          seriesKey: 'signal',
+          // Deliberately no expectedSeriesKeyValues: most locations carry only a
+          // subset of the 28 signals, and listing the rest as "(no data)" in the tree
+          // would be noise. v4 simply omits empty columns; this matches.
+          // Persisted alongside the URL params (but never sent) so a reloaded shared
+          // link still has `locations` and `issues` when importFluSurv re-destructures
+          // its arguments - neither appears in the v5 request itself. `lag` is
+          // intentionally absent; it no longer applies on this route.
+          displayParams: { locations, issues },
+          baseUrl: CAST_API_V5_ENDPOINT,
+        },
+      );
+    })
+    .then((ds) => {
+      if (ds instanceof DataGroup) {
+        ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+        ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      }
+      return ds;
+    });
+}
+
+// v5 signal names for ILINet. These deliberately keep v5's own spelling for the
+// age buckets (num_ili_age_0_4 and friends) rather than remapping them onto v4's
+// opaque num_age_0..5 indices: the v5 names state the age range outright, and an
+// incorrect index mapping would mislabel a series with no visible symptom.
+const FLUVIEW_ILINET_SIGNALS = [
+  'wili',
+  'ili',
+  'num_ili',
+  'num_patients',
+  'num_providers',
+  'num_ili_age_0_4',
+  'num_ili_age_5_24',
+  'num_ili_age_25_49',
+  'num_ili_age_25_64',
+  'num_ili_age_50_64',
+  'num_ili_age_65',
+];
+
+// Signal used to probe v5 availability on behalf of all of FLUVIEW_ILINET_SIGNALS.
+export const FLUVIEW_SENTINEL_SIGNAL = 'wili';
+
+// v4 names every FluView region in one flat `regions` namespace; v5 splits them
+// across four geo types. Returns null for the regions v5 has no equivalent for at
+// all - `ny_minus_jfk`, the five territories and the three cities - which pins
+// those selections to v4 (see loadDataSetWithFallback's null `v5` variant).
+//
+// Case carries meaning in the v4 list and is what separates the groups here:
+// states are the only uppercase two-letter values, territories are lowercase.
+export function fluViewV5Geo(regions: string): { geo_type: string; geo_value: string } | null {
+  if (regions === 'nat') {
+    return { geo_type: 'nation', geo_value: 'us' };
+  }
+  const hhs = /^hhs(\d{1,2})$/.exec(regions);
+  if (hhs) {
+    return { geo_type: 'hhs', geo_value: hhs[1] };
+  }
+  const census = /^cen(\d)$/.exec(regions);
+  if (census) {
+    return { geo_type: 'census_division', geo_value: census[1] };
+  }
+  if (/^[A-Z]{2}$/.test(regions)) {
+    return { geo_type: 'state', geo_value: regions.toLowerCase() };
+  }
+  return null;
 }
 
 export function importFluView({
@@ -798,7 +950,6 @@ export function importFluView({
   auth?: string;
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'ILINet (aka FluView)',
     selectionLabel: 'location: ' + regionLabel,
@@ -806,43 +957,103 @@ export function importFluView({
     dataSourceDescription:
       'The fluview endpoint reports influenza-like illness (ILI) data sourced from the U.S. Outpatient Influenza-like Illness Surveillance Network (ILINet) dashboard. Data is sourced from both ILINet (public health labs) and WHO_NREVSS (clinical labs).',
   };
-  return loadDataSet(
-    title,
-    'fluview',
-    {
-      epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
-    },
-    { regions, issues, lag },
-    [
-      'wili',
-      'ili',
-      'num_ili',
-      'num_patients',
-      'num_providers',
-      'num_age_0',
-      'num_age_1',
-      'num_age_2',
-      'num_age_3',
-      'num_age_4',
-      'num_age_5',
-    ],
-    auth,
-    {
-      wili: '%wILI',
-      ili: '%ILI',
-    },
-    additionalLabels,
-  ).then((ds) => {
-    // get inside the Promise and make sure its not null,
-    // then enable display of 'percent weighted ILI' data
-    if (ds instanceof DataGroup) {
-      ds.defaultEnabled = ['%wILI'];
-      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
-      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
-    }
-    return ds;
-  });
+  const v5Geo = fluViewV5Geo(regions);
+  // Resolved here as well as inside loadDataSetWithFallback so the title, the lag
+  // handling and the auth token can all reflect the route taken. Both calls share
+  // getV5Metadata's cached promise, so this costs no extra request.
+  return (v5Geo == null ? Promise.resolve(false) : isAvailableInV5('fluview_ilinet', FLUVIEW_SENTINEL_SIGNAL))
+    .then((useV5) => {
+      // v5 has no publication-lag concept - see importFluSurv.
+      const effectiveLag = useV5 ? null : lag;
+      const title = appendIssueToTitle(`[API] ILINet (aka FluView): ${regionLabel}`, { issues, lag: effectiveLag });
+      return loadDataSetWithFallback(
+        title,
+        'fluview_ilinet',
+        FLUVIEW_SENTINEL_SIGNAL,
+        // `auth` is a v4 credential and v5's /viz/ declares no such parameter, so it
+        // is not forwarded to the v5 host.
+        useV5 ? '' : auth ?? '',
+        additionalLabels,
+        {
+          endpoint: 'fluview',
+          fixedParams: {
+            epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
+          },
+          userParams: { regions, issues, lag },
+          columns: [
+            'wili',
+            'ili',
+            'num_ili',
+            'num_patients',
+            'num_providers',
+            'num_age_0',
+            'num_age_1',
+            'num_age_2',
+            'num_age_3',
+            'num_age_4',
+            'num_age_5',
+          ],
+          columnRenamings: {
+            wili: '%wILI',
+            ili: '%ILI',
+          },
+          baseUrl: ENDPOINT,
+        },
+        v5Geo == null
+          ? null
+          : {
+              // `endpoint` stays 'fluview': it is the key persisted as
+              // `params._endpoint` and the one `deriveLinkDefaults`'s `lookups` table
+              // resolves shared-link re-imports by. The URL path is 'viz'.
+              endpoint: 'fluview',
+              apiPath: 'viz',
+              fixedParams: {},
+              userParams: {
+                source: 'fluview_ilinet',
+                signal: FLUVIEW_ILINET_SIGNALS.join(','),
+                ...v5Geo,
+                snapshot_date: issues != null ? issueToSnapshotDate(issues) : null,
+              },
+              columns: ['value'],
+              // Empty renaming for the column, so each series is named by its signal;
+              // the two percentage signals keep the v4 display names so `defaultEnabled`
+              // and shared-link title matching survive a v4/v5 switch.
+              columnRenamings: { value: '', wili: '%wILI', ili: '%ILI' },
+              seriesKey: 'signal',
+              displayParams: { regions, issues },
+              baseUrl: CAST_API_V5_ENDPOINT,
+            },
+      );
+    })
+    .then((ds) => {
+      // get inside the Promise and make sure its not null,
+      // then enable display of 'percent weighted ILI' data
+      if (ds instanceof DataGroup) {
+        ds.defaultEnabled = ['%wILI'];
+        ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+        ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      }
+      return ds;
+    });
 }
+
+// v5 signal names for the clinical-labs series, paired with the v4 column name each
+// one carries. The correspondence was confirmed against live data rather than
+// inferred from the names: for nat/201740-201742 every v4 column equals its v5
+// signal exactly (e.g. total_a 230 == positive_a 230). Renaming them back to the v4
+// spellings keeps both routes producing the same series names, which is what lets
+// `defaultEnabled` and shared-link title matching survive a v4/v5 switch.
+const FLUVIEW_CLINICAL_V5_TO_V4 = {
+  total_specimens: 'total_specimens',
+  positive_a: 'total_a',
+  positive_b: 'total_b',
+  pct_positive: 'percent_positive',
+  pct_positive_a: 'percent_a',
+  pct_positive_b: 'percent_b',
+};
+
+// Signal used to probe v5 availability on behalf of all of the clinical signals.
+export const FLUVIEW_CLINICAL_SENTINEL_SIGNAL = 'pct_positive';
 
 export function importFluViewClinical({
   regions,
@@ -854,7 +1065,6 @@ export function importFluViewClinical({
   lag?: number | null;
 }): Promise<DataGroup | null> {
   const regionLabel = fluViewRegions.find((d) => d.value === regions)?.label ?? '?';
-  const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag });
   const additionalLabels = {
     titleLabel: 'FluView Clinical',
     selectionLabel: 'location: ' + regionLabel,
@@ -862,27 +1072,68 @@ export function importFluViewClinical({
     dataSourceDescription:
       'This data source provides age-stratified clinical data based on laboratory-confirmed influenza reports from the US FluView dashboard.',
   };
-  return loadDataSet(
-    title,
-    'fluview_clinical',
-    {
-      epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
-    },
-    { regions, issues, lag },
-    ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
-    '',
-    {},
-    additionalLabels,
-  ).then((ds) => {
-    // get inside the Promise and make sure its not null,
-    // then enable display of 'percent_positive' data
-    if (ds instanceof DataGroup) {
-      ds.defaultEnabled = ['percent_positive'];
-      ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
-      ds.dataSourceDescription = additionalLabels.dataSourceDescription;
-    }
-    return ds;
-  });
+  // Same region namespace as ILINet, so the same geo mapping and the same v4-only
+  // regions apply (see fluViewV5Geo).
+  const v5Geo = fluViewV5Geo(regions);
+  return (
+    v5Geo == null
+      ? Promise.resolve(false)
+      : isAvailableInV5('fluview_resp_lab_clinical', FLUVIEW_CLINICAL_SENTINEL_SIGNAL)
+  )
+    .then((useV5) => {
+      // v5 has no publication-lag concept - see importFluSurv.
+      const effectiveLag = useV5 ? null : lag;
+      const title = appendIssueToTitle(`[API] FluView Clinical: ${regionLabel}`, { issues, lag: effectiveLag });
+      return loadDataSetWithFallback(
+        title,
+        'fluview_resp_lab_clinical',
+        FLUVIEW_CLINICAL_SENTINEL_SIGNAL,
+        '',
+        additionalLabels,
+        {
+          endpoint: 'fluview_clinical',
+          fixedParams: {
+            epiweeks: epiRange(firstEpiWeek.fluview, currentEpiWeek),
+          },
+          userParams: { regions, issues, lag },
+          columns: ['total_specimens', 'total_a', 'total_b', 'percent_positive', 'percent_a', 'percent_b'],
+          baseUrl: ENDPOINT,
+        },
+        v5Geo == null
+          ? null
+          : {
+              // `endpoint` stays 'fluview_clinical': it is the key persisted as
+              // `params._endpoint` and the one `deriveLinkDefaults`'s `lookups` table
+              // resolves shared-link re-imports by. The URL path is 'viz'.
+              endpoint: 'fluview_clinical',
+              apiPath: 'viz',
+              fixedParams: {},
+              userParams: {
+                source: 'fluview_resp_lab_clinical',
+                signal: Object.keys(FLUVIEW_CLINICAL_V5_TO_V4).join(','),
+                ...v5Geo,
+                snapshot_date: issues != null ? issueToSnapshotDate(issues) : null,
+              },
+              columns: ['value'],
+              // Empty renaming for the column, so each series is named by its signal,
+              // then each signal is relabelled to its v4 equivalent.
+              columnRenamings: { value: '', ...FLUVIEW_CLINICAL_V5_TO_V4 },
+              seriesKey: 'signal',
+              displayParams: { regions, issues },
+              baseUrl: CAST_API_V5_ENDPOINT,
+            },
+      );
+    })
+    .then((ds) => {
+      // get inside the Promise and make sure its not null,
+      // then enable display of 'percent_positive' data
+      if (ds instanceof DataGroup) {
+        ds.defaultEnabled = ['percent_positive'];
+        ds.dataSourceDocumentationUrl = additionalLabels.dataSourceDocumentationUrl;
+        ds.dataSourceDescription = additionalLabels.dataSourceDescription;
+      }
+      return ds;
+    });
 }
 
 export function importGFT({ locations }: { locations: string }): Promise<DataGroup | null> {
