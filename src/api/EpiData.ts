@@ -145,7 +145,11 @@ function loadEpidata(
 
     for (const [key, points] of seriesPoints) {
       points.sort((a, b) => a.getDate().getIndex() - b.getDate().getIndex());
-      if (points.length > 0) {
+      // A series whose every value is null has nothing to plot. Individual null
+      // points are kept (the chart draws them as gaps), but an all-null series is
+      // dropped so it neither shows up as an empty indicator nor counts as data -
+      // v5 in particular can return a full set of rows with `value: null`.
+      if (points.some((point) => point.getValue() != null)) {
         const base = colRenamings.has(col) ? colRenamings.get(col)! : col;
         // An empty renaming means "the series key alone is the name" - used by v5
         // variants whose single `value` column is split into series by `seriesKey`,
@@ -188,6 +192,9 @@ export function loadDataSet(
   // (e.g. a human-readable label) - never sent as part of the API request
   displayParams: Record<string, unknown> = {},
   responseSchema: ResponseSchema = 'v4',
+  // called instead of showing the "returned no data" alert when the response has
+  // nothing plottable - lets a caller retry the request elsewhere (e.g. on v4)
+  onNoData?: () => Promise<DataGroup | null>,
 ): Promise<DataGroup | null> {
   const duplicates = get(expandedDataGroups).filter((d) => d.title == title);
   if (duplicates.length > 0) {
@@ -227,8 +234,11 @@ export function loadDataSet(
         );
         let missingKeys: string[] = [];
         if (seriesKey && expectedSeriesKeyValues && expectedSeriesKeyValues.length > 0) {
+          // Only rows carrying at least one non-null value count, so a key whose
+          // rows are all null is reported as missing, matching the dropped series.
           const actualKeys = new Set(
             res
+              .filter((row) => columns.some((col) => row[col] != null))
               .map((row) => row[seriesKey])
               .filter((value) => value != null)
               .map((value) => String(value)),
@@ -236,6 +246,9 @@ export function loadDataSet(
           missingKeys = expectedSeriesKeyValues.filter((key) => !actualKeys.has(key));
         }
         if (data.datasets.length == 0) {
+          if (onNoData) {
+            return onNoData();
+          }
           return UIkit.modal
             .alert(
               `
@@ -309,9 +322,11 @@ export interface FallbackRequestVariant {
 }
 
 // Checks v5 metadata for (source, signal) and dispatches to loadDataSet with
-// whichever of `v4`/`v5` request shapes matches. The routing decision is
-// made once, up front, from cached metadata - never retried based on
-// whether the chosen request itself succeeds (see spec's Non-goals).
+// whichever of `v4`/`v5` request shapes matches. The routing decision is made
+// up front from cached metadata, with one exception: if v5 answers but with
+// nothing plottable (no rows, or rows whose values are all null - v5 lists
+// signals in metadata for geos it has no values for), the request is retried
+// once on v4. Failed v5 requests (HTTP/network errors) are not retried.
 //
 // A null `v5` variant pins the request to v4 regardless of what the metadata
 // says. Callers use this for selections v5 cannot express at all - e.g. a
@@ -326,10 +341,12 @@ export function loadDataSetWithFallback(
   v4: FallbackRequestVariant,
   v5: FallbackRequestVariant | null,
 ): Promise<DataGroup | null> {
-  return (v5 == null ? Promise.resolve(false) : isAvailableInV5(source, signal)).then((useV5) => {
-    const variant = useV5 && v5 != null ? v5 : v4;
-    const responseSchema: ResponseSchema = useV5 ? 'v5' : 'v4';
-    return loadDataSet(
+  const load = (
+    variant: FallbackRequestVariant,
+    responseSchema: ResponseSchema,
+    onNoData?: () => Promise<DataGroup | null>,
+  ) =>
+    loadDataSet(
       title,
       variant.endpoint,
       variant.fixedParams,
@@ -344,7 +361,16 @@ export function loadDataSetWithFallback(
       variant.expectedSeriesKeyValues,
       variant.displayParams ?? {},
       responseSchema,
+      onNoData,
     );
+  return (v5 == null ? Promise.resolve(false) : isAvailableInV5(source, signal)).then((useV5) => {
+    if (useV5 && v5 != null) {
+      return load(v5, 'v5', () => {
+        console.warn(`v5 returned no values for ${source}:${signal}; falling back to v4`);
+        return load(v4, 'v4');
+      });
+    }
+    return load(v4, 'v4');
   });
 }
 
