@@ -11,6 +11,7 @@
   let dataSignals: string[] = [];
   let geoTypes: string[] = [];
   let ageGroups: string[] = [];
+  const fillMethods = ['source', 'ave', 'zero'];
 
   const debounce = (fn: Function, ms = 500) => {
     let timeoutId: ReturnType<typeof setTimeout>;
@@ -50,6 +51,7 @@
       geo_type: $formSelections.pophive.geoType,
       geo_value: $formSelections.pophive.geoValue,
       extra_keys: `age_group:${$formSelections.pophive.extraKeys}`,
+      fill_method: $formSelections.pophive.fillMethod,
       api_key: $apiKey,
     });
   }
@@ -88,6 +90,13 @@
   bind:value={$formSelections.pophive.extraKeys}
   name="extraKeys"
   options={ageGroups}
+/>
+<SelectField
+  id="{id}-fm"
+  label="Fill Method"
+  bind:value={$formSelections.pophive.fillMethod}
+  name="fill_method"
+  options={fillMethods}
 />
 <SelectField
   id="{id}-gt"

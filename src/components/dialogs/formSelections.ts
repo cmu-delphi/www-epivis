@@ -33,6 +33,7 @@ export class PopHiveSelections {
   signal = '';
   geoType = '';
   geoValue = '';
+  fillMethod = '';
   extraKeys = '';
 }
 
