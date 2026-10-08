@@ -422,12 +422,14 @@ export function importPopHive({
   geo_type,
   geo_value,
   extra_keys,
+  fill_method,
   api_key,
 }: {
   signal: string;
   geo_type: string;
   geo_value: string;
   extra_keys: string;
+  fill_method: string;
   api_key: string;
 }): Promise<DataGroup | null> {
   const title = `[API] PopHive: pophive:${signal} (${geo_type}:${geo_value}, ${extra_keys})`;
@@ -444,7 +446,7 @@ export function importPopHive({
     title,
     'pophive',
     {},
-    { source: 'pophive', signal, geo_type, geo_value, extra_keys },
+    { source: 'pophive', signal, geo_type, geo_value, extra_keys, fill_method },
     ['value'],
     api_key,
     {},
